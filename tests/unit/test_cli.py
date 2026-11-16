@@ -1,4 +1,3 @@
-import importlib.util
 
 import pytest
 
@@ -62,13 +61,6 @@ def test_telegram_commands_without_credentials(home, capsys):
 def test_no_command_prints_help(capsys):
     assert cli.main([]) == 0
     assert "scan" in capsys.readouterr().out
-
-
-def test_configurar_without_wizard(home, capsys):
-    if importlib.util.find_spec("jobradar.wizard"):
-        pytest.skip("la fase 6 ya existe")
-    assert cli.main(["configurar"]) == 1
-    assert "fase 6" in capsys.readouterr().out
 
 
 def test_init_db_recent_status(home, capsys):

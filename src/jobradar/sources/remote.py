@@ -1,5 +1,6 @@
 """Fuentes de empleo remoto con API/RSS sin clave: Remotive, RemoteOK, We Work Remotely, Himalayas, Arbeitnow."""
 from __future__ import annotations
+from jobradar.normalize import parse_iso
 
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -11,13 +12,7 @@ from jobradar.sources import SourceContext
 
 
 def _iso(value) -> datetime | None:
-    if not isinstance(value, str) or not value.strip():
-        return None
-    try:
-        dt = datetime.fromisoformat(value.strip().replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt.astimezone(timezone.utc)
+    return parse_iso(value)
 
 
 def _epoch(value) -> datetime | None:

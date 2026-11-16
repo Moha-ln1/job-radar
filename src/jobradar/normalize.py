@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime, timezone
 import unicodedata
 
 _GENDER = re.compile(
@@ -47,3 +48,26 @@ def norm_company(company: str | None) -> str:
     c = fold(company).replace(".", "")
     c = re.sub(r"[^\w]+", " ", c)
     return " ".join(w for w in c.split() if w not in _LEGAL)
+
+
+_FRACTION = re.compile(r"\.(\d+)")
+_COMPACT_TZ = re.compile(r"([+-]\d{2})(\d{2})$")
+
+
+def parse_iso(value) -> datetime | None:
+    """Fecha ISO 8601 de una fuente externa → datetime con zona UTC, o None si no se entiende.
+
+    Acepta lo que Python 3.10 no entiende por sí solo: sufijo "Z", " UTC", fracciones de segundo de
+    cualquier longitud ("…00.0000000" de Jooble) y zonas sin dos puntos ("+0000")."""
+    if not isinstance(value, str) or not value.strip():
+        return None
+    text = value.strip().replace(" UTC", "+00:00")
+    if text.endswith(("Z", "z")):
+        text = text[:-1] + "+00:00"
+    text = _FRACTION.sub(lambda m: "." + (m.group(1) + "000000")[:6], text, count=1)
+    text = _COMPACT_TZ.sub(lambda m: m.group(1) + ":" + m.group(2), text)
+    try:
+        dt = datetime.fromisoformat(text)
+    except ValueError:
+        return None
+    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt.astimezone(timezone.utc)

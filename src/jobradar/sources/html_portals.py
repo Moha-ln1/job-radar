@@ -4,6 +4,7 @@ Cada portal tiene una función pura ``_parse_<portal>(html)`` (testeable con fix
 Vía 1: JSON embebido o JSON-LD si el portal lo trae (InfoJobs). Vía 2: enlaces de oferta y su contenedor.
 """
 from __future__ import annotations
+from jobradar.normalize import parse_iso
 
 import json
 import logging
@@ -47,11 +48,7 @@ def _relative_date(text: str | None, now: datetime | None = None) -> datetime | 
 
 
 def _iso_date(value: str | None) -> datetime | None:
-    try:
-        d = datetime.fromisoformat((value or "").replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    return parse_iso(value)
 
 
 def _dedup(offers: list[JobOffer | None]) -> list[JobOffer]:

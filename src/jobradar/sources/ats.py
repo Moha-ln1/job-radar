@@ -1,6 +1,7 @@
 """Webs de empleo de empresas por API de ATS: Greenhouse, Lever, Ashby, SmartRecruiters, Workday, Recruitee,
 Personio (XML) y Teamtailor (RSS). Las empresas salen de ``companies:`` en config.yaml."""
 from __future__ import annotations
+from jobradar.normalize import parse_iso
 
 import logging
 import re
@@ -26,15 +27,7 @@ def _modality(value) -> Modality | None:
 
 
 def _iso(value) -> datetime | None:
-    """Fecha ISO 8601 o ``2026-11-11 13:21:40 UTC`` -> datetime aware UTC (None si no se entiende)."""
-    if not isinstance(value, str) or not value.strip():
-        return None
-    text = value.strip().replace(" UTC", "+00:00").replace("Z", "+00:00")
-    try:
-        dt = datetime.fromisoformat(text)
-    except ValueError:
-        return None
-    return dt.replace(tzinfo=timezone.utc) if dt.tzinfo is None else dt.astimezone(timezone.utc)
+    return parse_iso(value)
 
 
 def _epoch_ms(value) -> datetime | None:

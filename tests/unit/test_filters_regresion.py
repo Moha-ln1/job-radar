@@ -1,4 +1,4 @@
-"""Regresiones de recall encontradas en la auditoría de la fase 1."""
+"""Regresiones de recall de recall: ofertas válidas que en algún momento se descartaban."""
 from datetime import datetime, timezone
 from pathlib import Path
 

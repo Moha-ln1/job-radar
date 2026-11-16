@@ -1,10 +1,11 @@
 """Fuentes con API oficial y clave gratuita: Adzuna y Jooble. Sin clave en .env se desactivan en silencio."""
 from __future__ import annotations
+from jobradar.normalize import parse_iso
 
 import html
 import logging
 import re
-from datetime import datetime, timezone
+from datetime import datetime
 
 from jobradar.models import JobOffer, build_offer
 from jobradar.sources import SourceContext
@@ -21,11 +22,7 @@ def _clean(text: str | None) -> str | None:
 
 
 def _date(value: str | None) -> datetime | None:
-    try:
-        d = datetime.fromisoformat((value or "").replace("Z", "+00:00"))
-    except ValueError:
-        return None
-    return d if d.tzinfo else d.replace(tzinfo=timezone.utc)
+    return parse_iso(value)
 
 
 def _queries(ctx: SourceContext) -> list[tuple[str, str]]:
