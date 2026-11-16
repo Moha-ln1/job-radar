@@ -85,6 +85,14 @@ class Catalog:
         self.ubicaciones: dict[str, dict] = data.get("ubicaciones", {})
         self.remote_regions_ok: list[str] = data.get("remote_regions_ok", [])
         self.remote_regions_no: list[str] = data.get("remote_regions_no", [])
+        known = {fold(a) for e in self.ubicaciones.values() for a in e.get("aliases", [])}
+        known |= {fold(k) for k in self.ubicaciones} | {fold(a) for a in data.get("otras_ubicaciones", [])}
+        known -= _GENERIC_LOCATIONS
+        self._known = word_pattern(sorted(known), variants=False) if known else None
+
+    def known_place(self, location: str) -> bool:
+        """¿La ubicación nombra algún lugar conocido (de cualquier región)?"""
+        return bool(self._known and self._known.search(fold(location)))
 
     @classmethod
     def from_file(cls, path: Path) -> "Catalog":
@@ -132,8 +140,12 @@ def _location_ok(search: Search, location: str, catalog: Catalog) -> bool:
     loc = fold(location)
     if loc in _GENERIC_LOCATIONS:
         return True
-    return any(word_pattern(catalog.location_terms(u), variants=False).search(loc)
-               for u in search.ubicaciones)
+    if any(word_pattern(catalog.location_terms(u), variants=False).search(loc)
+           for u in search.ubicaciones):
+        return True
+    # Solo se descarta si la ubicación se reconoce como de otro sitio. Una ubicación
+    # desconocida (municipio pequeño, "Location Negotiable"...) pasa: ante la duda, se incluye.
+    return not catalog.known_place(loc)
 
 
 def _remote_region_ok(search: Search, region: str, catalog: Catalog) -> bool:

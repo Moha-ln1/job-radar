@@ -22,7 +22,22 @@ ubicaciones:
   andalucia:
     label: Andalucía
     aliases: [andalucia, andalusia, almeria, cadiz, cordoba, granada, huelva, jaen, malaga, sevilla,
-      seville, malaga, marbella, jerez, algeciras, dos hermanas, estepona]
+      seville, marbella, jerez, algeciras, dos hermanas, estepona,
+      # Municipios grandes por provincia (los no listados se incluyen igualmente: ubicación desconocida pasa)
+      roquetas de mar, el ejido, vicar, nijar, adra, huercal-overa,
+      jerez de la frontera, san fernando, el puerto de santa maria, chiclana de la frontera,
+      sanlucar de barrameda, la linea de la concepcion, puerto real, rota, arcos de la frontera,
+      barbate, conil de la frontera, medina-sidonia,
+      lucena, puente genil, montilla, priego de cordoba, cabra, palma del rio, baena, pozoblanco,
+      motril, almunecar, baza, guadix, loja, salobrena,
+      lepe, almonte, moguer, isla cristina, ayamonte, aljaraque, cartaya,
+      linares, andujar, ubeda, martos, alcala la real, baeza, bailen, la carolina, torredonjimeno,
+      mijas, fuengirola, velez-malaga, torremolinos, benalmadena, rincon de la victoria, antequera,
+      alhaurin de la torre, alhaurin el grande, ronda, nerja, coin, cartama, manilva, malaga-costa del sol,
+      alcala de guadaira, utrera, mairena del aljarafe, ecija, la rinconada, los palacios, carmona,
+      coria del rio, tomares, san juan de aznalfarache, lebrija, moron de la frontera, camas,
+      bormujos, espartinas, la algaba, sanlucar la mayor, gines, palomares del rio, mairena del alcor,
+      parque tecnologico de andalucia, campanillas]
   madrid:
     label: Madrid
     aliases: [madrid, alcobendas, getafe, mostoles, alcala de henares, leganes, pozuelo, las rozas,
@@ -37,7 +52,24 @@ ubicaciones:
       san sebastian, santander, palma, las palmas, tenerife, almeria, cadiz, huelva, jaen, salamanca,
       toledo, albacete, badajoz, caceres, leon, burgos, logrono, tarragona, girona, lleida, castellon,
       andalucia, cataluna, catalunya, galicia, asturias, cantabria, aragon, navarra, canarias,
-      baleares, extremadura, castilla, pais vasco, euskadi, comunidad valenciana, la rioja]
+      baleares, extremadura, castilla, pais vasco, euskadi, comunidad valenciana, la rioja,
+      # Las 52 provincias (con variantes) y otras ciudades
+      a coruna, la coruna, alava, araba, alacant, avila, castello, ciudad real, cuenca, guadalajara,
+      guipuzcoa, gipuzkoa, huesca, lugo, ourense, orense, palencia, pontevedra, santa cruz de tenerife,
+      segovia, soria, teruel, vizcaya, bizkaia, zamora, ceuta, melilla, murcia, region de murcia,
+      comunidad de madrid, castilla y leon, castilla-la mancha, castilla la mancha, illes balears,
+      merida, aranjuez, elche, cartagena, torrejon de ardoz, fuenlabrada, alcorcon, parla, sant boi,
+      mataro, reus, gandia, torrevieja, benidorm, ponferrada, ferrol, santiago de compostela, getxo,
+      barakaldo, irun, donostia, ibiza, menorca, mallorca, lanzarote, fuerteventura]
+# Lugares fuera de España: si la ubicación nombra uno de ellos (o un lugar de otra entrada del
+# catálogo), no encaja con búsquedas de otras ubicaciones. Lo que no se reconoce, pasa.
+otras_ubicaciones: [portugal, lisboa, lisbon, porto, oporto, france, francia, paris, lyon, germany,
+  alemania, berlin, munich, munchen, hamburg, frankfurt, italy, italia, milan, milano, rome, roma,
+  united kingdom, uk, london, londres, ireland, irlanda, dublin, netherlands, paises bajos, amsterdam,
+  belgium, belgica, brussels, bruselas, switzerland, suiza, zurich, poland, polonia, warsaw, krakow,
+  romania, bucharest, czech, prague, praga, austria, vienna, sweden, stockholm, denmark, copenhagen,
+  norway, oslo, finland, helsinki, mexico, argentina, buenos aires, colombia, bogota, chile, peru,
+  united states, usa, new york, san francisco, india, bangalore, singapore, japan, tokyo, china]
 # Regiones de teletrabajo aceptables (si la región no se conoce, la oferta pasa igualmente).
 remote_regions_ok: [eu, spain, españa, europe, europa, emea, worldwide, anywhere, global, cet, remote]
 # Regiones que descartan una oferta remota (salvo que la búsqueda las pida expresamente).
