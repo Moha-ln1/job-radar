@@ -210,6 +210,10 @@ ciberseguridad:
   - pentesting
 sistemas:
   - sistemas
+  - "!sistemas de seguridad electrónica"
+  - "!sistemas de seguridad contra incendios"
+  - "!sistemas de alarma"
+  - "!sistemas de protección contra incendios"
   - sysadmin
   - administrador de sistemas
   - devops
@@ -543,6 +547,9 @@ consultoria:
   - advisory
   - asesor
   - asesoría
+  - organización
+  - organización industrial
+  - organización de empresas
 logistica:
   - logística
   - logistics
@@ -722,6 +729,16 @@ hosteleria:
   - front office
   - housekeeping
   - barista
+  - sommelier
+  - guest relations
+  - guest experience
+  - guest service
+  - concierge
+  - conserje
+  - recepcionista de hotel
+  - animador turístico
+  - azafato
+  - azafata
 arquitectura:
   - arquitectura
   - arquitecto
@@ -758,6 +775,10 @@ arquitectura:
   - pintor
   - instalador
   - climatización
+  - seguridad electrónica
+  - sistemas de seguridad electrónica
+  - alarmas
+  - contra incendios
 videojuegos:
   - videojuegos
   - videojuego

@@ -14,6 +14,12 @@ CAT = Catalog.from_file(radar._DATA / "catalogo.yaml")
 CASES = [
     # (título, debe, no_debe)
     ("Técnico Informático Junior – Granada", {"sistemas"}, set()),
+    # Colados en "Junior tech" el 16/11/2026 por no tener área conocida o por "sistemas" suelto
+    ("Junior Sommelier", {"hosteleria"}, set()),
+    ("Guest Relations Intern - Hyatt Regency Barcelona Tower", {"hosteleria"}, set()),
+    ("Titulado/a Superior Junior en Organización", {"consultoria"}, set()),
+    ("Técnico/a Instalador/a Junior - Sistemas de Seguridad Electrónica", {"arquitectura"}, {"sistemas"}),
+    ("Ingeniero/a Junior de Integración de Sistemas", {"sistemas"}, set()),
     ("Prácticas Técnico/a de Sistemas y Soporte CAU", {"sistemas"}, set()),
     ("IT Support Technician Intern STP27", {"sistemas"}, set()),
     ("IT Systems Intern (Start December) - Hotel Arts Barcelona", {"sistemas"}, set()),

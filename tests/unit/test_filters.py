@@ -49,6 +49,14 @@ def test_exclusion_senior_y_caso_ambiguo():
     assert d.ok and any("caso ambiguo" in r for r in d.reasons)
 
 
+def test_exclusion_de_palabra_de_area_no_arrastra_su_grupo():
+    ex = Exclusions(words=["arquitecto"])
+    todo = [Search(id="a", name="A", tipos=["cualquiera"])]
+    assert not ev(offer("Arquitecta de software"), todo, ex).ok
+    assert ev(offer("Técnico instalador de climatización"), todo, ex).ok
+    assert ev(offer("Fontanero"), todo, ex).ok
+
+
 def test_exclusion_empresa_por_nombre_normalizado():
     d = ev(offer("Becario Data", company="NTT Data Spain S.L."), PRAC,
            Exclusions(companies=["NTT Data"]))

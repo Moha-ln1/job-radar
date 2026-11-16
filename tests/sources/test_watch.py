@@ -22,9 +22,10 @@ def test_parse_extrae_solo_enlaces_del_contenido_principal():
     assert [(o.title, o.url) for o in offers] == [
         ("¡Sumérgete!", "https://candidatura.42malaga.com/users/sign_up"),
         ("Ven a conocer el campus", "https://conoce-42malaga-2026.eventbrite.es/"),
-        ("Reserva tu plaza", "https://pdpython-diciembre-42malaga.eventbrite.es/"),
-        ("Reserva tu plaza", "https://ddciber-diciembre-42malaga.eventbrite.es/"),
-        ("Descubre más", "https://www.42malaga.com/programa/"),
+        # Los textos genéricos se completan con el destino del enlace
+        ("Reserva tu plaza (pdpython diciembre 42malaga)", "https://pdpython-diciembre-42malaga.eventbrite.es/"),
+        ("Reserva tu plaza (ddciber diciembre 42malaga)", "https://ddciber-diciembre-42malaga.eventbrite.es/"),
+        ("Descubre más (programa)", "https://www.42malaga.com/programa/"),
         # Las FAQs son páginas institucionales: no se vigilan
     ]
     assert all(o.source == "watch:42 Málaga" and o.category == "vigilancia" and o.company is None for o in offers)
@@ -53,6 +54,13 @@ def test_parse_descarta_paginas_institucionales_salvo_convocatorias():
     titles = {o.title for o in watch._parse_watch(html, URL, "x")}
     assert titles == {"ABIERTO PLAZO DE SOLICITUD PARA PRÁCTICAS", "Nueva edición del programa",
                       "Descubre el programa", "PROGRAMA BE TALENT BBVA"}
+
+
+def test_parse_completa_textos_genericos_con_el_destino():
+    html = ('<body><main><a href="/animate-y-prueba/">aquí</a><a href="/ven/">¡Apúntate ahora!</a>'
+            '<a href="/bootcamp-web/">Bootcamp de desarrollo web</a></main></body>')
+    titles = [o.title for o in watch._parse_watch(html, URL, "x")]
+    assert titles == ["aquí (animate y prueba)", "¡Apúntate ahora! (ven)", "Bootcamp de desarrollo web"]
 
 
 def test_parse_usa_atributo_title_si_el_enlace_no_tiene_texto():

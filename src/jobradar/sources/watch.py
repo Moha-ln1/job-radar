@@ -38,6 +38,21 @@ _NOISE = ("nav", "header", "footer", "aside", "script", "style", "noscript", "sv
 _NOISE_ROLES = ("navigation", "banner", "contentinfo")
 
 
+# Textos de enlace que no dicen nada por sí solos: se completan con el destino del enlace.
+_GENERIC = re.compile(
+    r"^[¡ ]*(?:(?:haz clic |pulsa |clic |click )?aqu[ií]|click here|here|descubre m[aá]s|ver m[aá]s.*|"
+    r"leer m[aá]s|saber m[aá]s|m[aá]s informaci[oó]n|inf[oó]rmate|learn more|read more|more|"
+    r"reserva tu plaza|inscr[ií]bete|ap[uú]ntate( ahora)?|[uú]nete)[.!¡ ]*$", re.IGNORECASE)
+
+
+def _slug(path: str, host: str, own_host: str) -> str:
+    """Última parte legible de la ruta ("/animate-y-prueba/" -> "animate y prueba")."""
+    seg = next((s for s in reversed(path.split("/")) if s), "")
+    if not seg and host != own_host:
+        seg = host.split(".")[0]  # p. ej. "pdpython-diciembre-42malaga.eventbrite.es"
+    return re.sub(r"[-_+]+", " ", seg).strip() or host
+
+
 def _host(url: str) -> str:
     host = (urlsplit(url).hostname or "").lower()
     return host.removeprefix("www.")
@@ -74,6 +89,8 @@ def _parse_watch(html: str, base_url: str, name: str) -> list[JobOffer]:
             continue
         if _INSTITUTIONAL.search(parts.path) and not _CALL_TEXT.search(title):
             continue
+        if _GENERIC.match(title):
+            title = f"{title} ({_slug(parts.path, host, own_host)})"
         offer = build_offer(title=title, company=None, url=url, source=f"watch:{name}", category="vigilancia")
         if offer is not None:
             offers.setdefault(offer.url, offer)

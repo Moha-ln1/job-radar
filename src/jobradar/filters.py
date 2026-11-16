@@ -245,6 +245,15 @@ def _eval_search(offer: JobOffer, s: Search, text: str, modality, syn: Synonyms,
     return True, f"encaja con '{s.name}'" + (": " + ", ".join(parts) if parts else ""), uncertain
 
 
+def _excluded(word: str, text: str, syn: Synonyms, catalog: Catalog) -> bool:
+    """Una palabra excluida que es de un área o tipo ("arquitecto") se busca tal cual: si se ampliara a su
+    grupo, excluir "arquitecto" (Software Architect) descartaría también instalador, fontanero, obra..."""
+    t = fold(word)
+    if any(t == k or t in syn.groups.get(k, ()) for k in (*catalog.areas, *catalog.tipos)):
+        return bool(word_pattern([t]).search(text))
+    return bool(syn.search(word, text))
+
+
 def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Synonyms,
              catalog: Catalog, now: datetime, max_age_days: int = 14) -> Decision:
     title_fold = match_text(offer.title)
@@ -273,7 +282,7 @@ def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Syn
     is_company = excluded_by is not None
     if not excluded_by:
         for w in excl.words:
-            if syn.search(w, title_fold):
+            if _excluded(w, title_fold, syn, catalog):
                 excluded_by = f"excluida por '{w}' en el título"
                 break
     if excluded_by:
