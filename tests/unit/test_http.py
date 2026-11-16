@@ -50,3 +50,29 @@ async def test_cabeceras_navegador():
     async with Http(FAST, transport=httpx.MockTransport(handler)) as http:
         await http.get("https://example.com/")
     assert "Mozilla" in seen["user-agent"] and seen["accept-language"].startswith("es-ES")
+
+
+async def test_muro_antibot_con_200_es_bloqueo():
+    import httpx
+    import pytest
+    from jobradar.http import Http, SourceBlocked
+    from jobradar.config import HttpSettings
+
+    def handler(request):
+        return httpx.Response(200, headers={"content-type": "text/html"},
+                              text="<html><body>No podemos identificar tu navegador</body></html>")
+    async with Http(HttpSettings(delay_seconds=[0, 0]), transport=httpx.MockTransport(handler)) as h:
+        with pytest.raises(SourceBlocked):
+            await h.get("https://www.infojobs.net/x")
+
+
+async def test_recaptcha_en_formulario_no_es_bloqueo():
+    import httpx
+    from jobradar.http import Http
+    from jobradar.config import HttpSettings
+
+    def handler(request):
+        return httpx.Response(200, headers={"content-type": "text/html"},
+                              text='<form><div class="g-recaptcha"></div>captcha</form>')
+    async with Http(HttpSettings(delay_seconds=[0, 0]), transport=httpx.MockTransport(handler)) as h:
+        assert (await h.get("https://factoriaf5.org/")).status_code == 200

@@ -23,6 +23,19 @@ class SourceBlocked(Exception):
         self.status = status
 
 
+# Muros anti-bot servidos con HTTP 200 (comprobados contra InfoJobs, Glassdoor, Indeed y Jooble).
+# No incluir "captcha" a secas: muchas webs normales llevan reCAPTCHA en sus formularios.
+_WALL_MARKERS = ("no podemos identificar tu navegador", "captcha-delivery.com",
+                 "<title>just a moment", "cf-chl-opt", "cf_chl_opt")
+
+
+def _is_wall(resp: httpx.Response) -> bool:
+    if "html" not in resp.headers.get("content-type", ""):
+        return False
+    head = resp.text[:30000].lower()
+    return any(m in head for m in _WALL_MARKERS)
+
+
 class Http:
     def __init__(self, settings: HttpSettings | None = None, *,
                  transport: httpx.AsyncBaseTransport | None = None, backoff: float = 2.0):
@@ -57,6 +70,8 @@ class Http:
                     await asyncio.sleep(self.backoff)
                     continue
                 resp.raise_for_status()
+                if _is_wall(resp):
+                    raise SourceBlocked(domain, resp.status_code)
                 return resp
         raise AssertionError("inalcanzable")
 
