@@ -36,9 +36,9 @@ Fetcher = Callable[[SourceContext], Awaitable[list[JobOffer]]]
 
 def all_fetchers() -> dict[str, Fetcher]:
     """Registro de todas las fuentes disponibles."""
-    from jobradar.sources import ats, html_portals, remote, watch
+    from jobradar.sources import ats, html_portals, official_apis, remote, watch
 
     registry: dict[str, Fetcher] = {}
-    for module in (ats, remote, html_portals, watch):
+    for module in (ats, remote, html_portals, official_apis, watch):
         registry.update(module.FETCHERS)
     return registry

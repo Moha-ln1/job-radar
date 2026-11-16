@@ -6,10 +6,12 @@ Vía 1: JSON embebido o JSON-LD si el portal lo trae (InfoJobs). Vía 2: enlaces
 from __future__ import annotations
 
 import json
+import logging
 import re
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus, urljoin, urlsplit
 
+import httpx
 from bs4 import BeautifulSoup, Tag
 
 from jobradar.models import JobOffer, build_offer
@@ -17,6 +19,7 @@ from jobradar.normalize import fold
 from jobradar.sources import SourceContext
 
 
+_log = logging.getLogger("jobradar.sources")
 _UNITS = (  # (prefijo plegado, segundos)
     ("min", 60), ("h", 3600), ("d", 86400), ("sem", 7 * 86400), ("w", 7 * 86400), ("mes", 30 * 86400),
 )
@@ -173,6 +176,7 @@ def _parse_infojobs_api(data: dict) -> list[JobOffer]:
     """Respuesta de la API oficial ``GET /api/9/offer`` (doc pública de InfoJobs)."""
     offers = []
     for o in data.get("offers") or []:
+        exp = (o.get("experienceMin") or {}).get("value")
         offers.append(build_offer(
             expected_domains=_IJ_DOMAINS,
             title=o.get("title") or "",
@@ -181,24 +185,39 @@ def _parse_infojobs_api(data: dict) -> list[JobOffer]:
             modality=_modality((o.get("teleworking") or {}).get("value")),
             url=_ij_url(o.get("link") or ""),
             source="infojobs",
-            posted_at=_iso_date(o.get("published")),
+            posted_at=_iso_date(o.get("published") or o.get("updated")),
+            category=(o.get("category") or {}).get("value"),
+            description=f"Experiencia mínima: {exp}" if exp else None,
         ))
+    return _dedup(offers)
+
+
+async def _infojobs_html(ctx: SourceContext) -> list[JobOffer]:
+    offers: list[JobOffer] = []
+    for term in _search_terms(ctx):
+        resp = await ctx.http.get(
+            f"https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword={quote_plus(term)}")
+        offers.extend(_parse_infojobs(resp.text))
     return _dedup(offers)
 
 
 async def fetch_infojobs(ctx: SourceContext) -> list[JobOffer]:
     cid, secret = ctx.env.get("INFOJOBS_CLIENT_ID"), ctx.env.get("INFOJOBS_CLIENT_SECRET")
+    if not (cid and secret):
+        return await _infojobs_html(ctx)
     offers: list[JobOffer] = []
     for term in _search_terms(ctx):
-        if cid and secret:
+        try:
             resp = await ctx.http.get(
-                f"https://api.infojobs.net/api/9/offer?q={quote_plus(term)}&maxResults=50",
+                "https://api.infojobs.net/api/9/offer",
+                params={"q": term, "maxResults": 50, "order": "updated-desc", "sinceDate": "_7_DAYS"},
                 auth=(cid, secret))
-            offers.extend(_parse_infojobs_api(resp.json()))
-        else:
-            resp = await ctx.http.get(
-                f"https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword={quote_plus(term)}")
-            offers.extend(_parse_infojobs(resp.text))
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 401:
+                _log.warning("clave de InfoJobs no válida: se usa el HTML público")
+                return await _infojobs_html(ctx)
+            raise
+        offers.extend(_parse_infojobs_api(resp.json()))
     return _dedup(offers)
 
 

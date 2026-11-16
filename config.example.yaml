@@ -22,6 +22,8 @@ sources:
   weworkremotely: {enabled: true}
   himalayas:     {enabled: true}
   arbeitnow:     {enabled: false}
+  adzuna:        {enabled: true}   # necesita clave gratuita en .env (ver docs/TUTORIAL.md)
+  jooble:        {enabled: true}   # necesita clave gratuita en .env (ver docs/TUTORIAL.md)
   watch:         {enabled: true}
 
 # Webs de empleo de empresas (añádelas con: jobradar ats detect <url>)
