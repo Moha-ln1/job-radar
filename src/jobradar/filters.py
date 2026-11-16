@@ -1,4 +1,4 @@
-"""Filtros: sinónimos, catálogo y evaluación de ofertas (reglas de PLAN.md 1.1 y 4.1)."""
+"""Filtros: sinónimos, catálogo y evaluación de ofertas (reglas de docs/ARQUITECTURA.md 1.1 y 4.1)."""
 from __future__ import annotations
 
 import re

@@ -15,15 +15,16 @@ python --version
 git --version
 ```
 
-Si alguno no responde, vuelve a instalarlo antes de seguir.
+En Windows, si `python --version` abre la Microsoft Store o no responde, prueba `py --version`: el instalador
+usa cualquiera de los dos. Si ninguno responde, vuelve a instalar Python marcando **Add python.exe to PATH**.
 
 ## 2. Descargar JobRadar
 
 En la terminal, dentro de la carpeta donde quieras guardarlo:
 
 ```
-git clone <URL-del-repositorio> JobScrapper
-cd JobScrapper
+git clone https://github.com/Moha-ln1/job-radar.git
+cd job-radar
 ```
 
 ## 3. Crear tu bot de Telegram
@@ -41,7 +42,7 @@ El token se pedirá durante la instalación.
 
 ## 4. Ejecutar el instalador
 
-**Windows** (dentro de la carpeta `JobScrapper`):
+**Windows** (dentro de la carpeta `job-radar`):
 
 ```
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
@@ -108,7 +109,12 @@ Cada aviso trae botones:
 
 - **🚫 Ocultar empresa**: no volverás a recibir ofertas de esa empresa.
 - **👎 No me interesa**: descarta esa oferta.
-- **➕ Era buena en descartadas**: añade el término que la descartó a tu búsqueda, para que encaje la próxima vez.
+
+Si una misma oferta aparece en varios portales, recibes **un solo aviso con los enlaces de todos**. Si más tarde
+aparece en otro portal, el aviso original se actualiza y el bot te responde con "➕ También en …".
+
+En `/descartadas`, cada oferta trae el botón **➕ Era buena**: te la envía, te pregunta qué palabra del título
+debería haberla encontrado y la añade a los sinónimos, para que las siguientes parecidas no se pierdan.
 
 ## 8. Cómo funcionan los filtros
 
@@ -125,7 +131,7 @@ Cada aviso trae botones:
 
 ## 9. Comandos de terminal útiles
 
-Ejecútalos desde la carpeta `JobScrapper`. En Windows puedes usar `.venv\Scripts\jobradar.exe` o activar el entorno
+Ejecútalos desde la carpeta `job-radar`. En Windows puedes usar `.venv\Scripts\jobradar.exe` o activar el entorno
 virtual; en Linux/macOS, `source .venv/bin/activate`.
 
 | Comando | Para qué sirve |
@@ -154,7 +160,7 @@ virtual; en Linux/macOS, `source .venv/bin/activate`.
 - **Arrancar**: `jobradar run`. Deja la ventana abierta mientras quieras que funcione, o usa el arranque automático.
 - **Parar**: `jobradar stop`.
 - **Estado**: `jobradar status`.
-- **Arranque automático**: `jobradar autostart on` para que arranque al iniciar sesión en Windows, y
+- **Arranque automático**: `jobradar autostart on` para que arranque al iniciar sesión (Windows, Linux o macOS), y
   `jobradar autostart off` para desactivarlo. `jobradar autostart status` muestra si está activo.
 
 **El PC debe estar encendido** para que JobRadar busque ofertas. Si lo apagas, al volver a encenderlo recupera el
@@ -162,9 +168,15 @@ escaneo atrasado.
 
 ## 11. Solución de problemas
 
-**En `/estado` aparece una fuente como bloqueada.** La web ha respondido con 403 o 429 (demasiadas peticiones o
-acceso denegado). JobRadar pausa esa fuente hasta el siguiente escaneo. Suele ser temporal. Si se repite, usa la API
-oficial de esa web (ver [APIS.md](APIS.md)) o desactiva la fuente (ver [FUENTES.md](FUENTES.md)).
+**En `/estado` aparece una fuente en pausa ("nos ha bloqueado; descansa hasta…").** La web ha detectado demasiadas
+peticiones (403, 429 o una página anti-bot). JobRadar deja de consultarla un tiempo para no saturarla: 6 h tras el
+primer bloqueo y el doble con cada bloqueo seguido, hasta 48 h. Cuando vuelve a responder bien, todo vuelve a la
+normalidad solo. No hace falta hacer nada. Si una fuente se bloquea siempre, usa su API oficial si existe (ver
+[APIS.md](APIS.md)) o desactívala (ver [FUENTES.md](FUENTES.md)). Las demás fuentes siguen funcionando mientras tanto.
+
+**El primer día no llega ningún aviso.** Es normal: el primer escaneo marca como vistas las ofertas que ya existían,
+para no enviarte cientos de golpe. Desde entonces solo recibes las nuevas. Para ver lo que ya hay que encaja con una
+búsqueda, guárdala desde `/busquedas`: el bot te dice cuántas ofertas guardadas encajan y te las enseña.
 
 **No llegan avisos al móvil.** Comprueba que el bot está activo con `jobradar telegram test`. Si no llega el mensaje
 de prueba, repite `jobradar telegram chat-id --save` después de escribir `/start` a tu bot. Después ejecuta
@@ -175,7 +187,7 @@ Ahí aparece el motivo exacto de cada descarte.
 
 ## 12. Actualizar JobRadar
 
-Dentro de la carpeta `JobScrapper`:
+Dentro de la carpeta `job-radar`:
 
 ```
 git pull

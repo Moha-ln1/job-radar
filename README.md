@@ -43,16 +43,16 @@ Requisitos: Python 3.10 o superior, git y una cuenta de Telegram.
 **Windows**
 
 ```
-git clone <URL-del-repositorio> JobScrapper
-cd JobScrapper
+git clone https://github.com/Moha-ln1/job-radar.git
+cd job-radar
 powershell -ExecutionPolicy Bypass -File scripts\setup.ps1
 ```
 
 **Linux / macOS**
 
 ```
-git clone <URL-del-repositorio> JobScrapper
-cd JobScrapper
+git clone https://github.com/Moha-ln1/job-radar.git
+cd job-radar
 bash scripts/setup.sh
 ```
 

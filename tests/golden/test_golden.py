@@ -1,4 +1,4 @@
-"""Conjunto de referencia (PLAN.md 1.1.7): recall 100 %, precisión solo informativa."""
+"""Conjunto de referencia (docs/ARQUITECTURA.md 1.1.7): recall 100 %, precisión solo informativa."""
 from datetime import datetime, timezone
 from pathlib import Path
 

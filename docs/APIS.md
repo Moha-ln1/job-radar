@@ -11,6 +11,10 @@ Rellena los valores en tu archivo `.env` y reinicia JobRadar. Consulta los lími
 
 Si la clave no es válida (error 401), JobRadar avisa en el log y usa el HTML público.
 
+> InfoJobs cierra a veces el registro de aplicaciones nuevas ("The registration of new apps is currently
+> unavailable"). Si te pasa, no necesitas hacer nada: JobRadar lee el HTML público de resultados, a menor ritmo
+> (cada 6 h) para no saturarlo. Puedes volver a intentarlo más adelante.
+
 ## Adzuna
 1. Regístrate en <https://developer.adzuna.com/>.
 2. Tras el registro verás tu `app_id` y tu `app_key` en el panel.

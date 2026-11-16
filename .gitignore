@@ -2,9 +2,13 @@
 .env
 config.yaml
 busquedas.yaml
+estado.json
 sinonimos_usuario.yaml
 *.db
 *.db-journal
+*.db-wal
+*.db-shm
+JobRadar.vbs
 logs/
 export/
 
