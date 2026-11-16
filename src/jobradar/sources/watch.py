@@ -33,7 +33,7 @@ _INSTITUTIONAL = re.compile(
     r"voluntari[^/]*|login|wp-login\.php)(?:/|$)", re.IGNORECASE)
 _CALL_TEXT = re.compile(
     r"(?<![a-záéíóúñ])(?:inscri|plaza|plazo|convocatoria|candidatur|ap[uú]ntate|matr[ií]cula|beca|"
-    r"pr[aá]cticas|bootcamp|nueva edici[oó]n|programa\b.*\btalent|sign[ _-]?up)", re.IGNORECASE)
+    r"pr[aá]cticas|nueva edici[oó]n|programa\b.*\btalent|sign[ _-]?up)", re.IGNORECASE)
 _NOISE = ("nav", "header", "footer", "aside", "script", "style", "noscript", "svg")
 _NOISE_ROLES = ("navigation", "banner", "contentinfo")
 

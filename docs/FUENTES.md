@@ -50,7 +50,7 @@ companies:
 
 ## Añadir páginas vigiladas
 
-Algunas páginas de programas no tienen listado de ofertas, pero publican novedades. Desde Telegram: `/paginas` →
+Algunas páginas de convocatorias no tienen listado de ofertas, pero publican novedades. Desde Telegram: `/paginas` →
 **➕ Añadir página** y pega el enlace (lo que ya hay en la página se marca como visto; solo te llegará lo nuevo). El
 botón 📢/🔎 de cada página cambia entre recibir todos sus enlaces nuevos o solo los que encajan con tus búsquedas.
 
@@ -58,10 +58,7 @@ También puedes añadir un bloque `watch:` en `config.yaml`:
 
 ```yaml
 watch:
-  - {name: Factoría F5, url: "https://factoriaf5.org/"}
-  - {name: Generation Spain, url: "https://spain.generation.org/"}
-  - {name: 42 Málaga, url: "https://42malaga.com/"}
-  - {name: Mi bootcamp, url: "https://ejemplo.com/convocatorias"}
+  - {name: Mis convocatorias, url: "https://ejemplo.com/convocatorias"}
 ```
 
 JobRadar avisa cuando aparece un enlace nuevo en el contenido principal de la página. No intenta extraer ofertas

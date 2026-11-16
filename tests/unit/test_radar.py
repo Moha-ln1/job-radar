@@ -70,15 +70,14 @@ def test_derive_terms_y_locations():
 
 
 def test_derive_terms_pone_primero_cada_tipo():
-    # LinkedIn solo usa los primeros: los cuatro tipos deben ir delante, aunque haya muchas búsquedas
+    # LinkedIn solo usa los primeros: los tipos deben ir delante, aunque haya muchas búsquedas
     syn = Synonyms.from_files(DATA / "sinonimos.yaml")
     cat = Catalog.from_file(DATA / "catalogo.yaml")
-    searches = [Search(id="a", name="a", tipos=["bootcamp"]),
-                Search(id="b", name="b", tipos=["practicas", "trainee"], areas=["programador", "data"]),
+    searches = [Search(id="b", name="b", tipos=["practicas", "trainee"], areas=["programador", "data"]),
                 Search(id="c", name="c", tipos=["junior"], areas=["sistemas"])]
     terms = derive_terms(searches, syn, cat)
-    assert terms[:5] == ["prácticas", "trainee", "bootcamp", "junior", "intern"]
-    assert "boot camp" not in terms
+    assert terms[:4] == ["prácticas", "trainee", "junior", "intern"]
+    assert "bootcamp" not in terms
 
 
 def test_due_sources():

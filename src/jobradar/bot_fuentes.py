@@ -200,7 +200,7 @@ async def on_page(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await _answer(update)
         context.user_data["await"] = ("pagina",)
         await update.effective_chat.send_message(
-            "Pega el enlace de la página que quieres vigilar (p. ej. la de convocatorias de una academia).",
+            "Pega el enlace de la página que quieres vigilar (p. ej. la de prácticas de tu universidad).",
             reply_markup=ForceReply(input_field_placeholder="https://..."))
         return
     watch = [dict(w) for w in _settings(paths).watch]

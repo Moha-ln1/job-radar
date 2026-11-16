@@ -14,7 +14,7 @@ CAT = Catalog.from_file(DATA / "catalogo.yaml")
 NOW = datetime(2026, 11, 17, 2, 47, 54, tzinfo=timezone.utc)
 
 SEARCHES = [
-    Search(id="A", name="Academies tech", tipos=["practicas", "trainee", "bootcamp"],
+    Search(id="A", name="Academies tech", tipos=["practicas", "trainee"],
            ubicaciones=["granada", "andalucia"], modalidades=[], prioridad="alta"),
     Search(id="J", name="Junior dev", tipos=["junior"], areas=["programador", "data"],
            modalidades=["remoto"], prioridad="normal"),

@@ -160,12 +160,12 @@ def test_three_modalities_note_and_short_name():
     s = bot.wizard_state_new()
     for m in bot.MODALIDADES:
         bot.toggle(s, "modalidades", m)
-    for t in ("practicas", "trainee", "bootcamp", "junior"):
+    for t in ("practicas", "trainee", "junior"):
         bot.toggle(s, "tipos", t)
     s["step"] = 2
     text, _ = bot.render_step(s, CAT)
     assert "equivalen a «cualquiera»" in text
-    assert bot.auto_name(s, CAT) == "Prácticas/Trainee +2 · Presencial/Híbrido +1"
+    assert bot.auto_name(s, CAT) == "Prácticas/Trainee +1 · Presencial/Híbrido +1"
 
 
 async def test_answer_ignores_network_and_stale_queries():

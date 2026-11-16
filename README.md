@@ -1,6 +1,6 @@
 # JobRadar
 
-JobRadar busca en tu PC convocatorias cortas (prácticas, trainee, bootcamp/academy y empleo junior) en webs de empresas,
+JobRadar busca en tu PC convocatorias cortas (prácticas, trainee y empleo junior) en webs de empresas,
 APIs de empleo y portales, y te avisa por Telegram. Una misma oferta publicada en varios portales llega una sola vez,
 con todos sus enlaces. Las búsquedas se crean con botones, sin tocar archivos.
 
@@ -30,7 +30,7 @@ responde al aviso original:
 - **Empleo remoto (APIs sin clave)**: Remotive, RemoteOK, We Work Remotely y Himalayas.
 - **APIs oficiales opcionales (con clave gratuita)**: InfoJobs, Adzuna y Jooble. Sin clave se usan las webs públicas.
 - **Portales**: LinkedIn, InfoJobs, Tecnoempleo, Infoempleo y Primer Empleo.
-- **Vigilancia de páginas**: avisa cuando aparece algo nuevo en páginas de programas sin listado de ofertas.
+- **Vigilancia de páginas**: avisa cuando aparece algo nuevo en páginas de convocatorias sin listado de ofertas (p. ej. la de prácticas de tu universidad).
 - **Filtros con botones y sinónimos**: tipo, área, modalidad y ubicación, en español e inglés.
 - **Todo se configura desde Telegram**: búsquedas, exclusiones, fuentes (`/fuentes`), webs de empresas (`/empresas`)
   y páginas vigiladas (`/paginas`), sin editar archivos.
@@ -87,7 +87,7 @@ tipo, área, modalidad, ubicación y cuándo avisarte. No hace falta tocar ning�
 | No ver nunca una palabra o una empresa | `/excluir` |
 | Apagar LinkedIn u otra fuente | `/fuentes` |
 | Seguir la web de empleo de una empresa | `/empresas` |
-| Vigilar la página de una academia | `/paginas` |
+| Vigilar una página de convocatorias | `/paginas` |
 | Saber si un título me llegaría | `/probar <título>` |
 | Ver qué se ha descartado y por qué | `/descartadas` |
 

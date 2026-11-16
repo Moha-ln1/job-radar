@@ -33,7 +33,7 @@ COMMANDS = [
     ("excluir", "Palabras y empresas excluidas"),
     ("fuentes", "Activar o desactivar fuentes de ofertas"),
     ("empresas", "Webs de empleo de empresas que se leen"),
-    ("paginas", "Páginas de academias y programas que se vigilan"),
+    ("paginas", "Páginas de convocatorias que se vigilan"),
     ("descartadas", "Ofertas descartadas en las últimas 24 h"),
     ("probar", "Probar un título: /probar <texto>"),
     ("recientes", "Ofertas encontradas últimamente"),
@@ -382,7 +382,7 @@ def _save(context, searches: list[Search], excl: Exclusions) -> None:
 
 # --- comandos ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await _say(update, "👋 <b>jobradar</b> te avisa de prácticas, trainee y bootcamps.\n"
+    await _say(update, "👋 <b>jobradar</b> te avisa de prácticas, trainee y empleo junior.\n"
                        "Empieza con /busquedas para decirme qué buscas. /ayuda lista todos los comandos.")
 
 

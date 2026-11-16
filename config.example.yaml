@@ -33,10 +33,8 @@ companies:
   - {name: Accenture, ats: workday, slug: "accenture.wd103/AccentureCareers"}
   - {name: Bosch, ats: smartrecruiters, slug: BoschGroup}
 
-# Páginas de programas sin listado de ofertas: se avisa cuando aparece algo nuevo.
+# Páginas de convocatorias sin listado de ofertas: se avisa cuando aparece un enlace nuevo.
 # Con `filtrar: true`, los enlaces nuevos pasan por tus búsquedas (útil en portales con ofertas de todo
-# tipo, como el de prácticas de una universidad): ej. {name: UGR Empleo, url: "https://empleo.ugr.es/", filtrar: true}
+# tipo, como el de prácticas de una universidad).
 watch:
-  - {name: Factoría F5, url: "https://factoriaf5.org/"}
-  - {name: Generation Spain, url: "https://spain.generation.org/"}
-  - {name: 42 Málaga, url: "https://42malaga.com/"}
+  - {name: UGR Empleo, url: "https://empleo.ugr.es/", filtrar: true}

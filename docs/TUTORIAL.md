@@ -76,7 +76,7 @@ Cuando termine, verás la lista de comandos útiles. Puedes ejecutarlo de nuevo 
 Abre tu bot en Telegram y escribe `/busquedas`. Pulsa **➕ Nueva búsqueda** y responde a los **5 pasos** con los
 botones:
 
-1. **Tipo**: prácticas, trainee, bootcamp/academy, junior...
+1. **Tipo**: prácticas, trainee o junior.
 2. **Área**: programación, datos, ciberseguridad, sistemas, diseño, marketing... (25 áreas). Si no eliges
    ninguna, vale cualquier área.
 3. **Modalidad**: presencial, híbrido, remoto o cualquiera.
@@ -109,7 +109,7 @@ la describe: pulsa **🔄 Nombre automático** o **✏️ Nombre** para cambiarl
 | `/excluir` | Añadir palabras o empresas que nunca quieres ver. |
 | `/fuentes` | Activar o desactivar cada fuente (LinkedIn, InfoJobs, portales de remoto...). |
 | `/empresas` | Añadir la web de empleo de una empresa pegando su enlace, o quitarla. |
-| `/paginas` | Vigilar la página de una academia o programa: te aviso cuando aparece un enlace nuevo. |
+| `/paginas` | Vigilar una página de convocatorias (p. ej. la de prácticas de tu universidad): te aviso cuando aparece un enlace nuevo. |
 | `/descartadas` | Ver las ofertas descartadas en las últimas 24 h, agrupadas por motivo. |
 | `/probar <texto>` | Comprobar si un título encaja con tus búsquedas. Ejemplo: `/probar Prácticas de marketing en Madrid`. |
 | `/recientes` | Ver las ofertas que encajan encontradas últimamente. |
@@ -130,7 +130,7 @@ No hace falta editar ningún archivo. Todo se hace desde Telegram:
 | No ver nunca una palabra ("senior") o una empresa | `/excluir`, o el botón 🚫 de un aviso |
 | Apagar LinkedIn u otra fuente | `/fuentes` |
 | Vigilar la web de empleo de una empresa | `/empresas` → ➕ y pega el enlace |
-| Vigilar la página de una academia o programa | `/paginas` → ➕ y pega el enlace |
+| Vigilar una página de convocatorias | `/paginas` → ➕ y pega el enlace |
 | Que una oferta descartada no se vuelva a perder | `/descartadas` → ➕ Era buena |
 | Saber si un título concreto me llegaría | `/probar <título>` |
 

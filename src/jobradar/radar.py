@@ -54,7 +54,7 @@ def _key_terms(key: str, syn: Synonyms, catalog: Catalog) -> tuple[str, str | No
     label = catalog.tipos.get(fold(key)) or catalog.areas.get(fold(key))
     # "Datos / IA" no sirve como término para un portal: solo etiquetas de una pieza
     primary = label.lower() if label and "/" not in label else es
-    def other(m: str) -> bool:  # distinto de verdad ("boot camp" es "bootcamp" con un espacio)
+    def other(m: str) -> bool:  # distinto de verdad ("entry-level" es "entry level" con un guion)
         return fold(m).replace(" ", "").replace("-", "") != fold(primary).replace(" ", "").replace("-", "")
     en = next((m for m in members if other(m) and not _looks_spanish(m) and len(m) > 2), None)
     if en is None:
@@ -82,7 +82,7 @@ def derive_terms(searches: list[Search], syn: Synonyms, catalog: Catalog) -> lis
 
 
 # Orden de los tipos para portales generalistas: de más a menos ofertas publicadas
-_COMBO_ORDER = ("practicas", "junior", "trainee", "bootcamp")
+_COMBO_ORDER = ("practicas", "junior", "trainee")
 
 
 def derive_combos(searches: list[Search], syn: Synonyms, catalog: Catalog, limit: int = 6) -> list[str]:

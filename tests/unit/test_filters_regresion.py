@@ -10,7 +10,7 @@ from jobradar.models import Exclusions, Search, build_offer
 DATA = Path(__file__).resolve().parents[2] / "src" / "jobradar" / "data"
 SYN = Synonyms.from_files(DATA / "sinonimos.yaml", None)
 CAT = Catalog.from_file(DATA / "catalogo.yaml")
-ACADEMIES = Search(id="a", name="Academies", tipos=["practicas", "trainee", "bootcamp"],
+ACADEMIES = Search(id="a", name="Academies", tipos=["practicas", "trainee"],
                    ubicaciones=["granada", "andalucia"])
 JUNIOR_REMOTO = Search(id="j", name="Junior", tipos=["junior"], areas=["programador"],
                        modalidades=["remoto"])

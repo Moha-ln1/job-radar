@@ -93,8 +93,6 @@ CASES = [
 
 
 TIPO_CASES = [
-    ("Academic Dean for MiaPrep Online Academy of Ohio", set(), {"bootcamp"}),  # colegio, no academia
-    ("Accenture Data Academy", {"bootcamp"}, set()),
     # (título, debe, no_debe)
     ("Practicante de Ingeniería Industrial – Operaciones y Customer Support", {"practicas"}, set()),
     ("Estudiante en prácticas – departamento de producción (MSS4_USS)", {"practicas"}, set()),
@@ -107,7 +105,7 @@ TIPO_CASES = [
     ("Fontanero/a sin experiencia en Jaén", {"junior"}, set()),
     ("Jr. Software Engineer", {"junior"}, set()),
     ("COORDINADOR/A DE GRUPOS ESTUDIANTES EXTRANJEROS", set(), {"practicas"}),
-    ("Senior Data Engineer", set(), {"practicas", "trainee", "junior", "bootcamp"}),
+    ("Senior Data Engineer", set(), {"practicas", "trainee", "junior"}),
 ]
 
 
