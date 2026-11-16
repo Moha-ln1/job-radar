@@ -23,6 +23,7 @@ from .paths import Paths
 from .store import Store
 
 _log = logging.getLogger("jobradar.bot")
+STALE_MENU = "Este menú ha caducado, vuelve a abrir /busquedas"
 _catalog_cache: Catalog | None = None
 
 COMMANDS = [
@@ -291,7 +292,7 @@ async def cmd_excluir(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 async def cmd_probar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     text = " ".join(context.args or []).strip()
     if not text:
-        await _say(update, "Uso: /probar <título de una oferta>")
+        await _say(update, "Uso: /probar &lt;título de una oferta&gt;")
         return
     decision = radar.probe(_paths(context), text)
     if decision is None:
@@ -320,8 +321,10 @@ async def cmd_estado(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
         runs = store.last_runs(name, 1)
         if runs:
             r = runs[0]
+            pause = radar.cooldown_until(scheduler._settings(paths), store, name)
             rows.append({"source": name, "ts": datetime.fromisoformat(r["ts"]), "ok": r["ok"],
-                         "count": r["count"], "filled_pct": r["filled_pct"]})
+                         "count": r["count"], "filled_pct": r["filled_pct"],
+                         "paused_until": pause if pause and pause > now else None})
         else:
             rows.append({"source": name, "ts": None})
     await _say(update, notify.format_status(rows, scheduler.next_scan(paths),
@@ -419,6 +422,9 @@ async def on_token(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     pick = query.data.split(":")[1]
     if not good or pick == "x" or not pick.isdigit() or int(pick) >= len(good["tokens"]):
         context.user_data.pop("good", None)
+        if not good and pick != "x":
+            await query.answer(STALE_MENU)
+            return
         await query.answer()
         await query.edit_message_text("Vale, solo la he marcado como buena.")
         return
@@ -438,7 +444,7 @@ async def on_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     catalog = default_catalog()
     label = {**catalog.tipos, **catalog.areas}.get(key)
     if not good or "token" not in good or label is None:
-        await query.answer("La sesión caducó.")
+        await query.answer(STALE_MENU)
         return
     add_user_synonym(_paths(context).user_synonyms, key, good["token"])
     await query.answer()
@@ -526,7 +532,7 @@ async def on_wizard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     state = context.user_data.get("wiz")
     if state is None:
-        await query.answer("El asistente caducó. Usa /busquedas.")
+        await query.answer(STALE_MENU)
         return
     _, action, *rest = query.data.split(":")
     step = state["step"]
@@ -596,7 +602,8 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await _say(update, view_text, kb)
         return
     state = context.user_data.get("wiz")
-    if state is None:
+    if state is None or "wiz_msg" not in context.user_data:
+        await _say(update, STALE_MENU)
         return
     if kind == "wiz_other":
         if text not in state[waiting[1]]:
@@ -611,10 +618,23 @@ async def guard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     chat = update.effective_chat
     if chat is None or chat.id != context.bot_data["chat_id"]:
         raise ApplicationHandlerStop
+    if update.callback_query is not None:
+        _log.info("botón recibido: callback %s", (update.callback_query.data or "").split(":")[0])
+    elif update.message is not None and (update.message.text or "").startswith("/"):
+        _log.info("comando recibido: %s", update.message.text.split()[0].split("@")[0])
 
 
 async def on_error(update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    _log.error("error en un handler", exc_info=context.error)
+    error = context.error
+    if isinstance(error, BadRequest) and "not modified" in str(error).lower():
+        return  # el mensaje ya mostraba ese contenido (doble pulsación): no es un fallo
+    _log.exception("error en un handler", exc_info=error)
+    chat = update.effective_chat if isinstance(update, Update) else None
+    if chat is not None:
+        try:
+            await context.bot.send_message(chat.id, "⚠️ Algo ha fallado; está anotado en logs/jobradar.log")
+        except Exception:
+            _log.exception("no se pudo avisar del error al usuario")
 
 
 async def _post_init(app: Application) -> None:
