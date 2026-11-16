@@ -1,3 +1,5 @@
+<img src="docs/img/avatar.png" alt="" width="96" align="right">
+
 # JobRadar
 
 JobRadar busca en tu PC convocatorias cortas (prácticas, trainee y empleo junior) en webs de empresas,

@@ -382,12 +382,34 @@ def _save(context, searches: list[Search], excl: Exclusions) -> None:
 
 # --- comandos ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await _say(update, "👋 <b>jobradar</b> te avisa de prácticas, trainee y empleo junior.\n"
-                       "Empieza con /busquedas para decirme qué buscas. /ayuda lista todos los comandos.")
+    await _say(update, "📡 <b>Job Radar</b>\n"
+                       "Rastreo portales y webs de empresas en busca de prácticas, trainee y empleo junior.\n\n"
+                       "🔥 Lo que encaja con tus búsquedas te llega al momento.\n"
+                       "📰 Lo demás, en un resumen diario.\n\n"
+                       "👉 Empieza con /busquedas para decirme qué buscas.\n"
+                       "❓ /ayuda lista todos los comandos.")
+
+
+# /ayuda agrupada; lo que no esté aquí sale al final
+_HELP_GROUPS = [
+    ("🎯 Qué busco", ("busquedas", "excluir", "probar")),
+    ("📬 Ofertas", ("recientes", "descartadas", "escanear", "silencio")),
+    ("🛰 Dónde busco", ("fuentes", "empresas", "paginas", "estado")),
+]
 
 
 async def cmd_ayuda(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await _say(update, "\n".join(f"/{c} — {escape(d)}" for c, d in COMMANDS))
+    desc = dict(COMMANDS)
+    shown: set[str] = set()
+    parts = []
+    for title, cmds in _HELP_GROUPS:
+        lines = [f"/{c} — {escape(desc[c])}" for c in cmds if c in desc]
+        shown.update(cmds)
+        parts.append(f"<b>{title}</b>\n" + "\n".join(lines))
+    rest = [f"/{c} — {escape(d)}" for c, d in COMMANDS if c not in shown]
+    if rest:
+        parts.append("<b>ℹ️ Otros</b>\n" + "\n".join(rest))
+    await _say(update, "\n\n".join(parts))
 
 
 async def cmd_busquedas(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
