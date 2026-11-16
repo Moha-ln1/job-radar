@@ -12,7 +12,7 @@ http:
 
 sources:
   linkedin:      {enabled: true, max_pages: 3}   # uso bajo tu responsabilidad, ver README
-  infojobs:      {enabled: true}
+  infojobs:      {enabled: true, min_interval_hours: 6}   # sin API oficial disponible: menos frecuencia = menos bloqueos
   tecnoempleo:   {enabled: true}
   infoempleo:    {enabled: true}
   primerempleo:  {enabled: true}
