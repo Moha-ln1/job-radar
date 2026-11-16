@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import re
 import logging
 import time
 from dataclasses import dataclass, field
@@ -108,6 +109,21 @@ def cooldown_until(settings: Settings, store: Store, name: str) -> datetime | No
     return last + timedelta(hours=min(base * 2 ** (blocked - 1), BLOCK_COOLDOWN_MAX_HOURS))
 
 
+# Enlaces de páginas vigiladas que suelen indicar una convocatoria abierta → aviso al momento.
+# El resto de enlaces nuevos (noticias, contacto...) va al resumen diario para no meter ruido.
+_CALL_WORDS = re.compile(
+    r"inscri|apunt|plaza|convocatoria|candidatur|admisi|matr[ií]cula|solicit|sign[_ -]?up|apply|"
+    r"registr|piscina|piscine|proceso de selecci|nueva edici|abiert|open call|eventbrite|typeform|forms",
+    re.IGNORECASE)
+
+
+def watch_decision(offer) -> Decision:
+    """Decisión para un enlace nuevo de una página vigilada (no pasa por los filtros de ofertas)."""
+    urgent = bool(_CALL_WORDS.search(f"{offer.title} {offer.url}"))
+    return Decision(matched=["watch"], priority="alta" if urgent else "normal",
+                    reasons=["página vigilada: enlace nuevo" + (" (parece una convocatoria)" if urgent else "")])
+
+
 def due_sources(settings: Settings, store: Store, now: datetime) -> list[str]:
     due = []
     for name, opts in settings.sources.items():
@@ -193,8 +209,7 @@ async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | N
             for job in up.new_jobs:
                 src = job.first_posting.source if job.first_posting else ""
                 if src.startswith("watch:"):
-                    store.set_decision(job.id, Decision(
-                        matched=["watch"], priority="alta", reasons=["página vigilada: enlace nuevo"]))
+                    store.set_decision(job.id, watch_decision(job.offer_view()))
                 else:
                     store.set_decision(job.id, evaluate(job.offer_view(), searches, excl, syn, catalog,
                                                         now, settings.scan.max_age_days))

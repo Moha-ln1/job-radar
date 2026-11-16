@@ -96,7 +96,7 @@ async def test_watch_salta_filtros(paths, http):
     w = offer("Convocatoria cualquiera de cosas", "https://w.com/1", source="watch:ayto", company=None)
     rep = await scan(paths, NOW, only=["a"], fetchers={"a": fixed(w, BAD)}, http=http)
     assert [j.title for j in rep.new_matched] == ["Convocatoria cualquiera de cosas"]
-    assert rep.new_matched[0].reasons == ["página vigilada: enlace nuevo"]
+    assert rep.new_matched[0].reasons[0].startswith("página vigilada: enlace nuevo")
     assert rep.new_discarded == 1
 
 
@@ -170,3 +170,16 @@ def test_un_error_que_no_es_bloqueo_no_enfria(tmp_path):
     store = Store(tmp_path / "db.sqlite")
     store.record_run("x", datetime(2026, 11, 16, tzinfo=timezone.utc), False, 0, None, "tiempo de espera agotado (90 s)")
     assert cooldown_until(st, store, "x") is None
+
+
+def test_enlaces_vigilados_convocatoria_urgente_y_resto_al_resumen():
+    from jobradar.models import build_offer
+    from jobradar.radar import watch_decision
+
+    def prio(title, url):
+        return watch_decision(build_offer(title=title, url=url, source="watch:X", category="vigilancia")).priority
+    assert prio("Reserva tu plaza", "https://pdpython-42malaga.eventbrite.es/") == "alta"
+    assert prio("¡Sumérgete!", "https://candidatura.42malaga.com/users/sign_up") == "alta"
+    assert prio("Inscripciones abiertas", "https://factoriaf5.org/bootcamp-ia") == "alta"
+    assert prio("Escríbenos", "https://spain.generation.org/contacto/") == "normal"
+    assert prio("Más Prensa", "https://spain.generation.org/press/") == "normal"
