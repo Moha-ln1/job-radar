@@ -21,7 +21,7 @@ _TRACKING = {
 _log = logging.getLogger("jobradar.extract")
 
 
-_MOJIBAKE = re.compile(r"[ÂÃ][-¿]")
+_MOJIBAKE = re.compile(r"[\u00c2\u00c3][\u0080-\u00bf]")
 
 
 def _fix_mojibake(v: str) -> str:
