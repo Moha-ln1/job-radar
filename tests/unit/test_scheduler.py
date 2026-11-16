@@ -127,8 +127,8 @@ async def test_cycles_do_not_overlap(paths, monkeypatch):
 async def test_tick_only_runs_when_due(paths, monkeypatch):
     calls = []
 
-    async def fake_cycle(app, paths, now=None, quiet=False):
-        calls.append(quiet)
+    async def fake_cycle(app, paths, now=None, quiet=False, baseline=False):
+        calls.append(baseline)  # el primer arranque debe ser línea base
     monkeypatch.setattr(scheduler, "cycle", fake_cycle)
     ctx = SimpleNamespace(application=make_app(paths))
     scheduler.update_state(paths, last_scan=datetime.now(timezone.utc).isoformat())

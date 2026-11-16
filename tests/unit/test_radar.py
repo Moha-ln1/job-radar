@@ -138,3 +138,35 @@ async def test_reevaluate_recupera_descartado(paths, http):
     found = reevaluate(paths, ["s2"], 14, NOW)
     assert [j.title for j in found] == ["Becario de Marketing"] and found[0].status == "avisada"
     assert reevaluate(paths, ["s2"], 14, NOW) == []
+
+
+def test_enfriamiento_tras_bloqueos_seguidos(tmp_path):
+    from datetime import datetime, timedelta, timezone
+    from jobradar.config import Settings
+    from jobradar.radar import cooldown_until, due_sources
+    from jobradar.store import Store
+
+    st = Settings(sources={"infojobs": {"enabled": True, "min_interval_hours": 6}})
+    store = Store(tmp_path / "db.sqlite")
+    t0 = datetime(2026, 11, 16, 8, tzinfo=timezone.utc)
+    store.record_run("infojobs", t0, False, 0, None, "www.infojobs.net bloquea las peticiones (HTTP 200)")
+    assert cooldown_until(st, store, "infojobs") == t0 + timedelta(hours=6)
+    t1 = t0 + timedelta(hours=7)
+    store.record_run("infojobs", t1, False, 0, None, "www.infojobs.net bloquea las peticiones (HTTP 403)")
+    assert cooldown_until(st, store, "infojobs") == t1 + timedelta(hours=12)   # se duplica
+    assert "infojobs" not in due_sources(st, store, t1 + timedelta(hours=8))
+    assert "infojobs" in due_sources(st, store, t1 + timedelta(hours=13))
+    store.record_run("infojobs", t1 + timedelta(hours=13), True, 40, 90.0, None)
+    assert cooldown_until(st, store, "infojobs") is None                      # vuelve a cero
+
+
+def test_un_error_que_no_es_bloqueo_no_enfria(tmp_path):
+    from datetime import datetime, timezone
+    from jobradar.config import Settings
+    from jobradar.radar import cooldown_until
+    from jobradar.store import Store
+
+    st = Settings(sources={"x": {"enabled": True}})
+    store = Store(tmp_path / "db.sqlite")
+    store.record_run("x", datetime(2026, 11, 16, tzinfo=timezone.utc), False, 0, None, "tiempo de espera agotado (90 s)")
+    assert cooldown_until(st, store, "x") is None

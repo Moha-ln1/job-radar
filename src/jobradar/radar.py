@@ -81,19 +81,45 @@ def derive_locations(searches: list[Search], catalog: Catalog) -> list[str]:
     return out or ["España"]
 
 
+BLOCK_COOLDOWN_MIN_HOURS = 6
+BLOCK_COOLDOWN_MAX_HOURS = 48
+
+
+def _ts(value: str) -> datetime:
+    t = datetime.fromisoformat(value)
+    return t if t.tzinfo else t.replace(tzinfo=timezone.utc)
+
+
+def cooldown_until(settings: Settings, store: Store, name: str) -> datetime | None:
+    """Si la fuente nos ha bloqueado en sus últimas ejecuciones, hasta cuándo se deja descansar.
+
+    Cada bloqueo seguido duplica la pausa (6 h, 12 h, 24 h... hasta 48 h) para no insistir
+    contra una web que ya nos ha cortado. Una ejecución correcta pone el contador a cero."""
+    blocked, last = 0, None
+    for run in store.last_runs(name, 6):
+        if run["ok"] or "bloquea" not in (run.get("error") or ""):
+            break
+        blocked += 1
+        last = last or _ts(run["ts"])
+    if not blocked:
+        return None
+    opts = settings.sources.get(name, {})
+    base = max(BLOCK_COOLDOWN_MIN_HOURS, opts.get("min_interval_hours", settings.scan.every_hours))
+    return last + timedelta(hours=min(base * 2 ** (blocked - 1), BLOCK_COOLDOWN_MAX_HOURS))
+
+
 def due_sources(settings: Settings, store: Store, now: datetime) -> list[str]:
     due = []
     for name, opts in settings.sources.items():
         if not opts.get("enabled", True):
             continue
+        pause = cooldown_until(settings, store, name)
+        if pause and now < pause:
+            continue
         hours = opts.get("min_interval_hours", settings.scan.every_hours)
         runs = store.last_runs(name, 1)
-        if runs:
-            last = datetime.fromisoformat(runs[0]["ts"])
-            if last.tzinfo is None:
-                last = last.replace(tzinfo=timezone.utc)
-            if now - last < timedelta(hours=hours):
-                continue
+        if runs and now - _ts(runs[0]["ts"]) < timedelta(hours=hours):
+            continue
         due.append(name)
     return due
 
@@ -102,14 +128,16 @@ async def run_sources(ctx: SourceContext, names: list[str], fetchers: dict[str, 
                       timeout: float = 90) -> dict[str, SourceResult]:
     async def one(name: str) -> SourceResult:
         t0 = time.monotonic()
+        limit = timeout
         fetcher = fetchers.get(name)
         if fetcher is None:
             return SourceResult(name, error="fuente desconocida (sin implementación)")
         try:
-            offers = await asyncio.wait_for(fetcher(ctx), timeout)
+            limit = ctx.options(name).get("timeout_seconds", timeout)
+            offers = await asyncio.wait_for(fetcher(ctx), limit)
             return SourceResult(name, offers=list(offers), ms=int((time.monotonic() - t0) * 1000))
         except asyncio.TimeoutError:
-            err = f"tiempo de espera agotado ({timeout:g} s)"
+            err = f"tiempo de espera agotado ({limit:g} s)"
         except Exception as exc:  # una fuente nunca debe afectar a las demás
             _log.warning("fuente %s falló: %r", name, exc)
             err = str(exc) or type(exc).__name__

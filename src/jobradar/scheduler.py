@@ -145,13 +145,23 @@ async def send_digest(bot, chat_id, paths: Paths, now: datetime | None = None, *
         store.close()
 
 
-async def cycle(app, paths: Paths, now: datetime | None = None, *, quiet: bool = False):
-    """Un escaneo completo y su entrega. Devuelve el ScanReport, o None si ya había uno en marcha."""
+async def cycle(app, paths: Paths, now: datetime | None = None, *, quiet: bool = False,
+                baseline: bool = False):
+    """Un escaneo completo y su entrega. Devuelve el ScanReport, o None si ya había uno en marcha.
+
+    baseline=True (primer arranque): lo encontrado se marca como ya visto y no se avisa de nada,
+    para no recibir de golpe todas las ofertas y enlaces que ya existían."""
     lock = app.bot_data.setdefault("scan_lock", asyncio.Lock())
     if lock.locked():
         return None
     async with lock:
         now = now or datetime.now(timezone.utc)
+        if baseline:
+            report = await radar.init_baseline(paths, now)
+            update_state(paths, last_scan=now.isoformat())
+            _log.info("primer escaneo: %d ofertas marcadas como vistas (sin avisos)",
+                      len(report.new_jobs))
+            return report
         report = await radar.scan(paths, now)
         update_state(paths, last_scan=now.isoformat())
         await deliver(app.bot, app.bot_data["chat_id"], paths, report, now, quiet=quiet)
@@ -166,8 +176,8 @@ async def tick(context) -> None:
     try:
         if not is_due(paths, now):
             return
-        # Primera ejecución: lo existente va al resumen en vez de inundar el chat.
-        await cycle(app, paths, now, quiet=last_scan(paths) is None)
+        # Primera ejecución: línea base (lo existente queda como visto, sin avisos).
+        await cycle(app, paths, now, baseline=last_scan(paths) is None)
     except ConfigError as exc:
         _log.error("configuración no válida: %s", exc)
     except Exception:

@@ -129,6 +129,10 @@ def format_status(rows: list[dict], next_scan: datetime | None = None,
         lines.append(f"{r['source'][:14]:<15}{_local(r['ts']):<12}{'OK' if r['ok'] else 'FALLO':<7}"
                      f"{r['count']:>7}{pct:>6}")
     text = "<pre>" + escape("\n".join(lines)) + "</pre>"
+    for r in rows:
+        if r.get("paused_until"):
+            text += (f"\n⏸ {escape(r['source'])}: nos ha bloqueado; descansa hasta "
+                     f"{_local(r['paused_until'])} para no saturarla")
     text += f"\n⏱ Próximo escaneo: {_local(next_scan)}" if next_scan else ""
     if silenced_until:
         text += f"\n🔕 Silenciado hasta {_local(silenced_until)}"

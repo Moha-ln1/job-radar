@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_settings_de_ejemplo():
     s = load_settings(ROOT / "config.example.yaml")
     assert s.scan.max_age_days == 14 and s.http.delay_seconds == [1, 3]
-    assert s.sources["linkedin"]["max_pages"] == 3 and len(s.companies) == 3
+    assert s.sources["linkedin"]["max_pages"] == 2 and len(s.companies) == 3
 
 
 def test_clave_erronea_en_espanol(tmp_path):

@@ -6,13 +6,14 @@ scan:
   digest_time: "09:00"
   max_age_days: 14
 
+# Si una web nos bloquea, descansa 6 h, 12 h, 24 h... (máx. 48 h) antes de volver a intentarlo.
 http:
   delay_seconds: [1, 3]      # pausa aleatoria entre peticiones al mismo dominio
   timeout_seconds: 20
 
 sources:
-  linkedin:      {enabled: true, max_pages: 3}   # uso bajo tu responsabilidad, ver README
-  infojobs:      {enabled: true, min_interval_hours: 6}   # sin API oficial disponible: menos frecuencia = menos bloqueos
+  linkedin:      {enabled: true, max_pages: 2, min_interval_hours: 4, timeout_seconds: 120}   # uso bajo tu responsabilidad, ver README
+  infojobs:      {enabled: true, min_interval_hours: 6, timeout_seconds: 60}   # sin API oficial disponible: menos frecuencia = menos bloqueos
   tecnoempleo:   {enabled: true}
   infoempleo:    {enabled: true}
   primerempleo:  {enabled: true}
