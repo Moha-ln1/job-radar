@@ -1,0 +1,131 @@
+{
+ "jobs": [
+  {
+   "title": "Platform Engineer (Backend Infrastructure)",
+   "excerpt": "Position: Infrastructure Engineer Location: Poland/Europe - Remote Type: This can be structured as a B2B contract or Employment Contract with full benefits Poland B2B Annual Rate: $102,000 - $117,500 ",
+   "companyName": "Focal Systems",
+   "companySlug": "focal-systems",
+   "companyLogo": "https://cdn-images.himalayas.app/nrxhbuid1g39dplko84prsx521qg",
+   "employmentType": "Full Time",
+   "minSalary": 102000,
+   "maxSalary": 117500,
+   "salaryPeriod": "annual",
+   "seniority": [
+    "Senior"
+   ],
+   "currency": "USD",
+   "locationRestrictions": [
+    "Albania",
+    "Andorra",
+    "Austria",
+    "Belarus",
+    "Belgium",
+    "Bosnia and Herzegovina",
+    "Bulgaria",
+    "Croatia",
+    "Cyprus",
+    "Czechia"
+   ],
+   "timezoneRestrictions": [
+    -1,
+    0,
+    1,
+    2,
+    3
+   ],
+   "categories": [
+    "Platform-Engineer",
+    "Infrastructure-Engineer",
+    "Cloud-Engineer",
+    "DevOps-Engineer",
+    "Site-Reliability-Engineer"
+   ],
+   "parentCategories": [
+    "Developer"
+   ],
+   "description": "<p><strong>Position: </strong>Infrastructure Engineer<strong><br>Location</strong>: Poland/Europe - Remote<br><strong>Type</strong>: This can be structured as a B2B contract or Employment Contract wit",
+   "pubDate": 1794793029,
+   "expiryDate": 1799977028,
+   "applicationLink": "https://himalayas.app/companies/focal-systems/jobs/platform-engineer-backend-infrastructure?utm_source=api",
+   "guid": "https://himalayas.app/companies/focal-systems/jobs/platform-engineer-backend-infrastructure"
+  },
+  {
+   "title": "Senior Manager of Compliance",
+   "excerpt": "TrendAI™, the global AI security leader and enterprise business unit of Trend Micro, empowers organizations with full AI visibility and consolidated security that inspires confidence, drives innovation, and eliminates risk.",
+   "companyName": "Trend Micro",
+   "companySlug": "trend-micro",
+   "companyLogo": "https://cdn-images.himalayas.app/9nnuuyyv6xx8oov1fukm3f7rw5mh",
+   "employmentType": "Full Time",
+   "minSalary": null,
+   "maxSalary": null,
+   "salaryPeriod": "annual",
+   "seniority": [
+    "Senior"
+   ],
+   "currency": null,
+   "locationRestrictions": [
+    "United States"
+   ],
+   "timezoneRestrictions": [
+    -10,
+    -9,
+    -8,
+    -7,
+    -6,
+    -5,
+    14
+   ],
+   "categories": [
+    "Compliance-Manager",
+    "GRC-Manager",
+    "Information-Security-Compliance-Manager",
+    "Security-Compliance-Manager",
+    "Compliance-Program-Manager"
+   ],
+   "parentCategories": [
+    "Legal"
+   ],
+   "description": "<p>TrendAI™, the global AI security leader and enterprise business unit of <a href=\"https://himalayas.app/companies/trend-micro\">Trend Micro</a>, empowers organizations with full AI visibility and con",
+   "pubDate": 1794793028,
+   "expiryDate": 1799977028,
+   "applicationLink": "https://himalayas.app/companies/trend-micro/jobs/senior-manager-of-compliance?utm_source=api",
+   "guid": "https://himalayas.app/companies/trend-micro/jobs/senior-manager-of-compliance"
+  },
+  {
+   "title": "E-Commerce Operations Manager | Philippines",
+   "excerpt": "About UsHireHawk connects talented professionals with growing international businesses, creating opportunities to work remotely with ambitious teams.",
+   "companyName": "HireHawk",
+   "companySlug": "hirehawk",
+   "companyLogo": "https://cdn-images.himalayas.app/10qn7lt4r5zmya4gslxmmhszxmht",
+   "employmentType": "Full Time",
+   "minSalary": null,
+   "maxSalary": null,
+   "salaryPeriod": "annual",
+   "seniority": [
+    "Mid-level"
+   ],
+   "currency": null,
+   "locationRestrictions": [
+    "Philippines"
+   ],
+   "timezoneRestrictions": [
+    8
+   ],
+   "categories": [
+    "eCommerce-Operations-Manager",
+    "ECommerce-Manager",
+    "Shopify-Operations-Manager",
+    "Digital-Operations-Manager",
+    "E-Commerce-Operations-Lead"
+   ],
+   "parentCategories": [
+    "Operations"
+   ],
+   "description": "<h3>About Us</h3><p><a href=\"https://himalayas.app/companies/hirehawk\">HireHawk</a> connects talented professionals with growing international businesses, creating opportunities to work remotely with ",
+   "pubDate": 1794792996,
+   "expiryDate": 1799976995,
+   "applicationLink": "https://himalayas.app/companies/hirehawk/jobs/e-commerce-operations-manager-philippines?utm_source=api",
+   "guid": "https://himalayas.app/companies/hirehawk/jobs/e-commerce-operations-manager-philippines"
+  }
+ ]
+}

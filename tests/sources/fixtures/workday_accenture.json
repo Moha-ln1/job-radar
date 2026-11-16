@@ -1,0 +1,266 @@
+{
+ "total": 3,
+ "jobPostings": [
+  {
+   "title": "MICROSOFT 365-Banking Operations New Associate-ETT",
+   "externalPath": "/job/Madrid/MICROSOFT-365-Banking-Operations-New-Associate-ETT_14904269",
+   "postedOn": "Posted 2 Days Ago",
+   "bulletFields": [
+    "14904269",
+    "Madrid"
+   ]
+  },
+  {
+   "title": "Fulfillment Analyst (Barcelona or Madrid)",
+   "externalPath": "/job/Barcelona/Fulfillment-Analyst--Barcelona-_R00356808",
+   "postedOn": "Posted 4 Days Ago",
+   "bulletFields": [
+    "R00356808",
+    "Location Negotiable"
+   ]
+  },
+  {
+   "title": "SAP Finance Consultant - Spain",
+   "externalPath": "/job/Sevilla/SAP-Finance-Consultant---Spain_R00362466",
+   "postedOn": "Posted 30+ Days Ago",
+   "bulletFields": [
+    "R00362466",
+    "Location Negotiable"
+   ]
+  }
+ ],
+ "facets": [
+  {
+   "facetParameter": "jobFamilyGroup",
+   "descriptor": "Area of Work",
+   "values": [
+    {
+     "descriptor": "Consulting",
+     "id": "bb69a804fb1201f53c8f0eed1301e875",
+     "count": 88
+    },
+    {
+     "descriptor": "Software Engineering",
+     "id": "bb69a804fb120130e52200ed1301d275",
+     "count": 59
+    },
+    {
+     "descriptor": "AI & Data",
+     "id": "99f04fef1b5710010b161504c3910000",
+     "count": 58
+    },
+    {
+     "descriptor": "Business & Technology Integration",
+     "id": "bb69a804fb1201a1606f05ed1301dc75",
+     "count": 55
+    },
+    {
+     "descriptor": "Security",
+     "id": "bb69a804fb1201653003f3ec1301ba75",
+     "count": 23
+    },
+    {
+     "descriptor": "Strategy Services",
+     "id": "bb69a804fb1201c74c5a02ed1301d675",
+     "count": 19
+    },
+    {
+     "descriptor": "Solution Architecture & Planning",
+     "id": "bb69a804fb1201f3415d01ed1301d475",
+     "count": 14
+    },
+    {
+     "descriptor": "Engineering & Networks",
+     "id": "bb69a804fb120147d2f209ed1301e275",
+     "count": 11
+    },
+    {
+     "descriptor": "Sales",
+     "id": "bb69a804fb120126dceefdec1301ce75",
+     "count": 11
+    },
+    {
+     "descriptor": "Marketing & Communications",
+     "id": "bb69a804fb120170aceff7ec1301c275",
+     "count": 9
+    }
+   ]
+  },
+  {
+   "facetParameter": "workerSubType",
+   "descriptor": "Skills",
+   "values": [
+    {
+     "descriptor": "Business Process Design",
+     "id": "f1363cc3535f0101a3dd7ea0ae970000",
+     "count": 117
+    },
+    {
+     "descriptor": "Change Management",
+     "id": "378d31f968b601019e492684e5b10000",
+     "count": 114
+    },
+    {
+     "descriptor": "Value Architecture & Realization",
+     "id": "10344f8718f6014732ba87125b01ba5d",
+     "count": 93
+    },
+    {
+     "descriptor": "Solution Architecture",
+     "id": "1a775c2261930101a229ff1842d90001",
+     "count": 74
+    },
+    {
+     "descriptor": "Research Analysis and Interpretation",
+     "id": "2ea7fc30fd82019b93bebbeb5a019a76",
+     "count": 72
+    },
+    {
+     "descriptor": "Go-to-Market Strategies",
+     "id": "63e792339baa01019dc3a9850e1c0000",
+     "count": 51
+    },
+    {
+     "descriptor": "Industry Insight",
+     "id": "bb307570ea970161e8c60e315a015056",
+     "count": 50
+    },
+    {
+     "descriptor": "Asset Management",
+     "id": "f1363cc3535f0101bd670d801af80000",
+     "count": 41
+    },
+    {
+     "descriptor": "Business Transformation",
+     "id": "31027b949a530101a4826e5a7ea20000",
+     "count": 41
+    },
+    {
+     "descriptor": "Business Architecture",
+     "id": "851d32045cad01020591cba599db0000",
+     "count": 35
+    }
+   ]
+  },
+  {
+   "facetParameter": "timeType",
+   "descriptor": "Time Type",
+   "values": [
+    {
+     "descriptor": "Full time",
+     "id": "a31fc2f90d56014bd4fe0028f7145a00",
+     "count": 416
+    },
+    {
+     "descriptor": "Part time",
+     "id": "a31fc2f90d5601ead3de0028f7145900",
+     "count": 3
+    }
+   ]
+  },
+  {
+   "facetParameter": "locationMainGroup",
+   "values": [
+    {
+     "facetParameter": "locationCountry",
+     "descriptor": "Country",
+     "values": [
+      {
+       "descriptor": "Spain",
+       "id": "bd34c524a6a04ae6915f5d96fa086199",
+       "count": 21
+      }
+     ]
+    },
+    {
+     "facetParameter": "locations",
+     "descriptor": "City",
+     "values": [
+      {
+       "descriptor": "A Coruna, Canton Grande",
+       "id": "940562459a6f0162bdce413cc300dc1e",
+       "count": 1
+      },
+      {
+       "descriptor": "Alicante",
+       "id": "3666ef49a96a01a6da94607acf002162",
+       "count": 1
+      },
+      {
+       "descriptor": "Barcelona",
+       "id": "3666ef49a96a010fc3342f7acf007261",
+       "count": 2
+      },
+      {
+       "descriptor": "Barcelona, La Rotonda",
+       "id": "940562459a6f01d2e594213cc300781e",
+       "count": 3
+      },
+      {
+       "descriptor": "Girona",
+       "id": "2d33319ffec7100189c26da8d2650000",
+       "count": 1
+      },
+      {
+       "descriptor": "La Coruna",
+       "id": "3666ef49a96a01e046d44b7acf00d661",
+       "count": 1
+      },
+      {
+       "descriptor": "Madrid",
+       "id": "3666ef49a96a01ce0e3a4a7acf00d161",
+       "count": 5
+      },
+      {
+       "descriptor": "Madrid, Castellana 85",
+       "id": "50d0bb994b6c015de1a36a9c9601d880",
+       "count": 11
+      },
+      {
+       "descriptor": "Madrid, Torre Chamartin",
+       "id": "c091d3d1cc7301bdd30cb2d096014ab5",
+       "count": 3
+      },
+      {
+       "descriptor": "Malaga",
+       "id": "3666ef49a96a019ed6c5487acf00cc61",
+       "count": 1
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "facetParameter": "distance",
+   "descriptor": "Distance",
+   "values": [
+    {
+     "descriptor": "10 miles",
+     "id": "a538cdb60a631000078a2c60ed1700f3",
+     "count": 1
+    },
+    {
+     "descriptor": "25 miles",
+     "id": "a538cdb60a631000078a2c6a410300f4",
+     "count": 1
+    },
+    {
+     "descriptor": "50 miles",
+     "id": "a538cdb60a631000078a2c6eadd300f5",
+     "count": 1
+    },
+    {
+     "descriptor": "100 miles",
+     "id": "a538cdb60a631000078a2c71efcc00f6",
+     "count": 1
+    },
+    {
+     "descriptor": "Any Distance",
+     "id": "a538cdb60a631000078a2c74f73b00f7",
+     "count": 1
+    }
+   ]
+  }
+ ],
+ "userAuthenticated": false
+}

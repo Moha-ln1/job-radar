@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:media="http://search.yahoo.com/mrss">
+  <channel>
+    <title>We Work Remotely: Remote jobs in design, programming, marketing and more</title>
+    <link>https://weworkremotely.com/remote-jobs.rss</link>
+    <description>We Work Remotely: Remote jobs in design, programming, marketing and more</description>
+    <language>en-US</language>
+    <ttl>60</ttl>
+    <item>
+      <media:content url="https://wwr-pro.s3.amazonaws.com/logos/0171/6795/logo.gif" type="image/png"/>
+      <title>FELYRI CONSULTING LIMITED: Research Consultant</title>
+      <region>Anywhere in the World</region>
+      <country></country>
+      <state>Alaska</state>
+      <skills>Research and Analysis and Content Writing</skills>
+      <category>All Other Remote</category>
+      <type>Contract</type>
+      <description>(recortado)</description>
+      <pubDate>Mon, 16 Nov 2026 02:47:54 +0000</pubDate>
+      <expires_at>Wed, 16 Dec 2026 02:47:54 +0000</expires_at>
+      <guid>https://weworkremotely.com/remote-jobs/felyri-consulting-limited-research-consultant</guid>
+      <link>https://weworkremotely.com/remote-jobs/felyri-consulting-limited-research-consultant</link>
+    </item>
+<item>
+      <media:content url="https://wwr-pro.s3.amazonaws.com/logos/0171/6790/logo.gif" type="image/png"/>
+      <title>Roofr: Sales Development Representative</title>
+      <region>Anywhere in the World</region>
+      <country>🇨🇦 Canada</country>
+      <state></state>
+      <skills>Adobe Creative Suite, Community Growth, Competitor Analysis, Architect, Architecture, Blog Writing,  Editing, Composition, Audio Editing, and Brand Identity Design</skills>
+      <category>Customer Support</category>
+      <type>Full-Time</type>
+      <description>(recortado)</description>
+      <pubDate>Sun, 15 Nov 2026 21:14:09 +0000</pubDate>
+      <expires_at>Tue, 15 Dec 2026 21:14:09 +0000</expires_at>
+      <guid>https://weworkremotely.com/remote-jobs/roofr-sales-development-representative</guid>
+      <link>https://weworkremotely.com/remote-jobs/roofr-sales-development-representative</link>
+    </item>
+<item>
+      <media:content url="https://wwr-pro.s3.amazonaws.com/logos/0171/6791/logo.gif" type="image/png"/>
+      <title>ServiceNow: Senior CRM Account Executive</title>
+      <region>Ontario</region>
+      <country>🇨🇦 Canada</country>
+      <state></state>
+      <skills>Adobe Creative Suite, Analytics, Community Growth, Architect, Architecture, Blog Writing, Analytics Tools,  Editing, Audio Editing, and Brand Identity Design</skills>
+      <category>Customer Support</category>
+      <type>Full-Time</type>
+      <description>(recortado)</description>
+      <pubDate>Sun, 15 Nov 2026 21:14:09 +0000</pubDate>
+      <expires_at>Tue, 15 Dec 2026 21:14:09 +0000</expires_at>
+      <guid>https://weworkremotely.com/remote-jobs/servicenow-senior-crm-account-executive</guid>
+      <link>https://weworkremotely.com/remote-jobs/servicenow-senior-crm-account-executive</link>
+    </item>
+</channel>
+</rss>

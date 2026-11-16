@@ -1,0 +1,344 @@
+{
+ "offset": 0,
+ "limit": 100,
+ "totalFound": 70,
+ "content": [
+  {
+   "id": "744000160852229",
+   "name": "People & Talent Intern (International Recruitment) – May 2027",
+   "uuid": "6043cfd9-6150-47e7-91ef-83a1c4be90ec",
+   "jobAdId": "21bb51ab-1716-4d56-aea4-4bf765373fa7",
+   "defaultJobAd": true,
+   "refNumber": "REF300273Y",
+   "company": {
+    "identifier": "BoschGroup",
+    "name": "Bosch Group"
+   },
+   "releasedDate": "2026-11-10T11:22:21.771Z",
+   "location": {
+    "city": "Barcelona",
+    "region": "CT",
+    "country": "es",
+    "address": "Carrer de Rosselló i Pòrcel 21",
+    "postalCode": "08016",
+    "remote": false,
+    "hybrid": true,
+    "latitude": "41.436685",
+    "longitude": "2.1807191",
+    "fullLocation": "Barcelona, CT, Spain"
+   },
+   "industry": {
+    "id": "telecommunications",
+    "label": "Telecommunications"
+   },
+   "department": {},
+   "function": {
+    "id": "customer_service",
+    "label": "Customer Service"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "internship",
+    "label": "Internship"
+   },
+   "customField": [
+    {
+     "fieldId": "5abe2a4ab60a5e486a2d9b1d",
+     "fieldLabel": "Contract type",
+     "valueId": "98487475-2a49-44f5-a615-408b525b3821",
+     "valueLabel": "Limited"
+    },
+    {
+     "fieldId": "5abe28e96d8bc56863dd9746",
+     "fieldLabel": "Tariff Area",
+     "valueId": "c27c6cd6-35d5-492c-ba81-369e0ee39e2c",
+     "valueLabel": "Spain Local Grades"
+    },
+    {
+     "fieldId": "586a997ee4b05fd937b86098",
+     "fieldLabel": "Legal Entity(acronym)",
+     "valueId": "348d8a36-c039-4510-a932-b8bea79f2a13",
+     "valueLabel": "SO"
+    },
+    {
+     "fieldId": "586a99b5e4b0daa006ae1079",
+     "fieldLabel": "Working Location",
+     "valueId": "d373be13-9f09-4ed9-8889-23578d0bc5fd",
+     "valueLabel": "Barcelona_SO"
+    },
+    {
+     "fieldId": "5abe295a6d8bc56863dd9747",
+     "fieldLabel": "Global Salary Level",
+     "valueId": "80ae06a1-4738-48e8-8aea-4613f58ecd57",
+     "valueLabel": "Others"
+    },
+    {
+     "fieldId": "69ca83a2489188782a1e9f87",
+     "fieldLabel": "Direct Or Indirect",
+     "valueId": "1aefbf4c-c10a-422e-a975-a504a7117792",
+     "valueLabel": "Indirect"
+    },
+    {
+     "fieldId": "5abe29f9b60a5e486a2d9b1c",
+     "fieldLabel": "Working hours",
+     "valueId": "60756b3e-dbab-4353-ac3a-0064d2bb27d8",
+     "valueLabel": "Full-time"
+    },
+    {
+     "fieldId": "586a9995e4b0daa006ae1078",
+     "fieldLabel": "Legal Entity",
+     "valueId": "405b67f4-1e61-4f96-9abe-8de685a25818",
+     "valueLabel": "Bosch Service Solutions, S.A.U."
+    },
+    {
+     "fieldId": "691cf1c93001c782b9560ab7",
+     "fieldLabel": "Division full name",
+     "valueId": "010db496-f6ec-4416-90a5-6f15534b537e",
+     "valueLabel": "Bosch Global Service Solutions"
+    },
+    {
+     "fieldId": "5abe27936d8bc56863dd9745",
+     "fieldLabel": "Position type",
+     "valueId": "f524b939-fe55-407b-a0b0-e8f4eec28997",
+     "valueLabel": "Intern"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings/744000160852229",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000160644659",
+   "name": "Hardware Engineer  ",
+   "uuid": "a15e01a7-41d2-405c-9e2c-5938f107dfce",
+   "jobAdId": "a380ad83-da7f-467d-a2ee-7686a2c2e5b6",
+   "defaultJobAd": true,
+   "refNumber": "REF300521B",
+   "company": {
+    "identifier": "BoschGroup",
+    "name": "Bosch Group"
+   },
+   "releasedDate": "2026-11-09T15:19:42.609Z",
+   "location": {
+    "city": "València",
+    "region": "VC",
+    "country": "es",
+    "address": "Carrer de l'Historiador Diago 2",
+    "postalCode": "46007",
+    "remote": false,
+    "hybrid": true,
+    "hybridDescription": "Work from home possibilities",
+    "latitude": "39.4676037",
+    "longitude": "-0.383746",
+    "fullLocation": "València, VC, Spain"
+   },
+   "industry": {
+    "id": "automotive",
+    "label": "Automotive"
+   },
+   "department": {},
+   "function": {
+    "id": "engineering",
+    "label": "Engineering"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "mid_senior_level",
+    "label": "Mid-Senior Level"
+   },
+   "customField": [
+    {
+     "fieldId": "5abe2a4ab60a5e486a2d9b1d",
+     "fieldLabel": "Contract type",
+     "valueId": "1e46492b-d24f-460c-b095-38cf08a778d8",
+     "valueLabel": "Unlimited"
+    },
+    {
+     "fieldId": "5abe28e96d8bc56863dd9746",
+     "fieldLabel": "Tariff Area",
+     "valueId": "c27c6cd6-35d5-492c-ba81-369e0ee39e2c",
+     "valueLabel": "Spain Local Grades"
+    },
+    {
+     "fieldId": "586a997ee4b05fd937b86098",
+     "fieldLabel": "Legal Entity(acronym)",
+     "valueId": "348d8a36-c039-4510-a932-b8bea79f2a13",
+     "valueLabel": "SO"
+    },
+    {
+     "fieldId": "586a99b5e4b0daa006ae1079",
+     "fieldLabel": "Working Location",
+     "valueId": "310462d8-e74c-46b5-afef-3b1dd2291983",
+     "valueLabel": "Valencia"
+    },
+    {
+     "fieldId": "5abe295a6d8bc56863dd9747",
+     "fieldLabel": "Global Salary Level",
+     "valueId": "80ae06a1-4738-48e8-8aea-4613f58ecd57",
+     "valueLabel": "Others"
+    },
+    {
+     "fieldId": "69ca83a2489188782a1e9f87",
+     "fieldLabel": "Direct Or Indirect",
+     "valueId": "0d8b2ae9-fc67-447b-9165-201f59f71e90",
+     "valueLabel": "Direct"
+    },
+    {
+     "fieldId": "5abe29f9b60a5e486a2d9b1c",
+     "fieldLabel": "Working hours",
+     "valueId": "60756b3e-dbab-4353-ac3a-0064d2bb27d8",
+     "valueLabel": "Full-time"
+    },
+    {
+     "fieldId": "586a9995e4b0daa006ae1078",
+     "fieldLabel": "Legal Entity",
+     "valueId": "405b67f4-1e61-4f96-9abe-8de685a25818",
+     "valueLabel": "Bosch Service Solutions, S.A.U."
+    },
+    {
+     "fieldId": "691cf1c93001c782b9560ab7",
+     "fieldLabel": "Division full name",
+     "valueId": "010db496-f6ec-4416-90a5-6f15534b537e",
+     "valueLabel": "Bosch Global Service Solutions"
+    },
+    {
+     "fieldId": "5abe27936d8bc56863dd9745",
+     "fieldLabel": "Position type",
+     "valueId": "c7b4da31-6f38-405a-b2e8-08a76e3c3f2c",
+     "valueLabel": "Professional"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings/744000160644659",
+   "creator": {
+    "name": "PABLO MENA (SO/HRL1-ES)"
+   },
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  },
+  {
+   "id": "744000160135761",
+   "name": "People & Talent Intern (International Recruitment) – February 2027",
+   "uuid": "0bb972f2-32d2-45e7-8f1e-8dd9479b34c0",
+   "jobAdId": "e85ddc62-d206-4677-8252-b6ce883e7146",
+   "defaultJobAd": true,
+   "refNumber": "REF300267H",
+   "company": {
+    "identifier": "BoschGroup",
+    "name": "Bosch Group"
+   },
+   "releasedDate": "2026-11-06T08:23:21.300Z",
+   "location": {
+    "city": "Barcelona",
+    "region": "CT",
+    "country": "es",
+    "address": "Carrer de Rosselló i Pòrcel 21",
+    "postalCode": "08016",
+    "remote": false,
+    "hybrid": true,
+    "latitude": "41.436685",
+    "longitude": "2.1807191",
+    "fullLocation": "Barcelona, CT, Spain"
+   },
+   "industry": {
+    "id": "telecommunications",
+    "label": "Telecommunications"
+   },
+   "department": {},
+   "function": {
+    "id": "customer_service",
+    "label": "Customer Service"
+   },
+   "typeOfEmployment": {
+    "id": "permanent",
+    "label": "Full-time"
+   },
+   "experienceLevel": {
+    "id": "internship",
+    "label": "Internship"
+   },
+   "customField": [
+    {
+     "fieldId": "5abe2a4ab60a5e486a2d9b1d",
+     "fieldLabel": "Contract type",
+     "valueId": "98487475-2a49-44f5-a615-408b525b3821",
+     "valueLabel": "Limited"
+    },
+    {
+     "fieldId": "5abe28e96d8bc56863dd9746",
+     "fieldLabel": "Tariff Area",
+     "valueId": "c27c6cd6-35d5-492c-ba81-369e0ee39e2c",
+     "valueLabel": "Spain Local Grades"
+    },
+    {
+     "fieldId": "586a997ee4b05fd937b86098",
+     "fieldLabel": "Legal Entity(acronym)",
+     "valueId": "348d8a36-c039-4510-a932-b8bea79f2a13",
+     "valueLabel": "SO"
+    },
+    {
+     "fieldId": "586a99b5e4b0daa006ae1079",
+     "fieldLabel": "Working Location",
+     "valueId": "d373be13-9f09-4ed9-8889-23578d0bc5fd",
+     "valueLabel": "Barcelona_SO"
+    },
+    {
+     "fieldId": "5abe295a6d8bc56863dd9747",
+     "fieldLabel": "Global Salary Level",
+     "valueId": "80ae06a1-4738-48e8-8aea-4613f58ecd57",
+     "valueLabel": "Others"
+    },
+    {
+     "fieldId": "69ca83a2489188782a1e9f87",
+     "fieldLabel": "Direct Or Indirect",
+     "valueId": "1aefbf4c-c10a-422e-a975-a504a7117792",
+     "valueLabel": "Indirect"
+    },
+    {
+     "fieldId": "5abe29f9b60a5e486a2d9b1c",
+     "fieldLabel": "Working hours",
+     "valueId": "60756b3e-dbab-4353-ac3a-0064d2bb27d8",
+     "valueLabel": "Full-time"
+    },
+    {
+     "fieldId": "586a9995e4b0daa006ae1078",
+     "fieldLabel": "Legal Entity",
+     "valueId": "405b67f4-1e61-4f96-9abe-8de685a25818",
+     "valueLabel": "Bosch Service Solutions, S.A.U."
+    },
+    {
+     "fieldId": "691cf1c93001c782b9560ab7",
+     "fieldLabel": "Division full name",
+     "valueId": "010db496-f6ec-4416-90a5-6f15534b537e",
+     "valueLabel": "Bosch Global Service Solutions"
+    },
+    {
+     "fieldId": "5abe27936d8bc56863dd9745",
+     "fieldLabel": "Position type",
+     "valueId": "f524b939-fe55-407b-a0b0-e8f4eec28997",
+     "valueLabel": "Intern"
+    }
+   ],
+   "visibility": "PUBLIC",
+   "ref": "https://api.smartrecruiters.com/v1/companies/BoschGroup/postings/744000160135761",
+   "language": {
+    "code": "en",
+    "label": "English",
+    "labelNative": "English (US)"
+   }
+  }
+ ]
+}
