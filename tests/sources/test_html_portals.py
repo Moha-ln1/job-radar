@@ -177,6 +177,18 @@ async def test_linkedin_bloqueo_se_propaga():
         await run(hp.fetch_linkedin, lambda r: httpx.Response(429))
 
 
+async def test_linkedin_bloqueo_a_mitad_conserva_lo_anterior():
+    calls = []
+
+    def handler(req):
+        calls.append(1)
+        return httpx.Response(429) if len(calls) > 2 else httpx.Response(200, text=_linkedin_page(4, len(calls) * 10))
+
+    with pytest.raises(SourceBlocked) as info:
+        await run(hp.fetch_linkedin, handler, terms=["a", "b"], locations=["Granada", "España"])
+    assert len(info.value.partial) == 8  # 2 búsquedas buenas × 4 tarjetas
+
+
 async def test_infojobs_html_envia_keyword():
     seen = []
 

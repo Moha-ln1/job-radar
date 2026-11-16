@@ -21,6 +21,7 @@ class SourceBlocked(Exception):
         super().__init__(f"{domain} bloquea las peticiones (HTTP {status})")
         self.domain = domain
         self.status = status
+        self.partial: list = []  # ofertas que la fuente ya había traído antes del bloqueo
 
 
 # Muros anti-bot servidos con HTTP 200 (comprobados contra InfoJobs, Glassdoor, Indeed y Jooble).

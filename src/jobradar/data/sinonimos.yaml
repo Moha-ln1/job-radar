@@ -71,6 +71,7 @@ bootcamp:
   - curso intensivo
   - programa de formación
   - academy
+  - "!academy of"
 junior:
   - junior
   - jr
@@ -97,6 +98,11 @@ programador:
   - programación
   - desarrollo web
   - desarrollo de software
+  - software
+  - software engineering
+  - ingeniería de software
+  - ingeniería informática
+  - ingeniero informático
   - desarrollo de aplicaciones
   - web developer
   - full stack
@@ -154,6 +160,8 @@ data:
   - data analyst
   - data scientist
   - data engineer
+  - applied science
+  - applied scientist
   - business intelligence
   - machine learning
   - inteligencia artificial
@@ -286,6 +294,10 @@ qa:
   - qa analyst
 diseno:
   - diseño
+  - animator
+  - animación
+  - animation
+  - motion graphics
   - diseno
   - designer
   - design

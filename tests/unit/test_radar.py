@@ -7,7 +7,7 @@ import pytest
 from jobradar import radar
 from jobradar.config import HttpSettings, Settings, save_searches
 from jobradar.filters import Catalog, Synonyms
-from jobradar.http import Http
+from jobradar.http import Http, SourceBlocked
 from jobradar.models import Exclusions, JobOffer, Search
 from jobradar.paths import Paths
 from jobradar.radar import (derive_locations, derive_terms, due_sources, init_baseline, reevaluate,
@@ -96,6 +96,17 @@ async def test_fuente_falla_y_otra_se_guarda(paths, http):
     assert rep.source_status["b"].error is None
     assert [j.title for j in rep.new_matched] == ["Becario Developer"]
     assert len(rep.health_alerts) == 1 and "a" in rep.health_alerts[0]
+
+
+async def test_bloqueo_a_mitad_guarda_lo_ya_traido(paths, http):
+    async def half(ctx):
+        exc = SourceBlocked("portal.com", 429)
+        exc.partial = [GOOD]
+        raise exc
+
+    rep = await scan(paths, NOW, only=["a"], fetchers={"a": half}, http=http)
+    assert "429" in rep.source_status["a"].error
+    assert [j.title for j in rep.new_matched] == ["Becario Developer"]
 
 
 async def test_timeout_por_fuente(paths, http):

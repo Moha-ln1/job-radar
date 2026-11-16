@@ -20,6 +20,12 @@ CASES = [
     ("Titulado/a Superior Junior en Organización", {"consultoria"}, set()),
     ("Técnico/a Instalador/a Junior - Sistemas de Seguridad Electrónica", {"arquitectura"}, {"sistemas"}),
     ("Ingeniero/a Junior de Integración de Sistemas", {"sistemas"}, set()),
+    # Auditoría completa del 16/11/2026: se perdían por no reconocer "software" suelto
+    ("Software Engineering Intern", {"programador"}, set()),
+    ("Estudiante en prácticas – departamento de BMG-2ES/ENG4 (Industria 4.0) Ingeniería Eléctrica/Software",
+     {"programador", "ingenieria"}, set()),
+    ("Applied Science Intern", {"data"}, set()),
+    ("Animator Intern", {"diseno"}, {"programador"}),
     ("Prácticas Técnico/a de Sistemas y Soporte CAU", {"sistemas"}, set()),
     ("IT Support Technician Intern STP27", {"sistemas"}, set()),
     ("IT Systems Intern (Start December) - Hotel Arts Barcelona", {"sistemas"}, set()),
@@ -87,6 +93,8 @@ CASES = [
 
 
 TIPO_CASES = [
+    ("Academic Dean for MiaPrep Online Academy of Ohio", set(), {"bootcamp"}),  # colegio, no academia
+    ("Accenture Data Academy", {"bootcamp"}, set()),
     # (título, debe, no_debe)
     ("Practicante de Ingeniería Industrial – Operaciones y Customer Support", {"practicas"}, set()),
     ("Estudiante en prácticas – departamento de producción (MSS4_USS)", {"practicas"}, set()),

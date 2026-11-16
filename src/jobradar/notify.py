@@ -125,6 +125,9 @@ def format_status(rows: list[dict], next_scan: datetime | None = None,
     """rows: dicts con source, ts (datetime|None), ok, count, filled_pct."""
     lines = [f"{'Fuente':<15}{'Última':<12}{'Estado':<7}{'Ofertas':>7}{'Datos':>6}"]
     for r in rows:
+        if r.get("note"):
+            lines.append(f"{r['source'][:14]:<15}{r['note']}")
+            continue
         if r.get("ts") is None:
             lines.append(f"{r['source'][:14]:<15}{'nunca':<12}{'-':<7}{'-':>7}{'-':>6}")
             continue

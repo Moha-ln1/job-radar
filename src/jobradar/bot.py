@@ -15,11 +15,12 @@ from telegram.ext import (Application, ApplicationHandlerStop, CallbackQueryHand
                           ContextTypes, MessageHandler, TypeHandler, filters)
 
 from . import notify, radar, scheduler, telegram_io
-from .config import (ConfigError, add_user_synonym, load_searches, save_searches)
+from .config import (ConfigError, add_user_synonym, load_env, load_searches, save_searches)
 from .filters import Catalog
 from .models import Decision, Exclusions, Search
 from .normalize import fold, norm_company
 from .paths import Paths
+from .sources.official_apis import missing_keys
 from .store import Store
 
 _log = logging.getLogger("jobradar.bot")
@@ -409,11 +410,18 @@ async def cmd_recientes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 async def cmd_estado(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     paths, store, now = _paths(context), _store(context), _now()
     rows = []
-    for name in scheduler._settings(paths).sources:
+    settings = scheduler._settings(paths)
+    env = load_env(paths.env) if paths.env.exists() else {}
+    for name, opts in settings.sources.items():
         runs = store.last_runs(name, 1)
-        if runs:
+        # Sin clave o apagada no consulta nada: "OK, 0 ofertas" haría pensar que funciona y no encuentra
+        note = ("apagada" if not opts.get("enabled", True)
+                else "sin clave (opcional)" if missing_keys(name, env) else None)
+        if note:
+            rows.append({"source": name, "note": note})
+        elif runs:
             r = runs[0]
-            pause = radar.cooldown_until(scheduler._settings(paths), store, name)
+            pause = radar.cooldown_until(settings, store, name)
             rows.append({"source": name, "ts": datetime.fromisoformat(r["ts"]), "ok": r["ok"],
                          "count": r["count"], "filled_pct": r["filled_pct"],
                          "paused_until": pause if pause and pause > now else None})

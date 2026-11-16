@@ -63,6 +63,12 @@ def test_parse_completa_textos_genericos_con_el_destino():
     assert titles == ["aquí (animate y prueba)", "¡Apúntate ahora! (ven)", "Bootcamp de desarrollo web"]
 
 
+def test_parse_recorta_titulos_largos_en_vez_de_perderlos():
+    html = f'<body><main><a href="/convocatoria/x/">Convocatoria de prácticas {"muy larga " * 40}</a></main></body>'
+    (o,) = watch._parse_watch(html, URL, "x")
+    assert len(o.title) == 200 and o.title.endswith("…")
+
+
 def test_parse_usa_atributo_title_si_el_enlace_no_tiene_texto():
     html = '<body><main><a href="/a" title="Programa de becas"><img src="x.png"></a></main></body>'
     (o,) = watch._parse_watch(html, URL, "x")

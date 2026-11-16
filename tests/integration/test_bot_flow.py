@@ -348,6 +348,17 @@ async def test_estado_with_cooldown(h):
     assert "descansa hasta" in h.last_text()
 
 
+async def test_estado_distingue_sin_clave_y_apagada(h):
+    h.paths.config.write_text("sources:\n  jooble: {}\n  arbeitnow: {enabled: false}\n  remotive: {}\n",
+                              encoding="utf-8")
+    store = Store(h.paths.db)
+    store.record_run("jooble", datetime.now(timezone.utc), True, 0, None, None)
+    store.close()
+    await h.say("/estado")
+    text = h.last_text()
+    assert "jooble         sin clave" in text and "arbeitnow      apagada" in text
+
+
 async def test_silencio_toggle(h):
     await h.say("/silencio")
     assert "Sin avisos" in h.last_text()

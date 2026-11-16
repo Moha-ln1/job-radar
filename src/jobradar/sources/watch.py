@@ -91,6 +91,8 @@ def _parse_watch(html: str, base_url: str, name: str) -> list[JobOffer]:
             continue
         if _GENERIC.match(title):
             title = f"{title} ({_slug(parts.path, host, own_host)})"
+        if len(title) > 200:  # tarjetas enteras como enlace (UGR): se recorta en vez de perder la convocatoria
+            title = title[:199].rstrip() + "…"
         offer = build_offer(title=title, company=None, url=url, source=f"watch:{name}", category="vigilancia")
         if offer is not None:
             offers.setdefault(offer.url, offer)

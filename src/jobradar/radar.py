@@ -12,7 +12,7 @@ from pathlib import Path
 from . import health
 from .config import Settings, load_env, load_searches, load_settings
 from .filters import Catalog, Synonyms, evaluate
-from .http import Http
+from .http import Http, SourceBlocked
 from .models import Decision, JobOffer, Search
 from .normalize import fold
 from .paths import Paths
@@ -189,6 +189,10 @@ async def run_sources(ctx: SourceContext, names: list[str], fetchers: dict[str, 
             limit = ctx.options(name).get("timeout_seconds", timeout)
             offers = await asyncio.wait_for(fetcher(ctx), limit)
             return SourceResult(name, offers=list(offers), ms=int((time.monotonic() - t0) * 1000))
+        except SourceBlocked as exc:  # bloqueo a mitad: se guarda lo traído antes y la fuente descansa
+            _log.warning("fuente %s bloqueada tras %d ofertas: %s", name, len(exc.partial), exc)
+            return SourceResult(name, offers=list(exc.partial), error=str(exc),
+                                ms=int((time.monotonic() - t0) * 1000))
         except asyncio.TimeoutError:
             err = f"tiempo de espera agotado ({limit:g} s)"
         except Exception as exc:  # una fuente nunca debe afectar a las demás
@@ -241,7 +245,7 @@ async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | N
                     report.health_alerts.append(alert)
             store.record_run(name, now, res.error is None, len(res.offers),
                              health.filled_pct(res.offers) if res.error is None else None, res.error)
-            if res.error:
+            if res.error and not res.offers:
                 continue
             up = store.upsert(res.offers, now)
             # Páginas vigiladas con `filtrar: true` (p. ej. un portal de prácticas con ofertas de todo

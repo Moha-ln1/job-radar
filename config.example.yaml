@@ -12,7 +12,7 @@ http:
   timeout_seconds: 20
 
 sources:
-  linkedin:      {enabled: true, max_pages: 2, min_interval_hours: 4, timeout_seconds: 240}   # uso bajo tu responsabilidad, ver README
+  linkedin:      {enabled: true, max_pages: 1, min_interval_hours: 4, timeout_seconds: 240}   # 15 búsquedas, las más recientes primero; uso bajo tu responsabilidad, ver README
   infojobs:      {enabled: true, min_interval_hours: 6, timeout_seconds: 60}   # sin API oficial: 3 búsquedas de tipo + área sacadas de tus búsquedas (keywords: [...] para fijarlas)
   tecnoempleo:   {enabled: true}
   infoempleo:    {enabled: true}

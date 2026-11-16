@@ -95,7 +95,8 @@ Para comprobar qué fuentes hay configuradas y cuándo se ejecutaron por última
 - Entre peticiones al mismo dominio hay una pausa aleatoria de 1 a 3 segundos (`http.delay_seconds`).
 - Cada fuente puede tener su propio intervalo mínimo entre consultas (`min_interval_hours`).
 - Si una web responde 403 o 429, o devuelve una página anti-bot, JobRadar deja descansar esa fuente 6 h; si vuelve a
-  bloquear, 12 h, 24 h y hasta 48 h. Lo muestra en `/estado` y no intenta saltarse el bloqueo.
+  bloquear, 12 h, 24 h y hasta 48 h. Lo muestra en `/estado` y no intenta saltarse el bloqueo. Las ofertas que
+  ya había traído antes del bloqueo se guardan igualmente.
 - Las ofertas de más de 14 días se descartan, salvo las de webs de empleo de empresas (`companies:`): esas webs
   solo muestran ofertas abiertas, así que la fecha de publicación no indica que estén cerradas.
 
@@ -116,7 +117,9 @@ fuente en ``config.yaml`` (``sources:``) y el valor es ``async def fetch(ctx: So
 - Deja que ``SourceBlocked`` y los errores de red se propaguen: ``radar`` los aísla por fuente.
 ```
 
-`SourceContext` contiene `http`, `settings`, `terms`, `locations` y `env`. Para leer las opciones de la fuente en
+`SourceContext` contiene `http`, `settings`, `terms`, `locations`, `combos` (búsquedas "tipo área" para portales
+generalistas) y `env`. Si una fuente hace varias peticiones, adjunta lo ya descargado al bloqueo
+(`exc.partial`) para que un 429 a mitad no tire las búsquedas anteriores. Para leer las opciones de la fuente en
 `config.yaml`, usa `ctx.options(nombre)`.
 
 Para añadir una fuente nueva:

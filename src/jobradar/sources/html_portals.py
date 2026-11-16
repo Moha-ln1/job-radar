@@ -9,12 +9,14 @@ from jobradar.normalize import parse_iso
 import json
 import logging
 import re
+import time
 from datetime import datetime, timedelta, timezone
 from urllib.parse import quote_plus, urljoin, urlsplit
 
 import httpx
 from bs4 import BeautifulSoup, Tag
 
+from jobradar.http import SourceBlocked
 from jobradar.models import JobOffer, build_offer
 from jobradar.normalize import fold
 from jobradar.sources import SourceContext
@@ -57,6 +59,12 @@ def _dedup(offers: list[JobOffer | None]) -> list[JobOffer]:
         if o is not None:
             seen.setdefault(o.url, o)
     return list(seen.values())
+
+
+def _partial(exc: SourceBlocked, offers: list[JobOffer | None]) -> SourceBlocked:
+    """Adjunta al bloqueo lo ya descargado: un 429 en la búsqueda 12 no debe tirar las 11 anteriores."""
+    exc.partial = _dedup(offers)
+    return exc
 
 
 def _strip_query(url: str) -> str:
@@ -122,21 +130,31 @@ def linkedin_location(label: str) -> str:
 
 
 async def fetch_linkedin(ctx: SourceContext) -> list[JobOffer]:
-    max_pages = int(ctx.options("linkedin").get("max_pages", 3))
+    opts = ctx.options("linkedin")
+    max_pages = int(opts.get("max_pages", 3))
+    max_locations = int(opts.get("max_locations", 3))
+    # Se para antes del límite de la fuente para devolver lo encontrado en vez de perderlo todo
+    deadline = time.monotonic() + 0.85 * float(opts.get("timeout_seconds", 90))
     base = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
     offers: list[JobOffer] = []
-    for term in ctx.terms[:int(ctx.options("linkedin").get("max_terms", 5))] or ["prácticas"]:
-        # 3 ubicaciones: p. ej. Granada y Málaga (presencial) + España (remoto/híbrido)
-        max_locations = int(ctx.options("linkedin").get("max_locations", 3))
-        for location in [linkedin_location(loc) for loc in ctx.locations[:max_locations]] or [""]:
-            for page in range(max_pages):
-                url = (f"{base}?keywords={quote_plus(term)}&location={quote_plus(location)}"
-                       f"&start={page * 10}&f_TPR=r604800")
-                resp = await ctx.http.get(url)
-                cards = _parse_linkedin(resp.text)
-                offers.extend(cards)
-                if len(cards) < 10:
-                    break
+    try:
+        for term in ctx.terms[:int(opts.get("max_terms", 5))] or ["prácticas"]:
+            # 3 ubicaciones: p. ej. Granada y Málaga (presencial) + España (remoto/híbrido)
+            for location in [linkedin_location(loc) for loc in ctx.locations[:max_locations]] or [""]:
+                for page in range(max_pages):
+                    if time.monotonic() > deadline:
+                        _log.warning("LinkedIn: tiempo casi agotado, se devuelven %d ofertas", len(offers))
+                        return _dedup(offers)
+                    # sortBy=DD: primero las más recientes, que son las que interesan en cada escaneo
+                    url = (f"{base}?keywords={quote_plus(term)}&location={quote_plus(location)}"
+                           f"&start={page * 10}&f_TPR=r604800&sortBy=DD")
+                    resp = await ctx.http.get(url)
+                    cards = _parse_linkedin(resp.text)
+                    offers.extend(cards)
+                    if len(cards) < 10:
+                        break
+    except SourceBlocked as exc:
+        raise _partial(exc, offers) from None
     return _dedup(offers)
 
 
@@ -220,10 +238,13 @@ def _infojobs_terms(ctx: SourceContext) -> list[str]:
 
 async def _infojobs_html(ctx: SourceContext) -> list[JobOffer]:
     offers: list[JobOffer] = []
-    for term in _infojobs_terms(ctx):
-        resp = await ctx.http.get(
-            f"https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword={quote_plus(term)}")
-        offers.extend(_parse_infojobs(resp.text))
+    try:
+        for term in _infojobs_terms(ctx):
+            resp = await ctx.http.get(
+                f"https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword={quote_plus(term)}")
+            offers.extend(_parse_infojobs(resp.text))
+    except SourceBlocked as exc:
+        raise _partial(exc, offers) from None
     return _dedup(offers)
 
 
@@ -274,9 +295,12 @@ def _parse_tecnoempleo(html: str) -> list[JobOffer]:
 
 async def fetch_tecnoempleo(ctx: SourceContext) -> list[JobOffer]:
     offers: list[JobOffer] = []
-    for term in _search_terms(ctx):
-        resp = await ctx.http.get(f"https://www.tecnoempleo.com/ofertas-trabajo/?te={quote_plus(term)}")
-        offers.extend(_parse_tecnoempleo(resp.text))
+    try:
+        for term in _search_terms(ctx):
+            resp = await ctx.http.get(f"https://www.tecnoempleo.com/ofertas-trabajo/?te={quote_plus(term)}")
+            offers.extend(_parse_tecnoempleo(resp.text))
+    except SourceBlocked as exc:
+        raise _partial(exc, offers) from None
     return _dedup(offers)
 
 
@@ -301,9 +325,12 @@ def _parse_infoempleo(html: str) -> list[JobOffer]:
 
 async def fetch_infoempleo(ctx: SourceContext) -> list[JobOffer]:
     offers: list[JobOffer] = []
-    for term in ctx.combos[:3] or _search_terms(ctx):  # portal generalista: tipo + área
-        resp = await ctx.http.get(f"https://www.infoempleo.com/trabajo/?q={quote_plus(term)}")
-        offers.extend(_parse_infoempleo(resp.text))
+    try:
+        for term in ctx.combos[:3] or _search_terms(ctx):  # portal generalista: tipo + área
+            resp = await ctx.http.get(f"https://www.infoempleo.com/trabajo/?q={quote_plus(term)}")
+            offers.extend(_parse_infoempleo(resp.text))
+    except SourceBlocked as exc:
+        raise _partial(exc, offers) from None
     return _dedup(offers)
 
 
@@ -330,9 +357,12 @@ async def fetch_primerempleo(ctx: SourceContext) -> list[JobOffer]:
     """El portal solo busca por etiquetas (``/?q=madrid``); sin etiqueta devuelve las últimas ofertas."""
     queries = [""] + [fold(t) for t in _search_terms(ctx)] + [fold(loc) for loc in ctx.locations if fold(loc) != "espana"]
     offers: list[JobOffer] = []
-    for q in dict.fromkeys(queries):
-        resp = await ctx.http.get("https://www.primerempleo.com/" + (f"?q={quote_plus(q)}" if q else ""))
-        offers.extend(_parse_primerempleo(resp.text))
+    try:
+        for q in dict.fromkeys(queries):
+            resp = await ctx.http.get("https://www.primerempleo.com/" + (f"?q={quote_plus(q)}" if q else ""))
+            offers.extend(_parse_primerempleo(resp.text))
+    except SourceBlocked as exc:
+        raise _partial(exc, offers) from None
     return _dedup(offers)
 
 
