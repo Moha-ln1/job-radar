@@ -40,6 +40,7 @@ def _display_name(chat) -> str:
 
 async def wait_for_start(bot, code: str, timeout: float = 300, poll: int = 25) -> tuple[int, str] | None:
     """Espera `/start <code>` en un chat privado. Devuelve (chat_id, nombre) o None si se agota el tiempo."""
+    from telegram import Update
     from telegram.error import Conflict
     pattern = re.compile(rf"^/start(?:@\w+)?\s+{re.escape(code)}$")
     deadline = time.monotonic() + timeout
@@ -67,9 +68,9 @@ async def wait_for_start(bot, code: str, timeout: float = 300, poll: int = 25) -
             if not updates:
                 await asyncio.sleep(0)
     finally:
-        if offset is not None:  # confirma lo leído para que el bot no lo reprocese
-            try:
-                await bot.get_updates(offset=offset, timeout=0, allowed_updates=["message"])
-            except Exception:
-                pass
+        # Confirma lo leído y restaura todos los tipos: Telegram recuerda el filtro entre llamadas
+        try:
+            await bot.get_updates(offset=offset, timeout=0, allowed_updates=Update.ALL_TYPES)
+        except Exception:
+            pass
     return found

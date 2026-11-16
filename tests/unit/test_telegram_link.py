@@ -22,6 +22,13 @@ async def test_picks_right_code_after_stranger():
     assert bot.get_updates.await_args_list[-1].kwargs["offset"] == 13  # confirma todo lo leído
 
 
+async def test_restores_all_update_types_even_on_timeout():
+    # Telegram recuerda allowed_updates: si se queda en ["message"], el bot deja de recibir botones
+    bot = NS(get_updates=AsyncMock(return_value=[]))
+    assert await tl.wait_for_start(bot, "CODE2345", timeout=0.01, poll=0) is None
+    assert "callback_query" in bot.get_updates.await_args_list[-1].kwargs["allowed_updates"]
+
+
 async def test_start_with_bot_suffix_and_ignores_groups():
     bot = NS(get_updates=AsyncMock(side_effect=[
         [upd(1, "/start CODE2345", chat_id=-7, kind="group"), upd(2, "/start@mi_bot CODE2345", chat_id=3)], []]))

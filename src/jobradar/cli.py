@@ -327,7 +327,9 @@ def cmd_run(args, paths: Paths) -> int:
     scheduler.update_state(paths, pid=os.getpid())
     _p("jobradar en marcha (Ctrl+C para parar).")
     try:
-        app.run_polling()
+        # Telegram recuerda el último allowed_updates: pedirlo explícito para recibir los botones
+        from telegram import Update
+        app.run_polling(allowed_updates=Update.ALL_TYPES)
     finally:
         scheduler.update_state(paths, pid=None)
     return 0

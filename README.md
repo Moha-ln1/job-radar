@@ -59,6 +59,21 @@ bash scripts/setup.sh
 El instalador crea el entorno virtual, instala JobRadar, configura Telegram y tus búsquedas, y pregunta si quieres
 que arranque al iniciar sesión. Es seguro repetirlo.
 
+### Arrancar, parar y comprobar
+
+Con el autoarranque activado no hay que hacer nada al encender el PC: el bot arranca solo al iniciar sesión.
+Si lo desactivaste o el bot no responde, arráncalo a mano desde la carpeta del proyecto:
+
+| Acción | Windows | Linux / macOS |
+|---|---|---|
+| Arrancar | `.venv\Scripts\jobradar.exe run` | `.venv/bin/jobradar run` |
+| Parar | `.venv\Scripts\jobradar.exe stop` | `.venv/bin/jobradar stop` |
+| ¿Está en marcha? | `.venv\Scripts\jobradar.exe status` | `.venv/bin/jobradar status` |
+| Autoarranque | `.venv\Scripts\jobradar.exe autostart on` / `off` | `.venv/bin/jobradar autostart on` / `off` |
+
+`run` deja la terminal ocupada mientras el bot funciona; ciérrala o pulsa Ctrl+C para pararlo. En Telegram,
+`/estado` responde si el bot está vivo y muestra cada fuente con su último escaneo y el porcentaje de datos completos.
+
 ## Documentación
 
 - [docs/TUTORIAL.md](docs/TUTORIAL.md): instalación paso a paso, primer uso del bot y solución de problemas.
