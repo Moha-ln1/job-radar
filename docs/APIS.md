@@ -1,7 +1,7 @@
 # Claves de las APIs oficiales
 
 Son opcionales y gratuitas. Sin clave, esa fuente se desactiva sola (InfoJobs vuelve a leer su web pública).
-Rellena los valores en tu archivo `.env` y reinicia JobRadar. Consulta los límites del plan gratuito en la web de cada servicio.
+Guarda cada valor con `jobradar env set <NOMBRE>` (no se muestra al escribirlo) o rellénalo a mano en `.env`. No hace falta reiniciar: se usa en el siguiente escaneo. Consulta los límites del plan gratuito en la web de cada servicio.
 
 ## InfoJobs
 1. Entra en <https://developer.infojobs.net/> e inicia sesión con tu cuenta de InfoJobs.

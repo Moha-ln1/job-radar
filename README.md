@@ -9,19 +9,18 @@ con todos sus enlaces. Las búsquedas se crean con botones, sin tocar archivos.
 Ejemplo ficticio de cómo llega un aviso al chat de Telegram:
 
 ```
-Nueva oferta: Prácticas
-Desarrollador/a Backend (prácticas)
-Empresa: Ejemplo Tech S.L.
-Ubicación: Granada (híbrido)
-Enlaces: LinkedIn · Greenhouse
+🔥 Desarrollador/a Backend en prácticas — Ejemplo Tech S.L. · Granada (híbrido)
+🔎 Búsqueda: Prácticas de programación · Granada
+🔗 LinkedIn · Greenhouse
 
 [🚫 Ocultar empresa] [👎 No me interesa]
 ```
 
-Si la misma oferta aparece después en otro portal, JobRadar responde al aviso original:
+🔥 llega al momento; 📰 llega en el resumen diario. Si la misma oferta aparece después en otro portal, JobRadar
+responde al aviso original:
 
 ```
-También en InfoJobs
+➕ También en InfoJobs
 ```
 
 ## Características
@@ -76,6 +75,23 @@ Si lo desactivaste o el bot no responde, arráncalo a mano desde la carpeta del 
 
 `run` deja la terminal ocupada mientras el bot funciona; ciérrala o pulsa Ctrl+C para pararlo. En Telegram,
 `/estado` responde si el bot está vivo y muestra cada fuente con su último escaneo y el porcentaje de datos completos.
+
+### Configurar desde Telegram
+
+Al terminar la instalación, abre tu bot y escribe `/busquedas` → **➕ Nueva búsqueda**. Son 5 pasos con botones:
+tipo, área, modalidad, ubicación y cuándo avisarte. No hace falta tocar ningún archivo:
+
+| Quiero… | Comando |
+|---|---|
+| Elegir qué ofertas me llegan | `/busquedas` |
+| No ver nunca una palabra o una empresa | `/excluir` |
+| Apagar LinkedIn u otra fuente | `/fuentes` |
+| Seguir la web de empleo de una empresa | `/empresas` |
+| Vigilar la página de una academia | `/paginas` |
+| Saber si un título me llegaría | `/probar <título>` |
+| Ver qué se ha descartado y por qué | `/descartadas` |
+
+El [tutorial](docs/TUTORIAL.md#5-primer-uso-del-bot) lo explica paso a paso, con un ejemplo de búsquedas.
 
 ## Documentación
 

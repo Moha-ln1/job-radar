@@ -83,6 +83,19 @@ def test_custom_name_roundtrip():
     assert bot.search_to_state(search)["name_custom"] is True
 
 
+def test_editar_avisa_si_el_nombre_ya_no_describe_la_busqueda():
+    search = Search(id="b1", name="Bootcamps · Granada", tipos=["bootcamp"], ubicaciones=["granada"])
+    s = bot.search_to_state(search, CAT)
+    s["step"] = bot.SUMMARY_STEP
+    text, kb = bot.render_step(s, CAT)
+    assert "w:auto" not in all_callbacks(kb)  # sin cambios: el nombre sigue valiendo
+    bot.toggle(s, "ubicaciones", "europa")
+    text, kb = bot.render_step(s, CAT)
+    assert "w:auto" in all_callbacks(kb) and "el nombre sigue siendo el de antes" in text
+    s["name_custom"] = False  # lo que hace el botón 🔄
+    assert bot.state_to_search(s, CAT).name != "Bootcamps · Granada"
+
+
 def test_views():
     searches = [Search(id="b1", name="Una", tipos=["practicas"]), Search(id="b2", name="Dos", paused=True)]
     text, kb = bot.searches_view(searches, CAT)

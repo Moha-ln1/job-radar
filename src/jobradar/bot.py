@@ -184,7 +184,20 @@ def search_to_state(search: Search, catalog: Catalog | None = None) -> dict:
              "ubicaciones": list(search.ubicaciones), "prioridad": search.prioridad,
              "paused": search.paused}
     state["name_custom"] = search.name != auto_name(state, catalog)
+    state["orig"] = _content(state)
     return state
+
+
+_CONTENT_FIELDS = ("tipos", "areas", "modalidades", "ubicaciones")
+
+
+def _content(state: dict) -> list[list[str]]:
+    return [sorted(state[f]) for f in _CONTENT_FIELDS]
+
+
+def stale_name(state: dict) -> bool:
+    """Nombre puesto a mano en una búsqueda cuyo contenido acabas de cambiar: probablemente ya no la describe."""
+    return bool(state.get("orig")) and state["name_custom"] and _content(state) != state["orig"]
 
 
 def advance(state: dict, delta: int) -> dict:
@@ -216,6 +229,9 @@ def render_step(state: dict, catalog: Catalog) -> tuple[str, InlineKeyboardMarku
     name = state["name"] if state["name_custom"] and state["name"] else auto_name(state, catalog)
     if step == SUMMARY_STEP:
         notes = redundancy_notes(state, catalog)
+        if stale_name(state):
+            notes.append(f"Has cambiado la búsqueda, pero el nombre sigue siendo el de antes. "
+                         f"Pulsa 🔄 para llamarla «{auto_name(state, catalog)}» o ✏️ Nombre para elegir otro.")
         text = (f"📋 <b>{escape(name)}</b>\n" + "\n".join(escape(x) for x in describe_lines(state, catalog))
                 + "".join(f"\nℹ️ {escape(n)}" for n in notes)
                 + "\n\nCada opción incluye sus sinónimos en español e inglés.\n¿Guardar esta búsqueda?")
@@ -223,6 +239,8 @@ def render_step(state: dict, catalog: Catalog) -> tuple[str, InlineKeyboardMarku
                InlineKeyboardButton("✏️ Cambiar", callback_data="w:c")],
               [InlineKeyboardButton("✏️ Nombre", callback_data="w:name"),
                InlineKeyboardButton("✖ Cancelar", callback_data="w:x")]]
+        if stale_name(state):
+            kb.insert(1, [InlineKeyboardButton("🔄 Nombre automático", callback_data="w:auto")])
         return text, InlineKeyboardMarkup(kb)
     field = STEP_FIELDS[step]
     opts = field_options(field, catalog)
@@ -652,6 +670,8 @@ async def on_wizard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     elif action == "o":
         await _ask(update, context, ("wiz_other", STEP_FIELDS[step]), "Escribe el término que quieres añadir:")
         return
+    elif action == "auto":
+        state["name_custom"] = False
     elif action == "name":
         await _ask(update, context, ("wiz_name",), "Escribe el nombre de la búsqueda:")
         return

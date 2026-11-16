@@ -77,15 +77,29 @@ Abre tu bot en Telegram y escribe `/busquedas`. Pulsa **➕ Nueva búsqueda** y 
 botones:
 
 1. **Tipo**: prácticas, trainee, bootcamp/academy, junior...
-2. **Área**: desarrollo, datos, diseño, marketing...
+2. **Área**: programación, datos, ciberseguridad, sistemas, diseño, marketing... (25 áreas). Si no eliges
+   ninguna, vale cualquier área.
 3. **Modalidad**: presencial, híbrido, remoto o cualquiera.
-4. **Ubicación**: la ciudad o región donde buscas (solo se aplica a presencial e híbrido).
-5. **Avisos**: 🔥 al momento (en cuanto aparece una oferta) o 📰 resumen diario.
+4. **Ubicación**: la ciudad o región donde buscas (solo se aplica a presencial e híbrido). Cada zona incluye sus
+   municipios: "Granada" incluye Armilla, Maracena, Las Gabias…; "España" incluye todas las provincias.
+5. **Avisos**: 🔥 al momento (en cuanto aparece una oferta) o 📰 resumen diario (a las 09:00).
 
-Al final pulsa **Guardar**. JobRadar aplicará la búsqueda también a las ofertas de los últimos 14 días y te dirá
+En cada paso, **✏️ Otra…** te deja escribir un término que no está en los botones (por ejemplo, "Salesforce"). Al
+final pulsa **💾 Guardar**. JobRadar aplicará la búsqueda también a las ofertas de los últimos 14 días y te dirá
 cuántas encajan.
 
-Puedes tener varias búsquedas. Puedes editarlas, pausarlas o borrarlas desde `/busquedas`.
+**Ejemplo**: para recibir al momento las prácticas de programación cerca de casa y, en el resumen, las remotas de
+toda España, crea dos búsquedas:
+
+| Búsqueda | Tipo | Área | Modalidad | Ubicación | Avisos |
+|---|---|---|---|---|---|
+| Cerca de casa | Prácticas | Programación | Cualquiera | Granada, Málaga | 🔥 al momento |
+| En remoto | Prácticas | Programación | Remoto, Híbrido | España | 📰 resumen |
+
+Puedes tener varias búsquedas. En `/busquedas`, pulsa una para **editarla, pausarla o borrarla**. Si al editar
+cambias su contenido y la búsqueda tenía un nombre puesto a mano, el resumen final te avisa de que el nombre ya no
+la describe: pulsa **🔄 Nombre automático** o **✏️ Nombre** para cambiarlo. El nombre aparece en cada aviso
+("🔎 Búsqueda: …"), así que conviene que diga la verdad.
 
 ## 6. Resto de comandos del bot
 
@@ -99,20 +113,40 @@ Puedes tener varias búsquedas. Puedes editarlas, pausarlas o borrarlas desde `/
 | `/descartadas` | Ver las ofertas descartadas en las últimas 24 h, agrupadas por motivo. |
 | `/probar <texto>` | Comprobar si un título encaja con tus búsquedas. Ejemplo: `/probar Prácticas de marketing en Madrid`. |
 | `/recientes` | Ver las ofertas que encajan encontradas últimamente. |
-| `/estado` | Ver el estado de cada fuente y si alguna está bloqueada. |
+| `/estado` | Ver cada fuente: último escaneo, ofertas, % de datos completos, y si está en pausa, sin clave o apagada. |
 | `/silencio` | Silenciar los avisos durante un tiempo. |
 | `/escanear` | Buscar ofertas ahora, sin esperar al siguiente escaneo. |
 | `/ayuda` | Ver la lista de comandos. |
 
 El bot solo responde al chat de Telegram que configuraste durante la instalación.
 
-No hace falta editar ningún archivo: lo que cambias con `/fuentes`, `/empresas` y `/paginas` se guarda en
-`ajustes_bot.yaml` y tiene prioridad sobre `config.yaml`.
+### Qué se configura y dónde
+
+No hace falta editar ningún archivo. Todo se hace desde Telegram:
+
+| Quiero… | Comando |
+|---|---|
+| Elegir qué ofertas me llegan | `/busquedas` |
+| No ver nunca una palabra ("senior") o una empresa | `/excluir`, o el botón 🚫 de un aviso |
+| Apagar LinkedIn u otra fuente | `/fuentes` |
+| Vigilar la web de empleo de una empresa | `/empresas` → ➕ y pega el enlace |
+| Vigilar la página de una academia o programa | `/paginas` → ➕ y pega el enlace |
+| Que una oferta descartada no se vuelva a perder | `/descartadas` → ➕ Era buena |
+| Saber si un título concreto me llegaría | `/probar <título>` |
+
+Lo que cambias se guarda solo: las búsquedas y exclusiones en `busquedas.yaml`; las fuentes, empresas y páginas en
+`ajustes_bot.yaml`, que tiene prioridad sobre `config.yaml`. Los cambios se aplican en el siguiente escaneo, sin
+reiniciar.
+
+Lo único que no se hace desde Telegram son las claves de las APIs opcionales (InfoJobs, Adzuna, Jooble), porque son
+secretos: se guardan desde la terminal con `jobradar env set <NOMBRE>` (ver [APIS.md](APIS.md)). Sin ellas, esas
+fuentes aparecen como "sin clave (opcional)" en `/estado` y InfoJobs usa su web pública.
 
 **Cómo se clasifican las ofertas.** Cada opción busca sus sinónimos en español e inglés en el título (y la
 categoría, si el portal la da), con plurales, femeninos y marcas como "Técnico/a". Si el título no indica el área
 (por ejemplo "Estudiante en prácticas – Departamento TEF7"), la oferta no se descarta: te llega en el resumen
-diario, para que no se pierda.
+diario, para que no se pierda. Si el título es claramente de otra área ("Prácticas de contabilidad" en una búsqueda
+de programación), se descarta y lo verás en `/descartadas`.
 
 ## 7. Botones de cada aviso
 
@@ -135,10 +169,12 @@ debería haberla encontrado y la añade a los sinónimos, para que las siguiente
 - **Las exclusiones ganan**: si el título de una oferta contiene una palabra excluida, no se avisa. La excepción es
   que el título contenga también el tipo buscado (p. ej. "Junior/Senior Developer"): en ese caso se incluye.
 - **Ante la duda, se incluye**. Si falta la modalidad, la ubicación o la fecha, la oferta pasa el filtro. Es
-  preferible recibir una oferta de más a perder una buena.
+  preferible recibir una oferta de más a perder una buena. Por eso una oferta de Madrid puede llegarte en una
+  búsqueda de remoto: el aviso lo indica con "(modalidad sin indicar)".
 - **Sinónimos en español e inglés**: "prácticas" encuentra también "internship", "intern" o "becario/a".
   No distingue mayúsculas ni tildes.
-- **Revisión**: si una oferta buena se ha descartado, `/descartadas` te deja añadir su término a la búsqueda.
+- **Revisión**: si una oferta buena se ha descartado, el botón **➕ Era buena** de `/descartadas` te pregunta qué
+  palabra del título la describe y la añade como sinónimo (en `sinonimos_usuario.yaml`).
 
 ## 9. Comandos de terminal útiles
 
@@ -163,6 +199,7 @@ virtual; en Linux/macOS, `source .venv/bin/activate`.
 | `jobradar digest` | Envía ahora el resumen de pendientes. |
 | `jobradar telegram test` | Envía un mensaje de prueba a tu chat. |
 | `jobradar ats detect <url> --add` | Añade la web de empleo de una empresa. |
+| `jobradar env set <NOMBRE>` | Guarda una clave en `.env` sin que se vea al escribirla (p. ej. `JOOBLE_API_KEY`). |
 | `jobradar autostart on\|off\|status` | Activa, desactiva o consulta el arranque automático. |
 | `jobradar --help` | Muestra todos los comandos. |
 
@@ -194,6 +231,10 @@ búsqueda, guárdala desde `/busquedas`: el bot te dice cuántas ofertas guardad
 **No llegan avisos al móvil.** Comprueba que el bot está activo con `jobradar telegram test`. Si no llega el mensaje
 de prueba, repite `jobradar telegram link` (o, a mano, `jobradar telegram chat-id --save` después de escribir `/start` a tu bot). Después ejecuta
 `jobradar verificar` para comprobar que las fuentes extraen bien los datos.
+
+**Me llegan ofertas que no tienen nada que ver con lo que busco.** Pulsa 👎 en el aviso. Si se repite una palabra
+("sommelier") o una empresa, añádela con `/excluir` o pulsa 🚫 Ocultar empresa. Si viene de una página vigilada,
+en `/paginas` pulsa 🔎 para que solo lleguen los enlaces que encajan con tus búsquedas.
 
 **Quiero saber por qué no ha llegado una oferta.** Usa `/descartadas` en el bot o `jobradar descartadas` en la terminal.
 Ahí aparece el motivo exacto de cada descarte.
