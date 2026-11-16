@@ -1,0 +1,45 @@
+# Catálogo de opciones visibles para configurar búsquedas (botones del bot y asistente).
+tipos:
+  practicas: Prácticas
+  trainee: Trainee
+  bootcamp: Bootcamp
+  junior: Junior
+areas:
+  programador: Programación
+  data: Datos / IA
+  ciberseguridad: Ciberseguridad
+  sistemas: Sistemas / DevOps
+  qa: QA / Testing
+  diseno: Diseño
+  marketing: Marketing
+  administracion: Administración
+ubicaciones:
+  granada:
+    label: Granada
+    aliases: [granada, armilla, atarfe, maracena, la zubia, ogijares, gojar, churriana de la vega,
+      cenes de la vega, peligros, albolote, pulianas, huetor vega, cullar vega, alhendin, las gabias,
+      santa fe, vegas del genil, pinos puente, otura, dilar, monachil, huetor santillan]
+  andalucia:
+    label: Andalucía
+    aliases: [andalucia, andalusia, almeria, cadiz, cordoba, granada, huelva, jaen, malaga, sevilla,
+      seville, malaga, marbella, jerez, algeciras, dos hermanas, estepona]
+  madrid:
+    label: Madrid
+    aliases: [madrid, alcobendas, getafe, mostoles, alcala de henares, leganes, pozuelo, las rozas,
+      majadahonda, tres cantos, boadilla del monte]
+  barcelona:
+    label: Barcelona
+    aliases: [barcelona, hospitalet, badalona, sabadell, terrassa, sant cugat, cornella, l'hospitalet]
+  espana:
+    label: España
+    aliases: [espana, spain, madrid, barcelona, valencia, sevilla, seville, malaga, bilbao, zaragoza,
+      murcia, alicante, granada, cordoba, valladolid, vigo, gijon, oviedo, a coruna, vitoria, pamplona,
+      san sebastian, santander, palma, las palmas, tenerife, almeria, cadiz, huelva, jaen, salamanca,
+      toledo, albacete, badajoz, caceres, leon, burgos, logrono, tarragona, girona, lleida, castellon,
+      andalucia, cataluna, catalunya, galicia, asturias, cantabria, aragon, navarra, canarias,
+      baleares, extremadura, castilla, pais vasco, euskadi, comunidad valenciana, la rioja]
+# Regiones de teletrabajo aceptables (si la región no se conoce, la oferta pasa igualmente).
+remote_regions_ok: [eu, spain, españa, europe, europa, emea, worldwide, anywhere, global, cet, remote]
+# Regiones que descartan una oferta remota (salvo que la búsqueda las pida expresamente).
+remote_regions_no: [us only, usa, u.s., us, united states, north america, americas, latam,
+  latin america, canada, apac, asia, india, australia, brazil, brasil]

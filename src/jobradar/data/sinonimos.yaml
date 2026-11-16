@@ -1,0 +1,178 @@
+# Grupos de sinónimos ES/EN. Cada grupo: clave -> términos (sin distinguir mayúsculas ni tildes,
+# por palabra completa; el femenino y el plural se aceptan solos).
+# Decisiones: "beca" se incluye (la mayoría de "beca X" en portales de empleo son prácticas;
+# priorizamos no perder ofertas); "dev" solo como palabra completa; "lead"/"principal" NO están en
+# "senior" para no excluir "Lead Generation Intern"; los lenguajes de programación van en
+# "programador" para no perder títulos tipo "Trainee Java".
+practicas:
+  - prácticas
+  - practicas
+  - intern
+  - internship
+  - becario
+  - becaria
+  - beca
+  - pasantía
+  - pasante
+  - work placement
+  - student placement
+  - working student
+  - fp dual
+  - formación dual
+  - practicum
+  - estudiante en prácticas
+trainee:
+  - trainee
+  - management trainee
+  - graduate programme
+  - graduate program
+  - programa de trainees
+  - programa trainee
+  - programa de talento
+  - talent program
+  - talent programme
+  - programa de graduados
+  - graduate scheme
+  - recién titulado
+  - recién graduado
+  - new grad
+  - early careers
+  - early career
+bootcamp:
+  - bootcamp
+  - boot camp
+  - formación intensiva
+  - curso intensivo
+  - programa de formación
+  - academy
+junior:
+  - junior
+  - jr
+  - entry level
+  - entry-level
+  - sin experiencia
+  - recién titulado
+  - recién graduado
+  - recien egresado
+  - early career
+  - nivel inicial
+  - graduate
+programador:
+  - programador
+  - desarrollador
+  - developer
+  - dev
+  - programmer
+  - software engineer
+  - software developer
+  - ingeniero de software
+  - full stack
+  - fullstack
+  - frontend
+  - front-end
+  - backend
+  - back-end
+  - java
+  - python
+  - javascript
+  - typescript
+  - php
+  - react
+  - angular
+  - golang
+  - kotlin
+data:
+  - data
+  - datos
+  - analista de datos
+  - data analyst
+  - data scientist
+  - data engineer
+  - business intelligence
+  - machine learning
+  - inteligencia artificial
+  - big data
+  - analytics
+ciberseguridad:
+  - ciberseguridad
+  - cybersecurity
+  - cyber security
+  - seguridad informática
+  - infosec
+  - pentester
+  - soc analyst
+sistemas:
+  - sistemas
+  - sysadmin
+  - administrador de sistemas
+  - devops
+  - sre
+  - infraestructura
+  - cloud
+  - redes
+  - helpdesk
+  - help desk
+  - soporte técnico
+  - it support
+qa:
+  - qa
+  - quality assurance
+  - tester
+  - testing
+  - test engineer
+  - control de calidad
+diseno:
+  - diseño
+  - diseno
+  - designer
+  - design
+  - ux
+  - ui
+  - diseñador
+  - gráfico
+marketing:
+  - marketing
+  - seo
+  - sem
+  - community manager
+  - social media
+  - growth
+  - contenidos
+  - content
+administracion:
+  - administración
+  - administracion
+  - administrativo
+  - admin
+  - back office
+  - backoffice
+  - oficina
+  - office
+  - contabilidad
+  - accounting
+  - finanzas
+  - finance
+  - rrhh
+  - recursos humanos
+remoto:
+  - remoto
+  - remote
+  - teletrabajo
+  - work from home
+  - wfh
+  - 100% remoto
+  - fully remote
+hibrido:
+  - híbrido
+  - hibrido
+  - hybrid
+  - semipresencial
+presencial:
+  - presencial
+  - on-site
+  - onsite
+  - on site
+senior:
+  - senior
+  - sénior
+  - sr
