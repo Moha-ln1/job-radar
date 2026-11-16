@@ -10,7 +10,7 @@ from html import escape
 
 from telegram import (BotCommand, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup, Update)
 from telegram.constants import ParseMode
-from telegram.error import BadRequest
+from telegram.error import BadRequest, NetworkError
 from telegram.ext import (Application, ApplicationHandlerStop, CallbackQueryHandler, CommandHandler,
                           ContextTypes, MessageHandler, TypeHandler, filters)
 
@@ -96,10 +96,75 @@ def _labels(state: dict, field: str, catalog: Catalog) -> list[str]:
     return [opts.get(v, v) for v in state[field]]
 
 
+def _short(labels: list[str], keep: int = 2) -> str:
+    return "/".join(labels[:keep]) + (f" +{len(labels) - keep}" if len(labels) > keep else "")
+
+
 def auto_name(state: dict, catalog: Catalog | None = None) -> str:
     catalog = catalog or default_catalog()
-    parts = ["/".join(_labels(state, f, catalog)) for f in _LIST_FIELDS if state[f]]
+    parts = [_short(_labels(state, f, catalog)) for f in _LIST_FIELDS if state[f]]
     return " · ".join(parts) or "Todas las ofertas"
+
+
+STEP_HELP = {
+    "tipos": "Qué tipo de puesto. Se busca en el título, en español e inglés.",
+    "areas": "De qué trata el puesto. Se busca en el título y la categoría de la oferta.",
+    "modalidades": "Si la oferta no indica modalidad, se incluye igualmente.",
+    "ubicaciones": ("Cada zona incluye sus municipios. Si la ubicación de la oferta no se reconoce, "
+                    "se incluye igualmente."),
+    "prioridad": "🔥 Al momento: un mensaje en cuanto aparece. 📰 Resumen: todo junto a las 09:00.",
+}
+_raw_synonyms: dict[str, list[str]] | None = None
+
+
+def _synonym_examples(key: str) -> list[str]:
+    """Términos del grupo de sinónimos tal como están escritos (con tildes), sin la propia clave."""
+    global _raw_synonyms
+    if _raw_synonyms is None:
+        import yaml
+        _raw_synonyms = yaml.safe_load((radar._DATA / "sinonimos.yaml").read_text(encoding="utf-8")) or {}
+    seen = {fold(key)}
+    out = []
+    for term in _raw_synonyms.get(key, []):
+        if fold(term) not in seen:
+            seen.add(fold(term))
+            out.append(term)
+    return out
+
+
+def option_hint(field: str, key: str, catalog: Catalog, limit: int = 6) -> str | None:
+    """Ejemplos de lo que cubre una opción marcada (para que se vea que no se pierden variantes)."""
+    if field == "ubicaciones":
+        entry = catalog.ubicaciones.get(key)
+        if not entry:
+            return None
+        examples = [a.title() for a in entry.get("aliases", []) if fold(a) != fold(key)]
+    elif field in ("tipos", "areas", "modalidades"):
+        label = field_options(field, catalog).get(key, key)
+        examples = [t for t in _synonym_examples(key) if fold(t) != fold(label)]
+    else:
+        return None
+    if not examples:
+        return None
+    more = f" y {len(examples) - limit} más" if len(examples) > limit else ""
+    return ", ".join(examples[:limit]) + more
+
+
+def redundancy_notes(state: dict, catalog: Catalog) -> list[str]:
+    """Selecciones que no aportan (no cambian el resultado, solo se explican)."""
+    notes = []
+    if set(MODALIDADES) <= set(state["modalidades"]):
+        notes.append("Las tres modalidades equivalen a «cualquiera».")
+    labels = field_options("ubicaciones", catalog)
+    for u in state["ubicaciones"]:
+        for v in state["ubicaciones"]:
+            if u == v or v not in catalog.ubicaciones:
+                continue
+            terms = set(catalog.location_terms(v))
+            if fold(u) in terms or fold(labels.get(u, u)) in terms:
+                notes.append(f"{labels.get(u, u)} ya está incluida en {labels[v]}.")
+                break
+    return notes
 
 
 def state_to_search(state: dict, catalog: Catalog | None = None) -> Search:
@@ -146,8 +211,10 @@ def render_step(state: dict, catalog: Catalog) -> tuple[str, InlineKeyboardMarku
     step = state["step"]
     name = state["name"] if state["name_custom"] and state["name"] else auto_name(state, catalog)
     if step == SUMMARY_STEP:
+        notes = redundancy_notes(state, catalog)
         text = (f"📋 <b>{escape(name)}</b>\n" + "\n".join(escape(x) for x in describe_lines(state, catalog))
-                + "\n\n¿Guardar esta búsqueda?")
+                + "".join(f"\nℹ️ {escape(n)}" for n in notes)
+                + "\n\nCada opción incluye sus sinónimos en español e inglés.\n¿Guardar esta búsqueda?")
         kb = [[InlineKeyboardButton("💾 Guardar", callback_data="w:s"),
                InlineKeyboardButton("✏️ Cambiar", callback_data="w:c")],
               [InlineKeyboardButton("✏️ Nombre", callback_data="w:name"),
@@ -157,7 +224,16 @@ def render_step(state: dict, catalog: Catalog) -> tuple[str, InlineKeyboardMarku
     opts = field_options(field, catalog)
     hint = ("Elige cuándo quieres el aviso." if field == "prioridad"
             else "Elige una o varias opciones (sin elegir = cualquiera).")
-    text = f"<b>Paso {step + 1}/5 · {STEP_TITLES[step]}</b>\n{hint}\n📋 {escape(name)}"
+    text = f"<b>Paso {step + 1}/5 · {STEP_TITLES[step]}</b>\n{STEP_HELP[field]}\n{hint}\n📋 {escape(name)}"
+    if field != "prioridad":
+        details = [(opts[k], option_hint(field, k, catalog)) for k in state[field] if k in opts]
+        details = [(label, h) for label, h in details if h]
+        if details:
+            text += "\n\n<b>Incluye:</b>" + "".join(f"\n• {escape(label)}: {escape(h)}" for label, h in details)
+        notes = [n for n in redundancy_notes(state, catalog)
+                 if field in ("modalidades", "ubicaciones")
+                 and (field == "modalidades") == n.startswith("Las tres")]
+        text += "".join(f"\nℹ️ {escape(n)}" for n in notes)
     buttons = []
     for key, label in opts.items():
         on = state[field] == key if field == "prioridad" else key in state[field]
@@ -254,6 +330,19 @@ async def _edit(bot, chat_id, message_id, text, markup=None) -> None:
     except BadRequest as exc:
         if "not modified" not in str(exc).lower():
             raise
+
+
+async def _answer(query, text: str | None = None) -> None:
+    """Responde a la pulsación (quita el reloj del botón). Es solo visual: un corte de red o una
+    pulsación antigua no deben impedir que se aplique lo que el usuario ha pedido."""
+    try:
+        await query.answer(text)
+    except BadRequest as exc:
+        if "too old" not in str(exc).lower() and "invalid" not in str(exc).lower():
+            raise
+        _log.info("pulsación sin responder: %s", exc)
+    except NetworkError as exc:
+        _log.warning("no se pudo responder a la pulsación (red): %s", exc)
 
 
 async def _ask(update: Update, context, awaiting: tuple, prompt: str) -> None:
@@ -380,20 +469,20 @@ async def on_job_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     store = _store(context)
     job = store.get_job(int(raw)) if raw.isdigit() else None
     if job is None:
-        await query.answer("Esa oferta ya no existe.")
+        await _answer(query, "Esa oferta ya no existe.")
         return
     if action == "h":
         if not job.company:
-            await query.answer("Esta oferta no tiene empresa.")
+            await _answer(query, "Esta oferta no tiene empresa.")
             return
         searches, excl = _load(context)
         if norm_company(job.company) not in {norm_company(c) for c in excl.companies}:
             excl.companies.append(job.company)
             _save(context, searches, excl)
-        await query.answer(f"🚫 {job.company} ocultada")
+        await _answer(query, f"🚫 {job.company} ocultada")
     else:
         store.set_decision(job.id, Decision(matched=[], reasons=["usuario: no me interesa"]))
-        await query.answer("👎 Descartada")
+        await _answer(query, "👎 Descartada")
     await query.edit_message_reply_markup(None)
 
 
@@ -402,11 +491,11 @@ async def on_era_buena(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     store = _store(context)
     job = store.get_job(int(query.data.split(":")[1]))
     if job is None:
-        await query.answer("Esa oferta ya no existe.")
+        await _answer(query, "Esa oferta ya no existe.")
         return
     store.set_decision(job.id, Decision(matched=["usuario"], priority="alta",
                                         reasons=["usuario: era buena"]))
-    await query.answer("Marcada como buena")
+    await _answer(query, "Marcada como buena")
     job = store.get_job(job.id)
     await telegram_io.send_job(context.bot, query.message.chat_id, store, job, ["Marcada por ti"])
     tokens = title_tokens(job.title)
@@ -423,16 +512,16 @@ async def on_token(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not good or pick == "x" or not pick.isdigit() or int(pick) >= len(good["tokens"]):
         context.user_data.pop("good", None)
         if not good and pick != "x":
-            await query.answer(STALE_MENU)
+            await _answer(query, STALE_MENU)
             return
-        await query.answer()
+        await _answer(query)
         await query.edit_message_text("Vale, solo la he marcado como buena.")
         return
     good["token"] = good["tokens"][int(pick)]
     catalog = default_catalog()
     buttons = [InlineKeyboardButton(label, callback_data=f"m:{key}")
                for key, label in {**catalog.tipos, **catalog.areas}.items()]
-    await query.answer()
+    await _answer(query)
     await query.edit_message_text(f"¿A qué grupo pertenece «{good['token']}»?",
                                   reply_markup=InlineKeyboardMarkup(_rows(buttons, 3)))
 
@@ -444,10 +533,10 @@ async def on_group(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     catalog = default_catalog()
     label = {**catalog.tipos, **catalog.areas}.get(key)
     if not good or "token" not in good or label is None:
-        await query.answer(STALE_MENU)
+        await _answer(query, STALE_MENU)
         return
     add_user_synonym(_paths(context).user_synonyms, key, good["token"])
-    await query.answer()
+    await _answer(query)
     await query.edit_message_text(f"✅ Añadido «{good['token']}» al grupo {label}. "
                                   "Lo tendré en cuenta desde el próximo escaneo.")
 
@@ -458,7 +547,7 @@ async def on_see(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     store = _store(context)
     searches = _load(context)[0]
     jobs = [j for j in store.recent(14, _now(), "avisada") if sid in j.matched_searches][:20]
-    await query.answer()
+    await _answer(query)
     for job in jobs:
         await telegram_io.send_job(context.bot, query.message.chat_id, store, job,
                                    notify.search_names(job, searches))
@@ -470,7 +559,7 @@ async def on_exclusion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     query = update.callback_query
     _, kind, *rest = query.data.split(":")
     if kind in ("aw", "ac"):
-        await query.answer()
+        await _answer(query)
         what = "palabra" if kind == "aw" else "empresa"
         await _ask(update, context, ("excl", kind), f"Escribe la {what} que quieres excluir:")
         return
@@ -480,7 +569,7 @@ async def on_exclusion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if idx < len(items):
         items.pop(idx)
         _save(context, searches, excl)
-    await query.answer("Quitada")
+    await _answer(query, "Quitada")
     text, kb = exclusions_view(excl)
     await _edit(context.bot, query.message.chat_id, query.message.message_id, text, kb)
 
@@ -492,7 +581,7 @@ async def on_search_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     searches, excl = _load(context)
     catalog = default_catalog()
     msg = query.message
-    await query.answer()
+    await _answer(query)
     if action in ("new", "e"):
         if action == "new":
             state = wizard_state_new(s.id for s in searches)
@@ -532,11 +621,11 @@ async def on_wizard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     state = context.user_data.get("wiz")
     if state is None:
-        await query.answer(STALE_MENU)
+        await _answer(query, STALE_MENU)
         return
     _, action, *rest = query.data.split(":")
     step = state["step"]
-    await query.answer()
+    await _answer(query)
     if action == "t" and step < SUMMARY_STEP:
         toggle(state, STEP_FIELDS[step], rest[0])
     elif action == "f" and step < SUMMARY_STEP:
@@ -628,6 +717,10 @@ async def on_error(update, context: ContextTypes.DEFAULT_TYPE) -> None:
     error = context.error
     if isinstance(error, BadRequest) and "not modified" in str(error).lower():
         return  # el mensaje ya mostraba ese contenido (doble pulsación): no es un fallo
+    if isinstance(error, NetworkError) and not isinstance(error, BadRequest):
+        # Corte momentáneo con Telegram: la librería reintenta sola; avisar también fallaría.
+        _log.warning("problema de red con Telegram: %s", error)
+        return
     _log.exception("error en un handler", exc_info=error)
     chat = update.effective_chat if isinstance(update, Update) else None
     if chat is not None:
@@ -649,7 +742,10 @@ def build_application(paths: Paths) -> Application:
         chat_id = int(chat)
     except ValueError:
         raise ConfigError("TELEGRAM_CHAT_ID debe ser un número (mira 'jobradar telegram chat-id').") from None
-    app = Application.builder().token(token).post_init(_post_init).build()
+    # Timeouts amplios: en redes domésticas lentas los 5 s por defecto cortan pulsaciones válidas.
+    app = (Application.builder().token(token).post_init(_post_init)
+           .connect_timeout(15).read_timeout(20).write_timeout(20).pool_timeout(10)
+           .get_updates_connect_timeout(15).get_updates_read_timeout(30).build())
     app.bot_data.update(paths=paths, chat_id=chat_id, store=Store(paths.db))
     auth = filters.Chat(chat_id=chat_id)
     app.add_handler(TypeHandler(Update, guard), group=-1)

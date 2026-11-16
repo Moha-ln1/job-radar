@@ -11,14 +11,62 @@ areas:
   sistemas: Sistemas / DevOps
   qa: QA / Testing
   diseno: Diseño
+  videojuegos: Videojuegos
+  electronica: Electrónica / Telecos
+  ingenieria: Ingeniería
+  producto: Producto / Proyectos
   marketing: Marketing
+  comunicacion: Comunicación
+  ventas: Ventas
+  atencion_cliente: Atención al cliente
   administracion: Administración
+  finanzas: Finanzas
+  rrhh: RRHH
+  consultoria: Consultoría
+  logistica: Logística
+  legal: Legal
+  educacion: Educación
+  salud: Salud
+  ciencia: Ciencia / I+D
+  hosteleria: Hostelería / Turismo
+  arquitectura: Arquitectura / Obra
 ubicaciones:
   granada:
     label: Granada
     aliases: [granada, armilla, atarfe, maracena, la zubia, ogijares, gojar, churriana de la vega,
       cenes de la vega, peligros, albolote, pulianas, huetor vega, cullar vega, alhendin, las gabias,
-      santa fe, vegas del genil, pinos puente, otura, dilar, monachil, huetor santillan]
+      santa fe, vegas del genil, pinos puente, otura, dilar, monachil, huetor santillan,
+      motril, almunecar, baza, guadix, loja, salobrena, iznalloz, alhama de granada, huescar]
+  malaga:
+    label: Málaga
+    aliases: [malaga, marbella, estepona, mijas, fuengirola, velez-malaga, torremolinos, benalmadena,
+      rincon de la victoria, antequera, alhaurin de la torre, alhaurin el grande, ronda, nerja, coin,
+      cartama, manilva, malaga-costa del sol, parque tecnologico de andalucia, campanillas]
+  sevilla:
+    label: Sevilla
+    aliases: [sevilla, seville, dos hermanas, alcala de guadaira, utrera, mairena del aljarafe, ecija,
+      la rinconada, los palacios, carmona, coria del rio, tomares, san juan de aznalfarache, lebrija,
+      moron de la frontera, camas, bormujos, espartinas, la algaba, sanlucar la mayor, gines,
+      palomares del rio, mairena del alcor]
+  cordoba:
+    label: Córdoba
+    aliases: [cordoba, lucena, puente genil, montilla, priego de cordoba, cabra, palma del rio, baena,
+      pozoblanco]
+  jaen:
+    label: Jaén
+    aliases: [jaen, linares, andujar, ubeda, martos, alcala la real, baeza, bailen, la carolina,
+      torredonjimeno]
+  almeria:
+    label: Almería
+    aliases: [almeria, roquetas de mar, el ejido, vicar, nijar, adra, huercal-overa]
+  cadiz:
+    label: Cádiz
+    aliases: [cadiz, jerez, jerez de la frontera, algeciras, san fernando, el puerto de santa maria,
+      chiclana de la frontera, sanlucar de barrameda, la linea de la concepcion, puerto real, rota,
+      arcos de la frontera, barbate, conil de la frontera, medina-sidonia]
+  huelva:
+    label: Huelva
+    aliases: [huelva, lepe, almonte, moguer, isla cristina, ayamonte, aljaraque, cartaya]
   andalucia:
     label: Andalucía
     aliases: [andalucia, andalusia, almeria, cadiz, cordoba, granada, huelva, jaen, malaga, sevilla,
@@ -45,6 +93,14 @@ ubicaciones:
   barcelona:
     label: Barcelona
     aliases: [barcelona, hospitalet, badalona, sabadell, terrassa, sant cugat, cornella, l'hospitalet]
+  valencia:
+    label: Valencia
+    aliases: [valencia, valència, comunidad valenciana, alicante, alacant, castellon, castello, elche,
+      gandia, torrevieja, benidorm, paterna, torrent, sagunto, burjassot]
+  pais_vasco:
+    label: País Vasco
+    aliases: [pais vasco, euskadi, bilbao, vitoria, gasteiz, san sebastian, donostia, getxo, barakaldo,
+      irun, alava, araba, guipuzcoa, gipuzkoa, vizcaya, bizkaia]
   espana:
     label: España
     aliases: [espana, spain, madrid, barcelona, valencia, sevilla, seville, malaga, bilbao, zaragoza,
@@ -61,6 +117,15 @@ ubicaciones:
       merida, aranjuez, elche, cartagena, torrejon de ardoz, fuenlabrada, alcorcon, parla, sant boi,
       mataro, reus, gandia, torrevieja, benidorm, ponferrada, ferrol, santiago de compostela, getxo,
       barakaldo, irun, donostia, ibiza, menorca, mallorca, lanzarote, fuerteventura]
+  europa:
+    label: Europa
+    # Incluye España (spain/espana en la ubicación) y los países europeos de otras_ubicaciones.
+    aliases: [europa, europe, eu, emea, spain, espana, portugal, lisboa, lisbon, porto, oporto, france,
+      francia, paris, lyon, germany, alemania, berlin, munich, munchen, hamburg, frankfurt, italy,
+      italia, milan, milano, rome, roma, united kingdom, uk, london, londres, ireland, irlanda, dublin,
+      netherlands, paises bajos, amsterdam, belgium, belgica, brussels, bruselas, switzerland, suiza,
+      zurich, poland, polonia, warsaw, krakow, romania, bucharest, czech, prague, praga, austria,
+      vienna, sweden, stockholm, denmark, copenhagen, norway, oslo, finland, helsinki]
 # Lugares fuera de España: si la ubicación nombra uno de ellos (o un lugar de otra entrada del
 # catálogo), no encaja con búsquedas de otras ubicaciones. Lo que no se reconoce, pasa.
 otras_ubicaciones: [portugal, lisboa, lisbon, porto, oporto, france, francia, paris, lyon, germany,

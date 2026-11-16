@@ -161,12 +161,276 @@ administracion:
   - backoffice
   - oficina
   - office
-  - contabilidad
-  - accounting
+  - auxiliar administrativo
+  - secretaria
+  - recepción
+finanzas:
   - finanzas
   - finance
+  - financiero
+  - financial
+  - contabilidad
+  - contable
+  - accounting
+  - accountant
+  - auditoría
+  - audit
+  - auditor
+  - controller
+  - control de gestión
+  - tesorería
+  - treasury
+  - fiscal
+  - tax
+  - banca
+  - banking
+  - economista
+  - risk analyst
+  - analista de riesgos
+rrhh:
   - rrhh
   - recursos humanos
+  - human resources
+  - hr
+  - talent acquisition
+  - recruiter
+  - recruitment
+  - reclutamiento
+  - selección
+  - técnico de selección
+  - nóminas
+  - payroll
+  - people partner
+ventas:
+  - ventas
+  - sales
+  - comercial
+  - vendedor
+  - dependiente
+  - account executive
+  - account manager
+  - key account
+  - business development
+  - desarrollo de negocio
+  - sdr
+  - bdr
+  - preventa
+  - presales
+  - retail
+  - inside sales
+atencion_cliente:
+  - atención al cliente
+  - customer service
+  - customer support
+  - customer success
+  - customer care
+  - soporte al cliente
+  - call center
+  - contact center
+  - teleoperador
+  - recepcionista
+  - gestor de clientes
+ingenieria:
+  - ingeniería
+  - engineering
+  - ingeniero industrial
+  - ingeniería industrial
+  - ingeniero mecánico
+  - ingeniería mecánica
+  - mechanical engineer
+  - ingeniero eléctrico
+  - electrical engineer
+  - ingeniero químico
+  - chemical engineer
+  - industrial
+  - mantenimiento
+  - maintenance
+  - manufacturing
+  - fabricación
+  - procesos
+  - process engineer
+  - automatización
+  - automation
+  - energía
+  - energy
+  - renovables
+  - aeronáutica
+  - aerospace
+  - calidad industrial
+electronica:
+  - electrónica
+  - electronics
+  - telecomunicaciones
+  - telecommunications
+  - telecom
+  - telco
+  - embedded
+  - embebidos
+  - firmware
+  - hardware
+  - iot
+  - robótica
+  - robotics
+  - fpga
+  - pcb
+  - radiofrecuencia
+producto:
+  - producto
+  - product manager
+  - product owner
+  - product analyst
+  - project manager
+  - gestión de proyectos
+  - jefe de proyecto
+  - project management
+  - pmo
+  - scrum master
+  - business analyst
+  - analista de negocio
+  - analista funcional
+consultoria:
+  - consultoría
+  - consultor
+  - consultant
+  - consulting
+  - advisory
+  - asesor
+  - asesoría
+logistica:
+  - logística
+  - logistics
+  - supply chain
+  - cadena de suministro
+  - compras
+  - purchasing
+  - procurement
+  - almacén
+  - warehouse
+  - operaciones
+  - operations
+  - transporte
+  - comercio exterior
+  - import export
+  - aduanas
+legal:
+  - legal
+  - jurídico
+  - abogado
+  - lawyer
+  - paralegal
+  - derecho
+  - law
+  - compliance
+  - cumplimiento normativo
+  - protección de datos
+comunicacion:
+  - comunicación
+  - communications
+  - periodismo
+  - periodista
+  - journalist
+  - prensa
+  - relaciones públicas
+  - public relations
+  - copywriter
+  - redactor
+  - audiovisual
+  - editor de vídeo
+  - video editor
+educacion:
+  - educación
+  - education
+  - profesor
+  - docente
+  - teacher
+  - tutor
+  - formador
+  - monitor
+  - edtech
+  - pedagogía
+  - enseñanza
+  - orientador
+salud:
+  - salud
+  - sanitario
+  - health
+  - healthcare
+  - enfermería
+  - enfermero
+  - nurse
+  - médico
+  - medical
+  - farmacia
+  - farmacéutico
+  - pharma
+  - pharmaceutical
+  - fisioterapeuta
+  - clínico
+  - clinical
+  - psicólogo
+  - nutricionista
+ciencia:
+  - laboratorio
+  - laboratory
+  - lab
+  - investigación
+  - research
+  - researcher
+  - investigador
+  - i+d
+  - r&d
+  - biotecnología
+  - biotech
+  - biología
+  - biology
+  - química
+  - chemistry
+  - químico
+  - científico
+  - scientist
+  - ciencias ambientales
+  - medio ambiente
+hosteleria:
+  - hostelería
+  - hospitality
+  - turismo
+  - tourism
+  - hotel
+  - cocina
+  - cocinero
+  - chef
+  - camarero
+  - waiter
+  - eventos
+  - events
+  - travel
+  - viajes
+  - guía turístico
+arquitectura:
+  - arquitectura
+  - arquitecto
+  - construcción
+  - construction
+  - jefe de obra
+  - obra civil
+  - ingeniero civil
+  - ingeniería civil
+  - civil engineer
+  - urbanismo
+  - delineante
+  - bim
+  - autocad
+  - interiorismo
+  - topografía
+videojuegos:
+  - videojuegos
+  - videojuego
+  - game developer
+  - game designer
+  - game design
+  - gaming
+  - unity
+  - unreal
 remoto:
   - remoto
   - remote

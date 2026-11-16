@@ -62,7 +62,8 @@ def derive_terms(searches: list[Search], syn: Synonyms, catalog: Catalog) -> lis
             if en is None and len(members) > 1:
                 en = members[1] if members[0] == es else members[0]
             label = catalog.tipos.get(fold(key)) or catalog.areas.get(fold(key))
-            if label and es == members[0]:
+            # "Datos / IA" no sirve como término para un portal: solo etiquetas de una pieza
+            if label and "/" not in label and es == members[0]:
                 es = label.lower()
             for t in (es, en):
                 if t and t not in out:
