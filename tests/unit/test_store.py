@@ -50,3 +50,15 @@ def test_fusion_ventana_30_dias():
     s.upsert([o("Trainee Java", "https://a.com/1")], NOW - timedelta(days=40))
     r = s.upsert([o("Trainee Java 2", "https://a.com/2")], NOW)  # distinta clave y fuera de ventana
     assert len(r.new_jobs) == 1
+
+
+def test_pending_digest_only_unnotified_matches():
+    s = Store(":memory:")
+    res = s.upsert([JobOffer(title=f"Becario {n}", url=f"https://a.com/{n}", source="x", company=f"C{n}")
+                    for n in "abc"], NOW)
+    a, b, c = (j.id for j in res.new_jobs)
+    s.set_decision(a, Decision(matched=["s"], priority="alta", reasons=[]))
+    s.set_decision(b, Decision(matched=["s"], priority="normal", reasons=[]))
+    s.set_decision(c, Decision(matched=[], reasons=["no"]))
+    s.mark_notified(a, 1, NOW)
+    assert [j.id for j in s.pending_digest()] == [b]

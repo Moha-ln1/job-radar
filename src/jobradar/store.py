@@ -230,3 +230,9 @@ class Store:
         rows = self.db.execute(
             "SELECT * FROM source_runs WHERE source=? ORDER BY id DESC LIMIT ?", (source, n))
         return [dict(r) | {"ok": bool(r["ok"])} for r in rows]
+
+    def pending_digest(self) -> list[Job]:
+        """Ofertas que encajan y aún no se han avisado (para el resumen diario)."""
+        rows = self.db.execute(
+            "SELECT * FROM jobs WHERE status='avisada' AND notified_at IS NULL ORDER BY first_seen, id")
+        return [self._job(r) for r in rows]
