@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import getpass
+import json
 import logging
 import os
+import re
 import subprocess
 import sys
 from datetime import datetime, timezone
@@ -191,7 +194,21 @@ def cmd_telegram(args, paths: Paths) -> int:
         return 1
     for cid, name in found.items():
         _p(f"chat_id: {cid}  ({name})")
-    _p("Copia el chat_id en TELEGRAM_CHAT_ID dentro de .env.")
+    if not args.save:
+        _p("Copia el chat_id en TELEGRAM_CHAT_ID dentro de .env (o ejecuta con --save).")
+        return 0
+    chosen = next(iter(found))
+    if len(found) > 1:
+        if not sys.stdin.isatty():
+            _p("Hay varios chats: ejecútalo en una terminal para elegir, o copia el chat_id a mano.")
+            return 1
+        import questionary
+        chosen = questionary.select("¿Cuál es tu chat?", choices=[
+            questionary.Choice(f"{name} ({cid})", value=cid) for cid, name in found.items()]).ask()
+        if chosen is None:
+            return 130
+    _env_set(paths, "TELEGRAM_CHAT_ID", str(chosen))
+    _p(f"TELEGRAM_CHAT_ID guardado en {paths.env.name}.")
     return 0
 
 
@@ -298,12 +315,113 @@ def cmd_digest(args, paths: Paths) -> int:
 
 
 def cmd_configurar(args, paths: Paths) -> int:
-    try:
-        from jobradar.wizard import main as wizard_main
-    except ImportError:
-        _p("El asistente 'configurar' estará disponible en la fase 6.")
+    from jobradar.wizard import main as wizard_main
+    return wizard_main(paths) or 0
+
+
+# --- .env ---
+_ENV_KEY = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
+
+
+def _ensure_env(paths: Paths) -> None:
+    if paths.env.exists():
+        return
+    example = paths.root / ".env.example"
+    paths.env.write_text(example.read_text(encoding="utf-8") if example.exists() else "", encoding="utf-8")
+
+
+def _env_set(paths: Paths, key: str, value: str) -> None:
+    """Escribe KEY=value en .env sustituyendo la línea existente (sin tocar el resto)."""
+    _ensure_env(paths)
+    lines = paths.env.read_text(encoding="utf-8").splitlines()
+    new = f"{key}={value}"
+    for i, line in enumerate(lines):
+        if re.match(rf"\s*{re.escape(key)}\s*=", line):
+            lines[i] = new
+            break
+    else:
+        lines.append(new)
+    paths.env.write_text("\n".join(lines) + "\n", encoding="utf-8")
+
+
+def cmd_env(args, paths: Paths) -> int:
+    if not _ENV_KEY.fullmatch(args.key):
+        _p("Error: nombre de variable no válido.")
+        return 2
+    key = args.key.upper()
+    value = getpass.getpass(f"Valor de {key} (no se muestra): ").strip()
+    if not value:
+        _p("Valor vacío: no se ha guardado nada.")
         return 1
-    return wizard_main() or 0
+    _env_set(paths, key, value)
+    _p(f"{key} guardado en {paths.env.name}.")
+    return 0
+
+
+# --- autoarranque ---
+def cmd_autostart(args, paths: Paths) -> int:
+    from jobradar import autostart
+    if args.accion == "on":
+        _p(autostart.enable(paths, args.dry_run))
+    elif args.accion == "off":
+        _p(autostart.disable(paths, args.dry_run))
+    else:
+        _p("Autoarranque: " + ("activado" if autostart.is_enabled() else "desactivado"))
+    return 0
+
+
+# --- ATS ---
+def _add_company(config_path, entry: dict) -> bool:
+    """Añade una línea a `companies:` conservando el resto del archivo; False si ya estaba."""
+    def q(v: str) -> str:
+        return v if re.fullmatch(r"[\w .-]+", v) else json.dumps(v, ensure_ascii=False)
+    text = config_path.read_text(encoding="utf-8")
+    if re.search(rf"ats:\s*{re.escape(entry['ats'])}\s*,\s*slug:\s*[\"']?{re.escape(entry['slug'])}[\"']?\s*}}", text):
+        return False
+    line = f"  - {{name: {q(entry['name'])}, ats: {entry['ats']}, slug: {q(entry['slug'])}}}"
+    lines = text.splitlines()
+    start = next((i for i, l in enumerate(lines) if re.match(r"companies\s*:", l)), None)
+    if start is None:
+        lines += ["", "companies:", line]
+    else:
+        last = start
+        for i in range(start + 1, len(lines)):
+            if re.match(r"\s+-\s", lines[i]):
+                last = i
+            elif lines[i].strip() and not lines[i].lstrip().startswith("#") and not lines[i].startswith(" "):
+                break
+        lines.insert(last + 1, line)
+    config_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return True
+
+
+def cmd_ats(args, paths: Paths) -> int:
+    from jobradar.ats_detect import detect_url
+    from jobradar.http import Http
+
+    async def run():
+        async with Http() as http:
+            return await detect_url(http, args.url)
+    try:
+        found = asyncio.run(run())
+    except Exception as exc:  # red caída, 404...
+        _p(f"Error al descargar la página: {exc}")
+        return 1
+    if not found:
+        _p("No se reconoce el ATS de esa web. Soportados: Greenhouse, Lever, Ashby, SmartRecruiters, "
+           "Workday, Recruitee, Personio y Teamtailor.")
+        return 1
+    _p(f"Detectado: {found['name']} · {found['ats']} · {found['slug']}")
+    if args.add:
+        if not paths.config.exists():
+            _p("Error: no existe config.yaml (cópialo de config.example.yaml).")
+            return 2
+        _p("Añadida a config.yaml (companies)." if _add_company(paths.config, found)
+           else "Esa empresa ya estaba en config.yaml.")
+    else:
+        _p("Añádela con --add o pegando en config.yaml: "
+           f"- {{name: {found['name']}, ats: {found['ats']}, slug: {found['slug']}}}")
+    return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -335,13 +453,26 @@ def build_parser() -> argparse.ArgumentParser:
     probar.add_argument("texto")
     p = add("telegram", cmd_telegram, "Utilidades de Telegram")
     tsub = p.add_subparsers(dest="accion", required=True, metavar="acción")
-    tsub.add_parser("chat-id", help="muestra tu chat_id (escribe /start a tu bot antes)")
+    cid = tsub.add_parser("chat-id", help="muestra tu chat_id (escribe /start a tu bot antes)")
+    cid.add_argument("--save", action="store_true", help="guarda el chat_id en .env")
     tsub.add_parser("test", help="envía un mensaje de prueba")
     add("run", cmd_run, "Arranca el bot y el programador")
     add("stop", cmd_stop, "Para jobradar")
     add("status", cmd_status, "Estado de jobradar")
     add("digest", cmd_digest, "Envía ahora el resumen de pendientes")
     add("configurar", cmd_configurar, "Asistente de instalación")
+    p = add("env", cmd_env, "Guarda un secreto en .env")
+    esub = p.add_subparsers(dest="accion", required=True, metavar="acción")
+    eset = esub.add_parser("set", help="pide el valor (oculto) y lo guarda")
+    eset.add_argument("key")
+    p = add("autostart", cmd_autostart, "Arranque automático al iniciar sesión")
+    p.add_argument("accion", choices=["on", "off", "status"])
+    p.add_argument("--dry-run", action="store_true", help="solo muestra lo que haría")
+    p = add("ats", cmd_ats, "Detecta el ATS de la web de empleo de una empresa")
+    asub = p.add_subparsers(dest="accion", required=True, metavar="acción")
+    det = asub.add_parser("detect", help="detecta el ATS de una URL")
+    det.add_argument("url")
+    det.add_argument("--add", action="store_true", help="añade la empresa a config.yaml")
     return parser
 
 
