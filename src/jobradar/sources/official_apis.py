@@ -12,7 +12,7 @@ from jobradar.sources import SourceContext
 
 _log = logging.getLogger("jobradar.sources")
 _TAGS = re.compile(r"<[^>]*>")
-_MAX_TERMS, _MAX_LOCATIONS = 4, 2
+_MAX_TERMS, _MAX_LOCATIONS = 4, 3
 
 
 def _clean(text: str | None) -> str | None:

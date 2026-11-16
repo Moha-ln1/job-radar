@@ -22,7 +22,7 @@ from .store import Job, Posting, Store
 _log = logging.getLogger("jobradar.radar")
 _DATA = Path(__file__).parent / "data"
 MAX_TERMS = 8
-_ES_END = ("dor", "dora", "ario", "aria", "cion", "as", "os", "ista", "dad", "ica", "ico")
+_ES_END = ("dor", "dora", "ario", "aria", "cion", "as", "os", "ista", "dad", "ica", "ico", "iva", "ivo")
 
 
 @dataclass
@@ -47,27 +47,37 @@ def _looks_spanish(term: str) -> bool:
     return term.endswith(_ES_END) or " de " in term
 
 
+def _key_terms(key: str, syn: Synonyms, catalog: Catalog) -> tuple[str, str | None]:
+    """(término principal, equivalente en inglés) de un tipo o área."""
+    members = syn.expand(key)
+    es = next((m for m in members if _looks_spanish(m)), members[0])
+    label = catalog.tipos.get(fold(key)) or catalog.areas.get(fold(key))
+    # "Datos / IA" no sirve como término para un portal: solo etiquetas de una pieza
+    primary = label.lower() if label and "/" not in label else es
+    def other(m: str) -> bool:  # distinto de verdad ("boot camp" es "bootcamp" con un espacio)
+        return fold(m).replace(" ", "").replace("-", "") != fold(primary).replace(" ", "").replace("-", "")
+    en = next((m for m in members if other(m) and not _looks_spanish(m) and len(m) > 2), None)
+    if en is None:
+        en = next((m for m in members if other(m)), None)
+    return primary, en
+
+
 def derive_terms(searches: list[Search], syn: Synonyms, catalog: Catalog) -> list[str]:
-    """Término principal en español e inglés de cada tipo/área de las búsquedas activas."""
+    """Términos para los buscadores de los portales, del más al menos importante.
+
+    Los portales solo usan los primeros (LinkedIn, 5): van antes los principales de cada tipo
+    (prácticas, trainee, junior...), luego sus equivalentes en inglés y al final las áreas."""
+    active = [s for s in searches if not s.paused]
     out: list[str] = []
-    for s in searches:
-        if s.paused:
-            continue
-        for key in [*s.tipos, *s.areas]:
-            if fold(key) == "cualquiera":
-                continue
-            members = syn.expand(key)
-            es = next((m for m in members if _looks_spanish(m)), members[0])
-            en = next((m for m in members if m != es and not _looks_spanish(m)), None)
-            if en is None and len(members) > 1:
-                en = members[1] if members[0] == es else members[0]
-            label = catalog.tipos.get(fold(key)) or catalog.areas.get(fold(key))
-            # "Datos / IA" no sirve como término para un portal: solo etiquetas de una pieza
-            if label and "/" not in label and es == members[0]:
-                es = label.lower()
-            for t in (es, en):
-                if t and t not in out:
-                    out.append(t)
+    for field_name in ("tipos", "areas"):
+        keys = list(dict.fromkeys(k for s in active for k in getattr(s, field_name)
+                                  if fold(k) != "cualquiera"))
+        order = list(catalog.tipos if field_name == "tipos" else catalog.areas)
+        keys.sort(key=lambda k: order.index(k) if k in order else len(order))  # orden del catálogo
+        pairs = [_key_terms(k, syn, catalog) for k in keys]
+        for t in [p for p, _ in pairs] + [e for _, e in pairs]:
+            if t and t not in out:
+                out.append(t)
     return out[:MAX_TERMS]
 
 

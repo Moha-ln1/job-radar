@@ -69,6 +69,18 @@ def test_derive_terms_y_locations():
     assert derive_locations([], cat) == ["España"]
 
 
+def test_derive_terms_pone_primero_cada_tipo():
+    # LinkedIn solo usa los primeros: los cuatro tipos deben ir delante, aunque haya muchas búsquedas
+    syn = Synonyms.from_files(DATA / "sinonimos.yaml")
+    cat = Catalog.from_file(DATA / "catalogo.yaml")
+    searches = [Search(id="a", name="a", tipos=["bootcamp"]),
+                Search(id="b", name="b", tipos=["practicas", "trainee"], areas=["programador", "data"]),
+                Search(id="c", name="c", tipos=["junior"], areas=["sistemas"])]
+    terms = derive_terms(searches, syn, cat)
+    assert terms[:5] == ["prácticas", "trainee", "bootcamp", "junior", "intern"]
+    assert "boot camp" not in terms
+
+
 def test_due_sources():
     store = Store(":memory:")
     settings = Settings(sources={"a": {"enabled": True}, "b": {"enabled": True, "min_interval_hours": 6},

@@ -58,6 +58,9 @@ def format_job(job, postings, matched_names: list[str]) -> str:
         head += f" · {escape(job.location)}"
     if job.modality:
         head += f" ({_MODALITY.get(job.modality, escape(job.modality))})"
+    elif job.location:
+        # La oferta pasa los filtros de modalidad por no indicarla (ante la duda, se incluye): que se vea
+        head += " (modalidad sin indicar)"
     lines = [head]
     if matched_names:
         lines.append("🔎 Búsqueda: " + escape(", ".join(matched_names)))

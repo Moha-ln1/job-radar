@@ -168,8 +168,8 @@ async def test_linkedin_respeta_max_pages_y_limita_combinaciones():
 
     await run(hp.fetch_linkedin, handler, terms=list("abcdef"), locations=["Granada", "España", "Madrid"],
               sources={"linkedin": {"max_pages": 2}})
-    assert len(seen) == 4 * 2 * 2
-    assert {s[0] for s in seen} == set("abcd") and {s[1] for s in seen} == {"Granada, Spain", "Spain"}
+    assert len(seen) == 5 * 3 * 2  # 5 términos × 3 ubicaciones × 2 páginas
+    assert {s[0] for s in seen} == set("abcde") and {s[1] for s in seen} == {"Granada, Spain", "Spain", "Madrid, Spain"}
 
 
 async def test_linkedin_bloqueo_se_propaga():

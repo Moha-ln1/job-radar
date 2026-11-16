@@ -106,6 +106,21 @@ data:
   - inteligencia artificial
   - big data
   - analytics
+  - ml
+  - ai
+  - ia
+  - ml engineer
+  - ai engineer
+  - ingeniero de ia
+  - mlops
+  - deep learning
+  - computer vision
+  - visión por computador
+  - visión artificial
+  - nlp
+  - llm
+  - ia generativa
+  - generative ai
 ciberseguridad:
   - ciberseguridad
   - cybersecurity
@@ -122,6 +137,14 @@ sistemas:
   - sre
   - infraestructura
   - cloud
+  - aws
+  - azure
+  - gcp
+  - google cloud
+  - kubernetes
+  - docker
+  - linux
+  - platform engineer
   # "redes" sola no: casaba con "Redes Sociales" (marketing)
   - técnico de redes
   - administrador de redes

@@ -12,7 +12,7 @@ http:
   timeout_seconds: 20
 
 sources:
-  linkedin:      {enabled: true, max_pages: 2, min_interval_hours: 4, timeout_seconds: 120}   # uso bajo tu responsabilidad, ver README
+  linkedin:      {enabled: true, max_pages: 2, min_interval_hours: 4, timeout_seconds: 240}   # uso bajo tu responsabilidad, ver README
   infojobs:      {enabled: true, min_interval_hours: 6, timeout_seconds: 60}   # sin API oficial disponible: menos frecuencia = menos bloqueos
   tecnoempleo:   {enabled: true}
   infoempleo:    {enabled: true}

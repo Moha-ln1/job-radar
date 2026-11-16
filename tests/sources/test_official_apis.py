@@ -60,7 +60,7 @@ async def test_adzuna_peticion_y_topes():
 
     offers = await run(oa.fetch_adzuna, handler, terms=list("abcdef"), locations=["Granada", "España", "Madrid"],
                        env={"ADZUNA_APP_ID": "i", "ADZUNA_APP_KEY": "k"})
-    assert len(seen) == 8 and len(offers) == 2
+    assert len(seen) == 4 * 3 and len(offers) == 2  # 4 términos × 3 ubicaciones
     u = seen[0]
     assert u.host == "api.adzuna.com" and u.path == "/v1/api/jobs/es/search/1"
     assert dict(u.params) == {"app_id": "i", "app_key": "k", "what": "a", "where": "Granada",
