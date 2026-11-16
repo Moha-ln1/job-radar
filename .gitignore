@@ -1,0 +1,23 @@
+# Secretos y datos personales: NUNCA al repo
+.env
+config.yaml
+busquedas.yaml
+sinonimos_usuario.yaml
+*.db
+*.db-journal
+logs/
+export/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+build/
+dist/
+
+# Herramientas
+graphify-out/
+.vscode/
+.idea/

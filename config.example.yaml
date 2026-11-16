@@ -1,0 +1,37 @@
+# Ajustes técnicos. Las búsquedas NO se configuran aquí: se crean con botones
+# (bot de Telegram: /busquedas, o el asistente: jobradar configurar).
+
+scan:
+  every_hours: 2
+  digest_time: "09:00"
+  max_age_days: 14
+
+http:
+  delay_seconds: [1, 3]      # pausa aleatoria entre peticiones al mismo dominio
+  timeout_seconds: 20
+
+sources:
+  linkedin:      {enabled: true, max_pages: 3}   # uso bajo tu responsabilidad, ver README
+  infojobs:      {enabled: true}
+  tecnoempleo:   {enabled: true}
+  infoempleo:    {enabled: true}
+  primerempleo:  {enabled: true}
+  ats:           {enabled: true}
+  remotive:      {enabled: true, min_interval_hours: 6}
+  remoteok:      {enabled: true}
+  weworkremotely: {enabled: true}
+  himalayas:     {enabled: true}
+  arbeitnow:     {enabled: false}
+  watch:         {enabled: true}
+
+# Webs de empleo de empresas (añádelas con: jobradar ats detect <url>)
+companies:
+  - {name: GitLab, ats: greenhouse, slug: gitlab}
+  - {name: Accenture, ats: workday, slug: "accenture.wd103/AccentureCareers"}
+  - {name: Bosch, ats: smartrecruiters, slug: BoschGroup}
+
+# Páginas de programas sin listado de ofertas: se avisa cuando aparece algo nuevo
+watch:
+  - {name: Factoría F5, url: "https://factoriaf5.org/"}
+  - {name: Generation Spain, url: "https://spain.generation.org/"}
+  - {name: 42 Málaga, url: "https://42malaga.com/"}
