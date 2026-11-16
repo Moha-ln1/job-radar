@@ -23,6 +23,17 @@ _SOCIAL = {
 _FORMS = {"typeform.com", "forms.gle", "docs.google.com", "eventbrite.es", "eventbrite.com", "hubspot.com", "hsforms.com"}
 _STATIC = re.compile(
     r"\.(?:pdf|zip|rar|docx?|xlsx?|pptx?|png|jpe?g|gif|svg|webp|ico|css|js|mp[34]|xml|json)$", re.I)
+# Páginas institucionales que cambian a menudo pero nunca son una convocatoria (noticias, prensa,
+# contacto, legal...). Se descartan salvo que el texto del enlace hable de inscribirse o de un programa.
+_INSTITUTIONAL = re.compile(
+    r"/(?:news|newsroom|noticias?|press|prensa|blog|author|autor|tag|category|categoria|contact[oa]?|"
+    r"transparencia|licitaci[oó]n[^/]*|empleadores|empresas|financiadores|partners|alianzas[^/]*|"
+    r"colaborador[^/]*|faqs?|preguntas-frecuentes|privac[^/]*|cookies?|aviso-legal|legal|"
+    r"terminos[^/]*|politica[^/]*|about|sobre-nosotros|quienes-somos|equipo|team|donar|donate|"
+    r"voluntari[^/]*|login|wp-login\.php)(?:/|$)", re.IGNORECASE)
+_CALL_TEXT = re.compile(
+    r"(?<![a-záéíóúñ])(?:inscri|plaza|plazo|convocatoria|candidatur|ap[uú]ntate|matr[ií]cula|beca|"
+    r"pr[aá]cticas|bootcamp|nueva edici[oó]n|programa\b.*\btalent|sign[ _-]?up)", re.IGNORECASE)
 _NOISE = ("nav", "header", "footer", "aside", "script", "style", "noscript", "svg")
 _NOISE_ROLES = ("navigation", "banner", "contentinfo")
 
@@ -60,6 +71,8 @@ def _parse_watch(html: str, base_url: str, name: str) -> list[JobOffer]:
             continue
         title = " ".join((a.get_text(" ", strip=True) or a.get("title") or a.get("aria-label") or "").split())
         if len(title) < 3:
+            continue
+        if _INSTITUTIONAL.search(parts.path) and not _CALL_TEXT.search(title):
             continue
         offer = build_offer(title=title, company=None, url=url, source=f"watch:{name}", category="vigilancia")
         if offer is not None:

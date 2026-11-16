@@ -10,6 +10,7 @@ from . import health
 from .config import load_env
 from .dedup import similar
 from .http import SourceBlocked
+from .sources.official_apis import missing_keys
 from .http import Http
 from .models import JobOffer
 from .normalize import norm_company, norm_title
@@ -113,6 +114,9 @@ async def verify(paths: Paths, sample: int = 3, *, fetchers: dict[str, Fetcher] 
         for name, res in results.items():
             if res.error:
                 rows.append(VerifyRow(name, 0, 0.0, 0, False, [f"ERROR: {res.error}"]))
+                continue
+            if not res.offers and missing_keys(name, ctx.env):
+                rows.append(VerifyRow(name, 0, 0.0, 0, True, ["SIN_CLAVE: opcional, ver docs/APIS.md"]))
                 continue
             problems: list[str] = []
             bad = not res.offers

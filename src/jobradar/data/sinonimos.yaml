@@ -122,18 +122,39 @@ sistemas:
   - sre
   - infraestructura
   - cloud
-  - redes
+  # "redes" sola no: casaba con "Redes Sociales" (marketing)
+  - técnico de redes
+  - administrador de redes
+  - redes informáticas
+  - redes y sistemas
+  - sistemas y redes
+  - networking
+  - network engineer
+  - ccna
   - helpdesk
   - help desk
   - soporte técnico
   - it support
+  - técnico informático
+  - informático
+  - informática
+  - soporte informático
+  - it technician
+  - microinformática
+  - cau
 qa:
   - qa
   - quality assurance
   - tester
   - testing
   - test engineer
-  - control de calidad
+  # "control de calidad" va en ingeniería: casi siempre es calidad industrial o alimentaria
+  - qa engineer
+  - qa tester
+  - test automation
+  - automatización de pruebas
+  - pruebas de software
+  - calidad de software
 diseno:
   - diseño
   - diseno
@@ -257,6 +278,7 @@ ingenieria:
   - aeronáutica
   - aerospace
   - calidad industrial
+  - control de calidad
 electronica:
   - electrónica
   - electronics

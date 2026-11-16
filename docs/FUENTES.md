@@ -61,7 +61,18 @@ watch:
   - {name: Mi bootcamp, url: "https://ejemplo.com/convocatorias"}
 ```
 
-JobRadar avisa cuando aparece contenido nuevo en la página. No intenta extraer ofertas de ella.
+JobRadar avisa cuando aparece un enlace nuevo en el contenido principal de la página. No intenta extraer ofertas
+de ella. Se ignoran los menús, las redes sociales y las páginas institucionales (noticias, prensa, contacto,
+licitaciones, legal…), salvo que el texto del enlace hable de inscripción, plazas, plazo, convocatoria o prácticas.
+
+Los enlaces vigilados no pasan por tus búsquedas: llegan todos. Si la página es un portal con ofertas de todo
+tipo (por ejemplo, el de prácticas de una universidad), añade `filtrar: true` para que solo te lleguen los enlaces
+que encajan con tus búsquedas:
+
+```yaml
+watch:
+  - {name: UGR Empleo, url: "https://empleo.ugr.es/", filtrar: true}
+```
 
 ## Desactivar una fuente
 
@@ -79,8 +90,10 @@ Para comprobar qué fuentes hay configuradas y cuándo se ejecutaron por última
 
 - Entre peticiones al mismo dominio hay una pausa aleatoria de 1 a 3 segundos (`http.delay_seconds`).
 - Cada fuente puede tener su propio intervalo mínimo entre consultas (`min_interval_hours`).
-- Si una web responde 403 o 429 (bloqueo o demasiadas peticiones), JobRadar pausa esa fuente hasta el siguiente
-  escaneo y lo muestra en `/estado`. No intenta saltarse el bloqueo.
+- Si una web responde 403 o 429, o devuelve una página anti-bot, JobRadar deja descansar esa fuente 6 h; si vuelve a
+  bloquear, 12 h, 24 h y hasta 48 h. Lo muestra en `/estado` y no intenta saltarse el bloqueo.
+- Las ofertas de más de 14 días se descartan, salvo las de webs de empleo de empresas (`companies:`): esas webs
+  solo muestran ofertas abiertas, así que la fecha de publicación no indica que estén cerradas.
 
 ## Para desarrolladores
 

@@ -58,6 +58,14 @@ def _parse_adzuna(data: dict) -> list[JobOffer]:
     return _dedup(offers)
 
 
+# Claves de .env que necesita cada API; sin ellas la fuente no consulta nada (no es un fallo).
+REQUIRED_KEYS = {"adzuna": ("ADZUNA_APP_ID", "ADZUNA_APP_KEY"), "jooble": ("JOOBLE_API_KEY",)}
+
+
+def missing_keys(name: str, env: dict) -> bool:
+    return any(not env.get(k) for k in REQUIRED_KEYS.get(name, ()))
+
+
 async def fetch_adzuna(ctx: SourceContext) -> list[JobOffer]:
     app_id, app_key = ctx.env.get("ADZUNA_APP_ID"), ctx.env.get("ADZUNA_APP_KEY")
     if not (app_id and app_key):

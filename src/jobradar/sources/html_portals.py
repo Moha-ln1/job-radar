@@ -102,12 +102,31 @@ def _parse_linkedin(html: str) -> list[JobOffer]:
     return _dedup(offers)
 
 
+_li_places: dict[str, str] | None = None
+
+
+def linkedin_location(label: str) -> str:
+    """Nombre de ubicación que LinkedIn entiende. Sin ", Spain" geolocaliza mal: "España" da ofertas
+    de EE. UU., "Sevilla" de Colombia y "Córdoba" de México (comprobado 16/11/2026)."""
+    global _li_places
+    if _li_places is None:
+        from pathlib import Path
+
+        from jobradar.filters import Catalog
+        cat = Catalog.from_file(Path(__file__).resolve().parents[1] / "data" / "catalogo.yaml")
+        _li_places = {}
+        for key, entry in cat.ubicaciones.items():
+            if entry.get("linkedin"):
+                _li_places[fold(key)] = _li_places[fold(entry.get("label", key))] = entry["linkedin"]
+    return _li_places.get(fold(label), label)
+
+
 async def fetch_linkedin(ctx: SourceContext) -> list[JobOffer]:
     max_pages = int(ctx.options("linkedin").get("max_pages", 3))
     base = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
     offers: list[JobOffer] = []
     for term in ctx.terms[:4] or ["prácticas"]:
-        for location in ctx.locations[:2] or [""]:
+        for location in [linkedin_location(loc) for loc in ctx.locations[:2]] or [""]:
             for page in range(max_pages):
                 url = (f"{base}?keywords={quote_plus(term)}&location={quote_plus(location)}"
                        f"&start={page * 10}&f_TPR=r604800")

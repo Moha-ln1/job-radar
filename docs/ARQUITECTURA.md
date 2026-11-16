@@ -103,7 +103,8 @@ Una **búsqueda** tiene los campos Tipo, Área, Modalidad, Ubicación y Avisos (
 - La ubicación solo se aplica a presencial e híbrido; el remoto se filtra por región (España/Europa/Mundial),
   y si no se conoce la región, se incluye.
 - Las exclusiones globales (palabras y empresas) ganan, con las salvedades de 1.1.4.
-- Antigüedad máxima: 14 días (`posted_at`; si no hay, `first_seen`).
+- Antigüedad máxima: 14 días (`posted_at`; si no hay, `first_seen`). No se aplica a las fuentes ATS
+  (`filters.LIVE_BOARDS`): solo listan ofertas abiertas.
 
 ### 4.2 Sinónimos (`src/jobradar/data/sinonimos.yaml`)
 Cada opción del catálogo es un grupo en español e inglés (Prácticas = prácticas, intern, internship, becario/a,

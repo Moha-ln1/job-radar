@@ -207,9 +207,12 @@ async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | N
             if res.error:
                 continue
             up = store.upsert(res.offers, now)
+            # Páginas vigiladas con `filtrar: true` (p. ej. un portal de prácticas con ofertas de todo
+            # tipo): sus enlaces pasan por las búsquedas como cualquier oferta.
+            filtered = {f"watch:{w.get('name')}" for w in settings.watch if w.get("filtrar")}
             for job in up.new_jobs:
                 src = job.first_posting.source if job.first_posting else ""
-                if src.startswith("watch:"):
+                if src.startswith("watch:") and src not in filtered:
                     store.set_decision(job.id, watch_decision(job.offer_view()))
                 else:
                     store.set_decision(job.id, evaluate(job.offer_view(), searches, excl, syn, catalog,

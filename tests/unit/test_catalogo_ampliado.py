@@ -7,11 +7,10 @@ import pytest
 from telegram.error import BadRequest, TimedOut
 
 from jobradar import bot
-from jobradar.filters import evaluate
+from jobradar.filters import Synonyms, evaluate
 from jobradar.models import Exclusions, Search, build_offer
 from jobradar.normalize import fold
 from jobradar.radar import _DATA
-from jobradar.filters import Synonyms
 
 CAT = bot.default_catalog()
 SYN = Synonyms.from_files(_DATA / "sinonimos.yaml", None)
@@ -61,6 +60,60 @@ def test_provinces_include_their_towns_and_reject_others():
     no = build_offer(source="t", url="https://example.com/2", title="Prácticas", location="Sevilla")
     assert evaluate(ok, [s], Exclusions(), SYN, CAT, NOW).ok
     assert not evaluate(no, [s], Exclusions(), SYN, CAT, NOW).ok
+
+
+@pytest.mark.parametrize("location", ["Seattle, Washington, Estados Unidos", "Gran Londres, Inglaterra, Reino Unido",
+                                      "Toronto, Ontario, Canadá", "Dubái, Emiratos Árabes Unidos"])
+def test_linkedin_foreign_locations_in_spanish_are_rejected(location):
+    s = Search(id="s", name="s", tipos=["practicas"], ubicaciones=["espana"])
+    o = build_offer(source="linkedin", url="https://example.com/1", title="Cybersecurity Intern", location=location)
+    assert not evaluate(o, [s], Exclusions(), SYN, CAT, NOW).ok
+
+
+def test_ambiguous_synonyms_fixed():
+    def ok(title, area):
+        o = build_offer(source="t", url="https://example.com/1", title=title)
+        return evaluate(o, [Search(id="s", name="s", areas=[area])], Exclusions(), SYN, CAT, NOW).ok
+    assert not ok("Prácticas Marketing Digital: Web, Redes Sociales, SEO", "sistemas")
+    assert ok("Prácticas Técnico de Redes", "sistemas")
+    assert not ok("Prácticas técnico control de calidad", "qa")
+    assert ok("Prácticas técnico control de calidad", "ingenieria")
+    assert ok("QA Tester Junior", "qa")
+
+
+def test_espana_includes_towns_listed_only_in_provinces():
+    s = Search(id="s", name="s", tipos=["junior"], ubicaciones=["espana"])
+    o = build_offer(source="linkedin", url="https://example.com/1", title="Jr. Software Engineer", location="Tomares")
+    assert evaluate(o, [s], Exclusions(), SYN, CAT, NOW).ok
+    assert "granada ya está incluida" in " ".join(bot.redundancy_notes(
+        {"modalidades": [], "ubicaciones": ["granada", "espana"]}, CAT)).lower()
+
+
+def test_tecnico_informatico_is_sistemas():
+    o = build_offer(source="t", url="https://example.com/1", title="Técnico Informático Junior – Granada")
+    assert evaluate(o, [Search(id="s", name="s", tipos=["junior"], areas=["sistemas"])],
+                    Exclusions(), SYN, CAT, NOW).ok
+
+
+def test_company_boards_are_not_discarded_by_age():
+    old = datetime(2026, 10, 1, tzinfo=timezone.utc)
+    s = [Search(id="s", name="s", tipos=["practicas"])]
+    board = build_offer(source="greenhouse:bitpanda", url="https://example.com/1", title="Intern, Data Engineer",
+                        posted_at=old)
+    portal = build_offer(source="linkedin", url="https://example.com/2", title="Intern, Data Engineer",
+                         posted_at=old)
+    assert evaluate(board, s, Exclusions(), SYN, CAT, NOW).ok
+    assert not evaluate(portal, s, Exclusions(), SYN, CAT, NOW).ok
+
+
+def test_linkedin_location_names():
+    from jobradar.sources.html_portals import linkedin_location
+    assert linkedin_location("España") == "Spain"
+    assert linkedin_location("Sevilla") == "Sevilla, Spain"
+    assert linkedin_location("País Vasco") == "Basque Country, Spain"
+    assert linkedin_location("Lisboa") == "Lisboa"  # texto libre: tal cual
+    for key, entry in CAT.ubicaciones.items():
+        assert entry.get("linkedin"), f"'{key}' sin nombre para LinkedIn"
 
 
 def test_wizard_shows_what_each_option_includes():

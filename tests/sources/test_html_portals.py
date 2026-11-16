@@ -155,7 +155,7 @@ async def test_linkedin_pagina_hasta_tarjetas_menores_de_10():
 
     offers = await run(hp.fetch_linkedin, handler, sources={"linkedin": {"max_pages": 5}})
     assert [p["start"] for p in seen] == ["0", "10"]
-    assert seen[0]["keywords"] == "prácticas" and seen[0]["location"] == "Granada" and seen[0]["f_TPR"] == "r604800"
+    assert seen[0]["keywords"] == "prácticas" and seen[0]["location"] == "Granada, Spain" and seen[0]["f_TPR"] == "r604800"
     assert len(offers) == 14
 
 
@@ -169,7 +169,7 @@ async def test_linkedin_respeta_max_pages_y_limita_combinaciones():
     await run(hp.fetch_linkedin, handler, terms=list("abcdef"), locations=["Granada", "España", "Madrid"],
               sources={"linkedin": {"max_pages": 2}})
     assert len(seen) == 4 * 2 * 2
-    assert {s[0] for s in seen} == set("abcd") and {s[1] for s in seen} == {"Granada", "España"}
+    assert {s[0] for s in seen} == set("abcd") and {s[1] for s in seen} == {"Granada, Spain", "Spain"}
 
 
 async def test_linkedin_bloqueo_se_propaga():

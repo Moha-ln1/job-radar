@@ -286,7 +286,8 @@ async def fetch_ats(ctx: SourceContext) -> list[JobOffer]:
         except SourceBlocked:
             raise
         except Exception as exc:  # una empresa rota no debe tumbar a las demás
-            _log.warning("fallo al leer %s (%s:%s): %s", name, ats, slug, exc)
+            # str() de un timeout de httpx está vacío: el tipo de error dice lo que ha pasado
+            _log.warning("fallo al leer %s (%s:%s): %s", name, ats, slug, str(exc) or type(exc).__name__)
             continue
         offers += found
     return offers

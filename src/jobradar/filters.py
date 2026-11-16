@@ -10,6 +10,8 @@ import yaml
 from .models import Decision, Exclusions, JobOffer, Modality, Search
 from .normalize import fold, norm_company
 
+LIVE_BOARDS = ("greenhouse:", "lever:", "ashby:", "smartrecruiters:", "workday:", "recruitee:",
+               "personio:", "teamtailor:")
 # Ubicaciones demasiado genéricas para descartar una búsqueda por ciudad: se incluyen.
 _GENERIC_LOCATIONS = {"spain", "espana", "europe", "europa", "emea", "remote", "remoto",
                       "hybrid", "hibrido", "worldwide", "anywhere", "global"}
@@ -98,12 +100,16 @@ class Catalog:
     def from_file(cls, path: Path) -> "Catalog":
         return cls(_load_yaml(path))
 
-    def location_terms(self, key: str) -> list[str]:
-        """Alias de una ubicación del catálogo; si no está, el propio texto."""
+    def location_terms(self, key: str, _seen: frozenset = frozenset()) -> list[str]:
+        """Alias de una ubicación del catálogo (más los de las zonas que `incluye`); si no está, el texto."""
         entry = self.ubicaciones.get(fold(key))
-        if entry:
-            return [fold(a) for a in entry.get("aliases", [])] + [fold(key)]
-        return [fold(key)]
+        if not entry:
+            return [fold(key)]
+        terms = [fold(a) for a in entry.get("aliases", [])] + [fold(key)]
+        for sub in entry.get("incluye", []):
+            if sub not in _seen:
+                terms += self.location_terms(sub, _seen | {fold(key)})
+        return list(dict.fromkeys(terms))
 
 
 def detect_modality(offer: JobOffer, syn: Synonyms) -> Modality | None:
@@ -194,7 +200,9 @@ def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Syn
     active = [s for s in searches if not s.paused]
     notes: list[str] = []
 
-    if offer.posted_at is not None:
+    # Los portales de empleo de empresa solo listan ofertas abiertas: una fecha antigua no significa
+    # que esté cerrada (programas de graduados que siguen abiertos meses), así que no se descartan por edad.
+    if offer.posted_at is not None and not offer.source.startswith(LIVE_BOARDS):
         posted = offer.posted_at
         if posted.tzinfo is None:
             posted = posted.replace(tzinfo=timezone.utc)

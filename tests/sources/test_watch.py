@@ -25,8 +25,7 @@ def test_parse_extrae_solo_enlaces_del_contenido_principal():
         ("Reserva tu plaza", "https://pdpython-diciembre-42malaga.eventbrite.es/"),
         ("Reserva tu plaza", "https://ddciber-diciembre-42malaga.eventbrite.es/"),
         ("Descubre más", "https://www.42malaga.com/programa/"),
-        ("Ver mas FAQs", "https://42malaga.com/faqs/"),  # el primero gana: /faqs/#pregunta-3 sin ancla
-        ("Ver mas FAQs", "https://www.42malaga.com/faqs/"),
+        # Las FAQs son páginas institucionales: no se vigilan
     ]
     assert all(o.source == "watch:42 Málaga" and o.category == "vigilancia" and o.company is None for o in offers)
 
@@ -37,6 +36,23 @@ def test_parse_descarta_ruido():
         assert not any(noise in u for u in urls), noise
     assert not any(u.endswith("/ok") for u in urls)  # texto de menos de 3 caracteres
     assert not any("#" in u for u in urls)
+
+
+def test_parse_descarta_paginas_institucionales_salvo_convocatorias():
+    html = ('<body><main>'
+            '<a href="/news/feria-de-empleo/">La feria reúne a mil asistentes</a>'
+            '<a href="/licitacion-publica-2/">Información y pliegos</a>'
+            '<a href="/politica-de-cookies/">Más información</a>'
+            '<a href="/empleadores/">EMPLEADORES</a>'
+            '<a href="/empleadores/">Encuentra talento</a>'
+            '<a href="/noticias/be-talent/">PROGRAMA BE TALENT BBVA</a>'
+            '<a href="/noticias/abierto-plazo-practicas/">ABIERTO PLAZO DE SOLICITUD PARA PRÁCTICAS</a>'
+            '<a href="/news/nueva-edicion/">Nueva edición del programa</a>'
+            '<a href="/programa/">Descubre el programa</a>'
+            '</main></body>')
+    titles = {o.title for o in watch._parse_watch(html, URL, "x")}
+    assert titles == {"ABIERTO PLAZO DE SOLICITUD PARA PRÁCTICAS", "Nueva edición del programa",
+                      "Descubre el programa", "PROGRAMA BE TALENT BBVA"}
 
 
 def test_parse_usa_atributo_title_si_el_enlace_no_tiene_texto():
@@ -55,7 +71,7 @@ async def test_fetch_vigila_cada_pagina_y_sigue_si_una_falla():
                                {"name": "42 Málaga", "url": URL}])
     async with Http(FAST, transport=httpx.MockTransport(handler)) as http:
         offers = await watch.fetch_watch(SourceContext(http=http, settings=settings))
-    assert len(offers) == 7 and {o.source for o in offers} == {"watch:42 Málaga"}
+    assert len(offers) == 5 and {o.source for o in offers} == {"watch:42 Málaga"}
 
 
 async def test_fetch_propaga_bloqueo():

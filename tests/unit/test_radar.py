@@ -100,6 +100,17 @@ async def test_watch_salta_filtros(paths, http):
     assert rep.new_discarded == 1
 
 
+async def test_watch_con_filtrar_pasa_por_las_busquedas(paths, http):
+    (paths.root / "config.yaml").write_text(
+        "sources:\n  a: {enabled: true}\n"
+        "watch:\n  - {name: uni, url: 'https://uni.es/', filtrar: true}\n", encoding="utf-8")
+    ok = offer("Prácticas desarrollador web", "https://uni.es/1", source="watch:uni", company=None)
+    no = offer("Prácticas en escuela infantil", "https://uni.es/2", source="watch:uni", company=None)
+    rep = await scan(paths, NOW, only=["a"], fetchers={"a": fixed(ok, no)}, http=http)
+    assert [j.title for j in rep.new_matched] == ["Prácticas desarrollador web"]
+    assert rep.new_discarded == 1
+
+
 async def test_dry_run_no_escribe(paths, http):
     rep = await scan(paths, NOW, only=["a"], fetchers={"a": fixed(GOOD)}, http=http, dry_run=True)
     assert len(rep.new_matched) == 1

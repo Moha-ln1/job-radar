@@ -59,6 +59,18 @@ async def test_todo_ok(tmp_path):
     assert rows[0].ok and rows[0].mismatches == [] and "OK" in format_table(rows)
 
 
+async def test_api_sin_clave_no_es_fallo(tmp_path):
+    (tmp_path / "config.yaml").write_text("sources:\n  jooble: {enabled: true}\n", encoding="utf-8")
+    save_searches(tmp_path / "busquedas.yaml", [], Exclusions())
+
+    async def fetch(ctx):
+        return []
+    http = Http(HttpSettings(delay_seconds=[0, 0]), transport=httpx.MockTransport(lambda r: httpx.Response(404)))
+    async with http:
+        rows = await verify(Paths(tmp_path), 3, fetchers={"jooble": fetch}, http=http)
+    assert rows[0].ok and "SIN_CLAVE" in rows[0].mismatches[0]
+
+
 def test_detalle_con_prefijos_hiring_coincide():
     from jobradar.verify import _titles_match
     assert _titles_match("Content Creator - YouTube", "[Hiring] Content Creator - YouTube @Metics Media", 0.9)

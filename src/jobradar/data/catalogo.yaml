@@ -33,42 +33,53 @@ areas:
 ubicaciones:
   granada:
     label: Granada
+    linkedin: "Granada, Spain"
     aliases: [granada, armilla, atarfe, maracena, la zubia, ogijares, gojar, churriana de la vega,
       cenes de la vega, peligros, albolote, pulianas, huetor vega, cullar vega, alhendin, las gabias,
       santa fe, vegas del genil, pinos puente, otura, dilar, monachil, huetor santillan,
       motril, almunecar, baza, guadix, loja, salobrena, iznalloz, alhama de granada, huescar]
   malaga:
     label: Málaga
+    linkedin: "Málaga, Spain"
     aliases: [malaga, marbella, estepona, mijas, fuengirola, velez-malaga, torremolinos, benalmadena,
       rincon de la victoria, antequera, alhaurin de la torre, alhaurin el grande, ronda, nerja, coin,
       cartama, manilva, malaga-costa del sol, parque tecnologico de andalucia, campanillas]
   sevilla:
     label: Sevilla
+    linkedin: "Sevilla, Spain"
     aliases: [sevilla, seville, dos hermanas, alcala de guadaira, utrera, mairena del aljarafe, ecija,
       la rinconada, los palacios, carmona, coria del rio, tomares, san juan de aznalfarache, lebrija,
       moron de la frontera, camas, bormujos, espartinas, la algaba, sanlucar la mayor, gines,
       palomares del rio, mairena del alcor]
   cordoba:
     label: Córdoba
+    linkedin: "Córdoba, Spain"
     aliases: [cordoba, lucena, puente genil, montilla, priego de cordoba, cabra, palma del rio, baena,
       pozoblanco]
   jaen:
     label: Jaén
+    linkedin: "Jaén, Spain"
     aliases: [jaen, linares, andujar, ubeda, martos, alcala la real, baeza, bailen, la carolina,
       torredonjimeno]
   almeria:
     label: Almería
+    linkedin: "Almería, Spain"
     aliases: [almeria, roquetas de mar, el ejido, vicar, nijar, adra, huercal-overa]
   cadiz:
     label: Cádiz
+    linkedin: "Cádiz, Spain"
     aliases: [cadiz, jerez, jerez de la frontera, algeciras, san fernando, el puerto de santa maria,
       chiclana de la frontera, sanlucar de barrameda, la linea de la concepcion, puerto real, rota,
       arcos de la frontera, barbate, conil de la frontera, medina-sidonia]
   huelva:
     label: Huelva
+    linkedin: "Huelva, Spain"
     aliases: [huelva, lepe, almonte, moguer, isla cristina, ayamonte, aljaraque, cartaya]
   andalucia:
     label: Andalucía
+    linkedin: "Andalusia, Spain"
+    # Zonas contenidas: sus municipios cuentan también aquí
+    incluye: [granada, malaga, sevilla, cordoba, jaen, almeria, cadiz, huelva]
     aliases: [andalucia, andalusia, almeria, cadiz, cordoba, granada, huelva, jaen, malaga, sevilla,
       seville, marbella, jerez, algeciras, dos hermanas, estepona,
       # Municipios grandes por provincia (los no listados se incluyen igualmente: ubicación desconocida pasa)
@@ -88,21 +99,28 @@ ubicaciones:
       parque tecnologico de andalucia, campanillas]
   madrid:
     label: Madrid
+    linkedin: "Madrid, Spain"
     aliases: [madrid, alcobendas, getafe, mostoles, alcala de henares, leganes, pozuelo, las rozas,
       majadahonda, tres cantos, boadilla del monte]
   barcelona:
     label: Barcelona
+    linkedin: "Barcelona, Spain"
     aliases: [barcelona, hospitalet, badalona, sabadell, terrassa, sant cugat, cornella, l'hospitalet]
   valencia:
     label: Valencia
+    linkedin: "Valencian Community, Spain"
     aliases: [valencia, valència, comunidad valenciana, alicante, alacant, castellon, castello, elche,
       gandia, torrevieja, benidorm, paterna, torrent, sagunto, burjassot]
   pais_vasco:
     label: País Vasco
+    linkedin: "Basque Country, Spain"
     aliases: [pais vasco, euskadi, bilbao, vitoria, gasteiz, san sebastian, donostia, getxo, barakaldo,
       irun, alava, araba, guipuzcoa, gipuzkoa, vizcaya, bizkaia]
   espana:
     label: España
+    linkedin: "Spain"
+    # Zonas contenidas: sus municipios cuentan también aquí
+    incluye: [andalucia, madrid, barcelona, valencia, pais_vasco]
     aliases: [espana, spain, madrid, barcelona, valencia, sevilla, seville, malaga, bilbao, zaragoza,
       murcia, alicante, granada, cordoba, valladolid, vigo, gijon, oviedo, a coruna, vitoria, pamplona,
       san sebastian, santander, palma, las palmas, tenerife, almeria, cadiz, huelva, jaen, salamanca,
@@ -119,6 +137,9 @@ ubicaciones:
       barakaldo, irun, donostia, ibiza, menorca, mallorca, lanzarote, fuerteventura]
   europa:
     label: Europa
+    linkedin: "European Union"
+    # Zonas contenidas: sus municipios cuentan también aquí
+    incluye: [espana]
     # Incluye España (spain/espana en la ubicación) y los países europeos de otras_ubicaciones.
     aliases: [europa, europe, eu, emea, spain, espana, portugal, lisboa, lisbon, porto, oporto, france,
       francia, paris, lyon, germany, alemania, berlin, munich, munchen, hamburg, frankfurt, italy,
@@ -134,9 +155,22 @@ otras_ubicaciones: [portugal, lisboa, lisbon, porto, oporto, france, francia, pa
   belgium, belgica, brussels, bruselas, switzerland, suiza, zurich, poland, polonia, warsaw, krakow,
   romania, bucharest, czech, prague, praga, austria, vienna, sweden, stockholm, denmark, copenhagen,
   norway, oslo, finland, helsinki, mexico, argentina, buenos aires, colombia, bogota, chile, peru,
-  united states, usa, new york, san francisco, india, bangalore, singapore, japan, tokyo, china]
+  united states, usa, new york, san francisco, india, bangalore, singapore, japan, tokyo, china,
+  # Nombres en español (LinkedIn traduce el país: "Seattle, Washington, Estados Unidos") y más países
+  estados unidos, eeuu, ee.uu., ee. uu., nueva york, reino unido, inglaterra, escocia, gales, suecia,
+  dinamarca, noruega, finlandia, rumania, republica checa, chequia, hungria, hungary, budapest, grecia,
+  greece, atenas, turquia, turkey, estambul, istanbul, israel, canada, canadá, toronto, montreal,
+  vancouver, brasil, brazil, sao paulo, australia, sidney, sydney, melbourne, nueva zelanda,
+  new zealand, japon, corea del sur, south korea, filipinas, philippines, vietnam, indonesia,
+  malasia, malaysia, tailandia, thailand, emiratos arabes unidos, united arab emirates, uae, dubai,
+  arabia saudi, saudi arabia, qatar, marruecos, morocco, egipto, egypt, sudafrica, south africa,
+  nigeria, kenia, kenya, uruguay, venezuela, ecuador, bolivia, paraguay, costa rica, panama,
+  guatemala, republica dominicana, puerto rico, luxemburgo, luxembourg, estonia, letonia, lituania,
+  ucrania, ukraine, bulgaria, croacia, croatia, serbia, eslovaquia, eslovenia, malta, chipre,
+  islandia, iceland, pakistan, bangladesh, sri lanka]
 # Regiones de teletrabajo aceptables (si la región no se conoce, la oferta pasa igualmente).
 remote_regions_ok: [eu, spain, españa, europe, europa, emea, worldwide, anywhere, global, cet, remote]
 # Regiones que descartan una oferta remota (salvo que la búsqueda las pida expresamente).
 remote_regions_no: [us only, usa, u.s., us, united states, north america, americas, latam,
-  latin america, canada, apac, asia, india, australia, brazil, brasil]
+  latin america, canada, apac, asia, india, australia, brazil, brasil, estados unidos, eeuu, ee.uu.,
+  norteamerica, america del norte, latinoamerica, canadá]
