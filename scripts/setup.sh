@@ -80,9 +80,17 @@ else
   echo "    2. Elige un nombre y un usuario (debe acabar en 'bot')."
   echo "    3. BotFather te dará un token largo: cópialo, te lo pido ahora (no se verá al pegarlo)."
   if "$JR" env set TELEGRAM_BOT_TOKEN; then
-    read -r -p "    Abre tu bot en Telegram, escríbele /start y pulsa Enter aquí " _
-    if "$JR" telegram chat-id --save; then "$JR" telegram test
-    else warn "No se pudo guardar el chat. Repite: jobradar telegram chat-id --save"; fi
+    echo "    Ahora vincula tu Telegram: escanea el QR con el móvil y pulsa INICIAR."
+    if ! "$JR" telegram link; then
+      warn "No se pudo vincular por QR."
+      if ask_yes_no "¿Probar el método manual (escribir /start a tu bot)?" 1; then
+        read -r -p "    Abre tu bot en Telegram, escríbele /start y pulsa Enter aquí " _
+        if "$JR" telegram chat-id --save; then "$JR" telegram test
+        else warn "No se pudo guardar el chat. Repite: jobradar telegram link"; fi
+      else
+        warn "Repite más tarde: jobradar telegram link"
+      fi
+    fi
   else
     warn "No se guardó el token. Repite más tarde: jobradar env set TELEGRAM_BOT_TOKEN"
   fi

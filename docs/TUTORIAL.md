@@ -38,7 +38,7 @@ JobRadar te avisa a través de un bot que creas tú. Solo tienes que hacerlo una
 5. BotFather te responderá con un **token**: una cadena larga de números y letras. Cópialo entero. Es una contraseña:
    no la compartas.
 
-El token se pedirá durante la instalación.
+El token se pedirá durante la instalación. No necesitas escribirle nada al bot: el instalador te mostrará un código QR.
 
 ## 4. Ejecutar el instalador
 
@@ -61,7 +61,7 @@ El instalador tiene 8 pasos. Esto es lo que hace y lo que te pregunta:
 | 1. Python | Comprueba que tienes Python 3.10 o superior. | Nada. |
 | 2. Entorno e instalación | Crea la carpeta `.venv` e instala JobRadar. | Nada. |
 | 3. Configuración | Crea `config.yaml` y `.env` a partir de los ejemplos, si no existen. | Nada. |
-| 4. Telegram | Guarda el token del bot. | Pide el **token** (no se ve al pegarlo). Después te pide que abras tu bot, escribas `/start` y pulses Enter. Guarda tu chat y te envía un mensaje de prueba. |
+| 4. Telegram | Guarda el token del bot. | Pide el **token** (no se ve al pegarlo). Después muestra un **código QR**: escanéalo con la cámara del móvil, se abre tu bot en Telegram y pulsas **Iniciar**. El instalador lo detecta solo (sin escribir nada ni volver a la terminal), guarda tu chat y te envía un mensaje de confirmación. |
 | 5. Claves opcionales | Permite añadir claves de InfoJobs, Adzuna y Jooble. | Si quieres añadirlas (`s/N`). Son opcionales: sin ellas se usan las webs públicas. Ver [APIS.md](APIS.md). |
 | 6. Búsquedas | Si no tienes búsquedas, abre el asistente para crear la primera. | Las preguntas del asistente (ver la siguiente sección). |
 | 7. Base de datos | Crea la base de datos. La primera vez marca como vistas las ofertas actuales para no recibir avisos de ofertas antiguas. | Nada. |
@@ -178,8 +178,10 @@ normalidad solo. No hace falta hacer nada. Si una fuente se bloquea siempre, usa
 para no enviarte cientos de golpe. Desde entonces solo recibes las nuevas. Para ver lo que ya hay que encaja con una
 búsqueda, guárdala desde `/busquedas`: el bot te dice cuántas ofertas guardadas encajan y te las enseña.
 
+**El QR no se ve bien en la terminal.** Abre el enlace que aparece justo debajo del QR (empieza por `https://t.me/`), en el móvil o en el ordenador, y pulsa **Iniciar**. También puedes repetirlo con `jobradar telegram link`.
+
 **No llegan avisos al móvil.** Comprueba que el bot está activo con `jobradar telegram test`. Si no llega el mensaje
-de prueba, repite `jobradar telegram chat-id --save` después de escribir `/start` a tu bot. Después ejecuta
+de prueba, repite `jobradar telegram link` (o, a mano, `jobradar telegram chat-id --save` después de escribir `/start` a tu bot). Después ejecuta
 `jobradar verificar` para comprobar que las fuentes extraen bien los datos.
 
 **Quiero saber por qué no ha llegado una oferta.** Usa `/descartadas` en el bot o `jobradar descartadas` en la terminal.

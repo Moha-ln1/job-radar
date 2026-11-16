@@ -7,6 +7,7 @@ param(
 )
 
 $ErrorActionPreference = 'Continue'
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 $Root = Split-Path -Parent $PSScriptRoot
 Set-Location $Root
 $Interactive = -not $NonInteractive
@@ -86,9 +87,18 @@ if (-not $Interactive) {
     Say "    3. BotFather te dará un token largo: cópialo, te lo pido ahora (no se verá al pegarlo)."
     & $JR env set TELEGRAM_BOT_TOKEN
     if ($LASTEXITCODE -eq 0) {
-        Read-Host "    Abre tu bot en Telegram, escríbele /start y pulsa Enter aquí" | Out-Null
-        & $JR telegram chat-id --save
-        if ($LASTEXITCODE -eq 0) { & $JR telegram test } else { Warn "No se pudo guardar el chat. Repite: jobradar telegram chat-id --save" }
+        Say "    Ahora vincula tu Telegram: escanea el QR con el móvil y pulsa INICIAR."
+        & $JR telegram link
+        if ($LASTEXITCODE -ne 0) {
+            Warn "No se pudo vincular por QR."
+            if (AskYesNo "¿Probar el método manual (escribir /start a tu bot)?" $true) {
+                Read-Host "    Abre tu bot en Telegram, escríbele /start y pulsa Enter aquí" | Out-Null
+                & $JR telegram chat-id --save
+                if ($LASTEXITCODE -eq 0) { & $JR telegram test } else { Warn "No se pudo guardar el chat. Repite: jobradar telegram link" }
+            } else {
+                Warn "Repite más tarde: jobradar telegram link"
+            }
+        }
     } else {
         Warn "No se guardó el token. Repite más tarde: jobradar env set TELEGRAM_BOT_TOKEN"
     }

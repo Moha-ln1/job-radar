@@ -166,6 +166,8 @@ def cmd_filtros(args, paths: Paths) -> int:
 # --- telegram ---
 def cmd_telegram(args, paths: Paths) -> int:
     from telegram import Bot
+    if args.accion == "link":
+        return _telegram_link(args, paths)
     creds = _creds_or_explain(paths, need_chat=args.accion == "test")
     if creds is None:
         return 2
@@ -210,6 +212,76 @@ def cmd_telegram(args, paths: Paths) -> int:
     _env_set(paths, "TELEGRAM_CHAT_ID", str(chosen))
     _p(f"TELEGRAM_CHAT_ID guardado en {paths.env.name}.")
     return 0
+
+
+def _restart_background(paths: Paths) -> bool:
+    """Lanza `jobradar run` desacoplado de la terminal. Devuelve False si no se pudo."""
+    from jobradar import autostart
+    env = dict(os.environ, JOBRADAR_HOME=str(paths.root))
+    kwargs: dict = {}
+    if sys.platform == "win32":
+        kwargs["creationflags"] = 0x00000008 | 0x08000000  # DETACHED_PROCESS | CREATE_NO_WINDOW
+        exe = autostart._python(True)
+        if not os.path.exists(exe):
+            exe = autostart._python()
+    else:
+        kwargs["start_new_session"] = True
+        exe = sys.executable
+    try:
+        subprocess.Popen([exe, "-m", "jobradar", "run"], cwd=str(paths.root), env=env, stdin=subprocess.DEVNULL,
+                         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **kwargs)
+    except OSError:
+        return False
+    return True
+
+
+def _telegram_link(args, paths: Paths) -> int:
+    from telegram import Bot
+    from jobradar import telegram_io, telegram_link
+    token, _ = telegram_io.credentials(paths)
+    if not token:
+        _p("Error: falta TELEGRAM_BOT_TOKEN. Guárdalo con 'jobradar env set TELEGRAM_BOT_TOKEN'.")
+        return 2
+    was_running = _running_pid(paths) is not None
+    if was_running:
+        _p("Paro JobRadar un momento para vincular…")
+        cmd_stop(args, paths)
+
+    async def link():
+        async with Bot(token) as bot:
+            me = await bot.get_me()
+            code = telegram_link.new_code()
+            url = telegram_link.deep_link(me.username, code)
+            _p(telegram_link.qr_text(url))
+            _p(url)
+            _p()
+            _p("Escanéalo con el móvil (o abre el enlace) y pulsa INICIAR en Telegram. "
+               f"Esperando… (máx. {max(1, round(args.timeout / 60))} min, Ctrl+C para cancelar)")
+            res = await telegram_link.wait_for_start(bot, code, timeout=args.timeout)
+            if res is not None:
+                _env_set(paths, "TELEGRAM_CHAT_ID", str(res[0]))
+                await telegram_io.send_text(
+                    bot, res[0], "✅ JobRadar conectado. Crea tu primera búsqueda con /busquedas")
+            return res
+
+    try:
+        try:
+            res = asyncio.run(link())
+        except KeyboardInterrupt:
+            _p("Cancelado.")
+            return 130
+        except telegram_link.LinkConflict as exc:
+            _p(f"Error: {exc}")
+            return 1
+        if res is None:
+            _p("Se agotó el tiempo sin recibir el /start. Alternativa: abre tu bot, escríbele /start y ejecuta "
+               "'jobradar telegram chat-id --save'.")
+            return 1
+        _p(f"Conectado con {res[1]}.")
+        return 0
+    finally:
+        if was_running and not _restart_background(paths):
+            _p("No pude volver a arrancar JobRadar: arráncalo con 'jobradar run'.")
 
 
 # --- ejecución continua ---
@@ -456,6 +528,8 @@ def build_parser() -> argparse.ArgumentParser:
     cid = tsub.add_parser("chat-id", help="muestra tu chat_id (escribe /start a tu bot antes)")
     cid.add_argument("--save", action="store_true", help="guarda el chat_id en .env")
     tsub.add_parser("test", help="envía un mensaje de prueba")
+    lnk = tsub.add_parser("link", help="vincula tu chat escaneando un QR")
+    lnk.add_argument("--timeout", type=int, default=300, help="segundos de espera (por defecto 300)")
     add("run", cmd_run, "Arranca el bot y el programador")
     add("stop", cmd_stop, "Para jobradar")
     add("status", cmd_status, "Estado de jobradar")
