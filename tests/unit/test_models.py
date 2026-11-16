@@ -44,3 +44,11 @@ def test_description_no_se_rechaza():
 def test_decision_ok():
     assert Decision(matched=["a"], priority="alta", reasons=[]).ok
     assert not Decision(matched=[], reasons=["x"]).ok
+
+
+def test_repara_texto_doblemente_codificado():
+    from jobradar.models import build_offer
+    o = build_offer(title="Ingeniero en MÃ¼nchen", url="https://e.com/1", source="remoteok",
+                    location="Ciudad de MÃ©xico, Mexico")
+    assert o.title == "Ingeniero en München" and o.location == "Ciudad de México, Mexico"
+    assert build_offer(title="Ãrea técnica", url="https://e.com/2", source="x").title == "Ãrea técnica"

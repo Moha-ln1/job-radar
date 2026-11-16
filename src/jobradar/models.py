@@ -21,8 +21,21 @@ _TRACKING = {
 _log = logging.getLogger("jobradar.extract")
 
 
+_MOJIBAKE = re.compile("[ÂÃ][-¿]")
+
+
+def _fix_mojibake(v: str) -> str:
+    """Repara texto UTF-8 decodificado dos veces ("MÃ¼nchen" → "München"), como el de RemoteOK."""
+    if not _MOJIBAKE.search(v):
+        return v
+    try:
+        return v.encode("latin-1").decode("utf-8")
+    except UnicodeError:
+        return v
+
+
 def _clean_text(v: str) -> str:
-    return re.sub(r"\s+", " ", html.unescape(v)).strip()
+    return re.sub(r"\s+", " ", _fix_mojibake(html.unescape(v))).strip()
 
 
 class JobOffer(BaseModel):

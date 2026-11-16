@@ -1971,7 +1971,7 @@
   company: Vogel
   location: null
   modality: remoto
-  remote_region: MÃ¼nchen
+  remote_region: München
   category: null
   posted_at: '2026-11-03T16:00:25+00:00'
   expected: true
@@ -2000,7 +2000,7 @@
   company: DEUNA
   location: null
   modality: remoto
-  remote_region: Ciudad de MÃ©xico, Mexico
+  remote_region: Ciudad de México, Mexico
   category: null
   posted_at: '2026-10-11T00:00:05+00:00'
   expected: false
