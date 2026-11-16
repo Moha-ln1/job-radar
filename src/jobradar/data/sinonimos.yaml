@@ -428,6 +428,12 @@ ventas:
   - agente de seguros
   - televenta
   - promotor
+  - cajero
+  - reponedor
+  - vendedor de tienda
+  - dependiente de tienda
+  - store assistant
+  - sales assistant
 atencion_cliente:
   - atención al cliente
   - customer service
@@ -575,6 +581,41 @@ logistica:
   - international trade
   - comprador
   - shipping
+  - mozo de almacén
+  - carretillero
+  - preparador de pedidos
+  - repartidor
+  - conductor
+  - chófer
+  - delivery driver
+limpieza_seguridad:
+  - limpieza
+  - limpiador
+  - personal de limpieza
+  - "!limpieza de datos"
+  - "!data cleaning"
+  - cleaner
+  - vigilante de seguridad
+  - auxiliar de seguridad
+  - security guard
+  - controlador de accesos
+  - jardinero
+  - jardinería
+accion_social:
+  - trabajador social
+  - trabajo social
+  - integrador social
+  - integración social
+  - educador social
+  - educación social
+  - social worker
+  - mediador social
+  - animador sociocultural
+  - técnico de atención sociosanitaria
+  - auxiliar de ayuda a domicilio
+  - cuidador
+  - ong
+  - tercer sector
 legal:
   - legal
   - jurídico

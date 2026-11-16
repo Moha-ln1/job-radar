@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 def test_settings_de_ejemplo():
     s = load_settings(ROOT / "config.example.yaml")
     assert s.scan.max_age_days == 14 and s.http.delay_seconds == [1, 3]
-    assert s.sources["linkedin"]["max_pages"] == 1 and len(s.companies) == 3
+    assert s.sources["linkedin"]["max_pages"] == 1
+    assert s.companies == [] and s.watch == []  # instalación nueva: sin empresas ni páginas de nadie
 
 
 def test_clave_erronea_en_espanol(tmp_path):
@@ -53,3 +54,12 @@ def test_load_env(tmp_path):
     p = tmp_path / ".env"
     p.write_text("TOKEN=abc\n", encoding="utf-8")
     assert load_env(p) == {"TOKEN": "abc"}
+
+
+def test_ats_detect_sobre_la_config_de_ejemplo(tmp_path):
+    from jobradar.cli import _add_company
+    p = tmp_path / "config.yaml"
+    p.write_text((ROOT / "config.example.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    entry = {"name": "GitLab", "ats": "greenhouse", "slug": "gitlab"}  # el mismo que el ejemplo comentado
+    assert _add_company(p, entry) and not _add_company(p, entry)
+    assert load_settings(p).companies == [entry]

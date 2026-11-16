@@ -26,6 +26,11 @@ class Paths:
         return self.root / "sinonimos_usuario.yaml"
 
     @property
+    def profile_marker(self) -> Path:
+        """Id del bot al que ya se le puso nombre, descripción y foto."""
+        return self.root / "perfil_bot.txt"
+
+    @property
     def db(self) -> Path:
         return self.root / "jobradar.db"
 

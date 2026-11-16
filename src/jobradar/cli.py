@@ -450,7 +450,9 @@ def _add_company(config_path, entry: dict) -> bool:
     def q(v: str) -> str:
         return v if re.fullmatch(r"[\w .-]+", v) else json.dumps(v, ensure_ascii=False)
     text = config_path.read_text(encoding="utf-8")
-    if re.search(rf"ats:\s*{re.escape(entry['ats'])}\s*,\s*slug:\s*[\"']?{re.escape(entry['slug'])}[\"']?\s*}}", text):
+    # solo líneas reales: los ejemplos comentados no cuentan como ya añadidas
+    if re.search(rf"^\s*-[^#\n]*ats:\s*{re.escape(entry['ats'])}\s*,\s*slug:\s*[\"']?{re.escape(entry['slug'])}[\"']?\s*}}",
+                 text, re.MULTILINE):
         return False
     line = f"  - {{name: {q(entry['name'])}, ats: {entry['ats']}, slug: {q(entry['slug'])}}}"
     lines = text.splitlines()

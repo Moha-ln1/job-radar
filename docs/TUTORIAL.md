@@ -40,6 +40,9 @@ JobRadar te avisa a través de un bot que creas tú. Solo tienes que hacerlo una
 
 El token se pedirá durante la instalación. No necesitas escribirle nada al bot: el instalador te mostrará un código QR.
 
+No hace falta que le pongas foto ni descripción: la primera vez que arranca, JobRadar le pone el nombre «Job Radar»,
+una foto de perfil (un radar) y una descripción. Si después los cambias en BotFather, se respetan.
+
 ## 4. Ejecutar el instalador
 
 **Windows** (dentro de la carpeta `job-radar`):
@@ -77,11 +80,13 @@ Abre tu bot en Telegram y escribe `/busquedas`. Pulsa **➕ Nueva búsqueda** y 
 botones:
 
 1. **Tipo**: prácticas, trainee o junior.
-2. **Área**: programación, datos, ciberseguridad, sistemas, diseño, marketing... (25 áreas). Si no eliges
-   ninguna, vale cualquier área.
+2. **Área**: programación, datos, ciberseguridad, sistemas, diseño, marketing, ventas, salud, hostelería,
+   logística, limpieza y seguridad, social… (27 áreas, de cualquier sector). Si no eliges ninguna, vale
+   cualquier área.
 3. **Modalidad**: presencial, híbrido, remoto o cualquiera.
 4. **Ubicación**: la ciudad o región donde buscas (solo se aplica a presencial e híbrido). Cada zona incluye sus
    municipios: "Granada" incluye Armilla, Maracena, Las Gabias…; "España" incluye todas las provincias.
+   Hay una zona por cada comunidad autónoma (y por provincia en Andalucía), además de Europa.
 5. **Avisos**: 🔥 al momento (en cuanto aparece una oferta) o 📰 resumen diario (a las 09:00).
 
 En cada paso, **✏️ Otra…** te deja escribir un término que no está en los botones (por ejemplo, "Salesforce"). Al

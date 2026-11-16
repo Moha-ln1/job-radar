@@ -71,7 +71,7 @@ que encajan con tus búsquedas:
 
 ```yaml
 watch:
-  - {name: UGR Empleo, url: "https://empleo.ugr.es/", filtrar: true}
+  - {name: Prácticas de mi universidad, url: "https://ejemplo.es/practicas", filtrar: true}
 ```
 
 ## Desactivar una fuente

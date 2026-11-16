@@ -22,13 +22,15 @@ areas:
   finanzas: Finanzas
   rrhh: RRHH
   consultoria: Consultoría
-  logistica: Logística
+  logistica: Logística / Transporte
   legal: Legal
   educacion: Educación
   salud: Salud
   ciencia: Ciencia / I+D
   hosteleria: Hostelería / Turismo
   arquitectura: Arquitectura / Obra
+  limpieza_seguridad: Limpieza / Seguridad
+  accion_social: Social / ONG
 # Palabra con la que se busca cada área en los portales generalistas ("prácticas programador").
 # Si un área no aparece, se usa su etiqueta ("Marketing" -> "marketing").
 consulta_portal:
@@ -129,11 +131,80 @@ ubicaciones:
     linkedin: "Basque Country, Spain"
     aliases: [pais vasco, euskadi, bilbao, vitoria, gasteiz, san sebastian, donostia, getxo, barakaldo,
       irun, alava, araba, guipuzcoa, gipuzkoa, vizcaya, bizkaia]
+  cataluna:
+    label: Cataluña
+    linkedin: "Catalonia, Spain"
+    incluye: [barcelona]
+    aliases: [cataluna, catalunya, catalonia, girona, gerona, lleida, lerida, tarragona, reus, mataro,
+      manresa, vic, figueres, granollers, mollet del valles, rubi, viladecans, castelldefels, sitges]
+  madrid_region:
+    label: Comunidad de Madrid
+    linkedin: "Community of Madrid, Spain"
+    incluye: [madrid]
+    aliases: [comunidad de madrid, fuenlabrada, alcorcon, parla, torrejon de ardoz, rivas-vaciamadrid,
+      coslada, san sebastian de los reyes, collado villalba, aranjuez, arganda del rey, valdemoro]
+  galicia:
+    label: Galicia
+    linkedin: "Galicia, Spain"
+    aliases: [galicia, a coruna, la coruna, coruna, vigo, santiago de compostela, ourense, orense, lugo,
+      pontevedra, ferrol, narón, oleiros, arteixo]
+  asturias:
+    label: Asturias
+    linkedin: "Principality of Asturias, Spain"
+    aliases: [asturias, oviedo, gijon, aviles, siero, langreo, mieres]
+  cantabria:
+    label: Cantabria
+    linkedin: "Cantabria, Spain"
+    aliases: [cantabria, santander, torrelavega, castro urdiales, camargo]
+  navarra:
+    label: Navarra
+    linkedin: "Navarre, Spain"
+    aliases: [navarra, navarre, pamplona, iruna, tudela, barañain, baranain, estella]
+  rioja:
+    label: La Rioja
+    linkedin: "La Rioja, Spain"
+    aliases: [la rioja, logrono, calahorra, arnedo, haro]
+  aragon:
+    label: Aragón
+    linkedin: "Aragon, Spain"
+    aliases: [aragon, zaragoza, huesca, teruel, calatayud, utebo, monzon, barbastro, jaca]
+  castilla_leon:
+    label: Castilla y León
+    linkedin: "Castile and León, Spain"
+    aliases: [castilla y leon, valladolid, burgos, leon, salamanca, palencia, zamora, segovia, avila,
+      soria, ponferrada, miranda de ebro, aranda de duero, medina del campo]
+  castilla_mancha:
+    label: Castilla-La Mancha
+    linkedin: "Castilla-La Mancha, Spain"
+    aliases: [castilla-la mancha, castilla la mancha, toledo, albacete, ciudad real, cuenca,
+      guadalajara, talavera de la reina, puertollano, tomelloso, alcazar de san juan, hellin]
+  extremadura:
+    label: Extremadura
+    linkedin: "Extremadura, Spain"
+    aliases: [extremadura, badajoz, caceres, merida, plasencia, don benito, almendralejo,
+      villanueva de la serena]
+  murcia:
+    label: Región de Murcia
+    linkedin: "Region of Murcia, Spain"
+    aliases: [murcia, region de murcia, cartagena, lorca, molina de segura, alcantarilla, aguilas,
+      mazarron, cieza, yecla]
+  baleares:
+    label: Baleares
+    linkedin: "Balearic Islands, Spain"
+    aliases: [baleares, illes balears, islas baleares, balearic islands, mallorca, palma de mallorca,
+      menorca, ibiza, eivissa, formentera, manacor, calvia, mahon, mao, ciutadella, llucmajor]
+  canarias:
+    label: Canarias
+    linkedin: "Canary Islands, Spain"
+    aliases: [canarias, islas canarias, canary islands, las palmas, las palmas de gran canaria,
+      gran canaria, tenerife, santa cruz de tenerife, la laguna, san cristobal de la laguna, lanzarote,
+      arrecife, fuerteventura, telde, la palma, la gomera, el hierro, arona, adeje]
   espana:
     label: España
     linkedin: "Spain"
     # Zonas contenidas: sus municipios cuentan también aquí
-    incluye: [andalucia, madrid, barcelona, valencia, pais_vasco]
+    incluye: [andalucia, madrid_region, cataluna, valencia, pais_vasco, galicia, asturias, cantabria,
+      navarra, rioja, aragon, castilla_leon, castilla_mancha, extremadura, murcia, baleares, canarias]
     aliases: [espana, spain, madrid, barcelona, valencia, sevilla, seville, malaga, bilbao, zaragoza,
       murcia, alicante, granada, cordoba, valladolid, vigo, gijon, oviedo, a coruna, vitoria, pamplona,
       san sebastian, santander, palma, las palmas, tenerife, almeria, cadiz, huelva, jaen, salamanca,

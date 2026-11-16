@@ -89,6 +89,16 @@ CASES = [
     ("Growth Hacking Intern", {"marketing"}, {"ciberseguridad"}),
     ("Prácticas en Marketing Digital: Web, Redes Sociales, Seo y Geo", {"marketing"}, {"sistemas"}),
     ("PRÁCTICAS TÉCNICO CONTROL DE CALIDAD", {"ingenieria"}, {"qa"}),
+    # Áreas para cualquier sector
+    ("Personal de limpieza para hotel", {"limpieza_seguridad"}, set()),
+    ("Vigilante de seguridad sin experiencia", {"limpieza_seguridad"}, {"ciberseguridad"}),
+    ("Prácticas Data Analyst: limpieza de datos y dashboards", {"data"}, {"limpieza_seguridad"}),
+    ("Integrador/a social en prácticas", {"accion_social"}, set()),
+    ("Convocatoria para entidades sin ánimo de lucro o marcado interés social", set(), {"accion_social"}),
+    ("Prácticas en servicios centrales del Ministerio", set(), {"limpieza_seguridad"}),
+    ("Repartidor/a con carnet B", {"logistica"}, set()),
+    ("Cajero/a reponedor/a supermercado", {"ventas"}, set()),
+    ("Ingeniero junior de semiconductores", set(), {"logistica"}),
 ]
 
 

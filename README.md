@@ -33,7 +33,10 @@ responde al aviso original:
 - **APIs oficiales opcionales (con clave gratuita)**: InfoJobs, Adzuna y Jooble. Sin clave se usan las webs públicas.
 - **Portales**: LinkedIn, InfoJobs, Tecnoempleo, Infoempleo y Primer Empleo.
 - **Vigilancia de páginas**: avisa cuando aparece algo nuevo en páginas de convocatorias sin listado de ofertas (p. ej. la de prácticas de tu universidad).
+- **Para cualquier sector**: 27 áreas (de programación a hostelería, salud o logística) y todas las comunidades
+  autónomas. Se empieza sin búsquedas, empresas ni páginas de nadie: cada uno crea las suyas.
 - **Filtros con botones y sinónimos**: tipo, área, modalidad y ubicación, en español e inglés.
+- **Bot listo de serie**: al primer arranque se pone nombre, foto de perfil y descripción.
 - **Todo se configura desde Telegram**: búsquedas, exclusiones, fuentes (`/fuentes`), webs de empresas (`/empresas`)
   y páginas vigiladas (`/paginas`), sin editar archivos.
 - **Ante la duda, se incluye**: si una oferta no dice su área, su modalidad o una ubicación conocida, no se descarta.

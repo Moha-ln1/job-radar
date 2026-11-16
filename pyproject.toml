@@ -31,7 +31,7 @@ jobradar = "jobradar.cli:main"
 where = ["src"]
 
 [tool.setuptools.package-data]
-jobradar = ["data/*.yaml"]
+jobradar = ["data/*.yaml", "data/*.png"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

@@ -14,7 +14,7 @@ from telegram.error import BadRequest, NetworkError
 from telegram.ext import (Application, ApplicationHandlerStop, CallbackQueryHandler, CommandHandler,
                           ContextTypes, MessageHandler, TypeHandler, filters)
 
-from . import notify, radar, scheduler, telegram_io
+from . import notify, perfil, radar, scheduler, telegram_io
 from .config import (ConfigError, add_user_synonym, load_env, load_searches, save_searches)
 from .filters import Catalog
 from .models import Decision, Exclusions, Search
@@ -789,6 +789,7 @@ async def on_error(update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 async def _post_init(app: Application) -> None:
     await app.bot.set_my_commands([BotCommand(c, d) for c, d in COMMANDS])
+    await perfil.apply_profile(app.bot, app.bot_data["paths"].profile_marker)
 
 
 def build_application(paths: Paths) -> Application:

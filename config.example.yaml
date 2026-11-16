@@ -27,14 +27,10 @@ sources:
   jooble:        {enabled: true}   # necesita clave gratuita en .env (ver docs/TUTORIAL.md)
   watch:         {enabled: true}
 
-# Webs de empleo de empresas (añádelas con: jobradar ats detect <url>)
-companies:
-  - {name: GitLab, ats: greenhouse, slug: gitlab}
-  - {name: Accenture, ats: workday, slug: "accenture.wd103/AccentureCareers"}
-  - {name: Bosch, ats: smartrecruiters, slug: BoschGroup}
-
-# Páginas de convocatorias sin listado de ofertas: se avisa cuando aparece un enlace nuevo.
-# Con `filtrar: true`, los enlaces nuevos pasan por tus búsquedas (útil en portales con ofertas de todo
-# tipo, como el de prácticas de una universidad).
-watch:
-  - {name: UGR Empleo, url: "https://empleo.ugr.es/", filtrar: true}
+# Webs de empleo de empresas y páginas de convocatorias que se vigilan. Se empieza sin ninguna:
+# añádelas desde Telegram con /empresas y /paginas (o con: jobradar ats detect <url>).
+# Ejemplos:
+# companies:
+#   - {name: GitLab, ats: greenhouse, slug: gitlab}
+# watch:
+#   - {name: Prácticas de mi universidad, url: "https://ejemplo.es/practicas", filtrar: true}

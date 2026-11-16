@@ -64,7 +64,7 @@ Prioridad: **API → HTML → vigilar la página**.
 | API sin clave (empleo remoto) | Remotive, RemoteOK, We Work Remotely (RSS), Himalayas; Arbeitnow desactivada por defecto | 200 con datos |
 | API con clave gratuita (opcional) | InfoJobs oficial, Adzuna, Jooble | 401/400 sin clave, esperado |
 | HTML | LinkedIn (guest), InfoJobs (sin clave), Tecnoempleo, Infoempleo, Primer Empleo | 200 con ofertas en el HTML |
-| Vigilancia de páginas | UGR Empleo y las que añada el usuario | 200 |
+| Vigilancia de páginas | Las que añada el usuario (`/paginas`) | 200 |
 | No incluidas | Indeed, Glassdoor, web de Jooble (403); WTTJ, StudentJob (JS); Talent.com (duplicados); Jobatus (no responde); EURES, Empléate (apps JS); Ícaro (requiere cuenta) | — |
 
 - Ritmo: 1–3 s entre peticiones al mismo dominio, topes de páginas y términos por escaneo, `timeout_seconds` y

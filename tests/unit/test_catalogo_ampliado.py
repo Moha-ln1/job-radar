@@ -182,3 +182,12 @@ async def test_error_handler_does_not_message_user_on_network_error():
     ctx = NS(error=TimedOut(), bot=NS(send_message=send))
     await bot.on_error(None, ctx)
     send.assert_not_awaited()
+
+
+def test_todas_las_comunidades_estan_en_espana():
+    cat = bot.default_catalog()
+    terms = set(cat.location_terms("espana"))
+    for lugar in ("sabadell", "getafe", "vigo", "oviedo", "santander", "pamplona", "logrono", "zaragoza",
+                  "valladolid", "toledo", "badajoz", "lorca", "ibiza", "las palmas de gran canaria"):
+        assert lugar in terms, lugar
+    assert "palma" not in set(cat.location_terms("baleares"))  # Palma del Río es Córdoba
