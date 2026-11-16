@@ -30,6 +30,20 @@ areas:
   ciencia: Ciencia / I+D
   hosteleria: Hostelería / Turismo
   arquitectura: Arquitectura / Obra
+# Palabra con la que se busca cada área en los portales generalistas ("prácticas programador").
+# Si un área no aparece, se usa su etiqueta ("Marketing" -> "marketing").
+consulta_portal:
+  programador: programador
+  data: data
+  ciberseguridad: ciberseguridad
+  sistemas: informática
+  qa: qa
+  diseno: diseño
+  atencion_cliente: atención al cliente
+  producto: proyectos
+  ciencia: laboratorio
+  hosteleria: hostelería
+  arquitectura: arquitectura
 ubicaciones:
   granada:
     label: Granada

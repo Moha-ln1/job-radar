@@ -56,7 +56,9 @@ def _parse_greenhouse(data: dict, company: str, slug: str) -> list[JobOffer]:
         location=(j.get("location") or {}).get("name"),
         posted_at=_iso(j.get("first_published")) or _iso(j.get("updated_at")),
         category=_first(j.get("departments"), "name"),
-        expected_domains={"greenhouse.io"},
+        # Sin comprobar dominio: la API devuelve la web de empleo de la empresa si la tiene
+        # (p. ej. careers.datadoghq.com), y el enlace viene de la API oficial, no de leer HTML.
+        expected_domains=None,
     ) for j in data.get("jobs", [])])
 
 
@@ -80,7 +82,8 @@ def _parse_lever(data: list, company: str, slug: str) -> list[JobOffer]:
 
 
 async def _fetch_lever(ctx: SourceContext, company: str, slug: str) -> list[JobOffer]:
-    resp = await ctx.http.get(f"https://api.lever.co/v0/postings/{slug}?mode=json")
+    # Lever devuelve todas las descripciones (cientos de KB): necesita más margen que el general
+    resp = await ctx.http.get(f"https://api.lever.co/v0/postings/{slug}?mode=json", timeout=60)
     return _parse_lever(resp.json(), company, slug)
 
 

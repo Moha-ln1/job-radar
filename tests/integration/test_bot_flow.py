@@ -400,3 +400,80 @@ async def test_commands_and_buttons_are_logged(h, caplog):
     msgs = [r.getMessage() for r in caplog.records if r.name == "jobradar.bot"]
     assert any("/busquedas" in m for m in msgs) and any("callback s" in m for m in msgs)
     assert not any("privado" in m for m in msgs)
+
+
+# --- configuración sin archivos: /fuentes, /empresas, /paginas ---
+async def test_fuentes_toggle_saves_bot_settings_not_config(h):
+    from jobradar.config import load_settings
+    before = (h.paths.root / "config.yaml").read_text(encoding="utf-8")
+    await h.say("/fuentes")
+    assert "Fuentes" in h.last_text()
+    await h.press("InfoJobs")
+    assert load_settings(h.paths.config).sources["infojobs"]["enabled"] is False
+    assert (h.paths.root / "config.yaml").read_text(encoding="utf-8") == before
+    await h.press("InfoJobs")
+    assert load_settings(h.paths.config).sources["infojobs"]["enabled"] is True
+
+
+async def test_empresas_add_by_url_and_delete(h):
+    from jobradar.config import load_settings
+    await h.say("/empresas")
+    await h.press("Añadir")
+    assert "force_reply" in json.dumps(h.fake.calls[-1][1]["reply_markup"])
+    await h.say("https://boards.greenhouse.io/acmecorp")
+    companies = load_settings(h.paths.config).companies
+    assert companies == [{"name": "Acmecorp", "ats": "greenhouse", "slug": "acmecorp"}]
+    await h.say("/empresas")
+    await h.press("🗑")
+    assert load_settings(h.paths.config).companies == []
+
+
+async def test_empresas_unknown_portal_explains(h, monkeypatch):
+    from jobradar import bot_fuentes
+
+    async def nothing(http, url):
+        return None
+    monkeypatch.setattr(bot_fuentes.ats_detect, "detect_url", nothing)
+    await h.say("/empresas")
+    await h.press("Añadir")
+    await h.say("https://ejemplo.invalid/empleo")
+    assert "No he reconocido" in h.last_text() or "Webs de empleo" in h.last_text()
+    assert any("No he reconocido" in t for t in h.sent_texts())
+
+
+async def test_paginas_add_marks_existing_links_seen_then_toggle_and_delete(h, monkeypatch):
+    from jobradar import bot_fuentes
+    from jobradar.config import load_settings
+
+    class FakeResp:
+        url = "https://academia.invalid/"
+        text = ('<body><main><a href="/convocatoria-2027">Convocatoria 2027</a>'
+                '<a href="/curso">Curso de Python</a></main></body>')
+
+    class FakeHttp:
+        def __init__(self, *a, **k):
+            pass
+
+        async def __aenter__(self):
+            return self
+
+        async def __aexit__(self, *a):
+            pass
+
+        async def get(self, url):
+            return FakeResp()
+    monkeypatch.setattr(bot_fuentes, "Http", FakeHttp)
+    await h.say("/paginas")
+    await h.press("Añadir")
+    await h.say("academia.invalid")
+    assert any("Vigilando academia.invalid" in t for t in h.sent_texts())
+    watch = load_settings(h.paths.config).watch
+    assert watch == [{"name": "academia.invalid", "url": "https://academia.invalid"}]
+    store = Store(h.paths.db)
+    assert store.pending_digest() == []  # lo que ya había no se envía
+    store.close()
+    await h.say("/paginas")
+    await h.press("📢")
+    assert load_settings(h.paths.config).watch[0]["filtrar"] is True
+    await h.press("🗑")
+    assert load_settings(h.paths.config).watch == []

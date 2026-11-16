@@ -73,12 +73,47 @@ def _read_yaml(path: Path) -> dict:
     return data
 
 
+BOT_SETTINGS = "ajustes_bot.yaml"
+
+
+def bot_settings_path(config_path: Path) -> Path:
+    """Ajustes cambiados desde el bot (fuentes, empresas, páginas): junto a config.yaml."""
+    return Path(config_path).with_name(BOT_SETTINGS)
+
+
 def load_settings(path: Path) -> Settings:
+    """config.yaml + lo cambiado desde el bot (ajustes_bot.yaml), que tiene prioridad: por fuente, sus
+    opciones se combinan; las listas de empresas y páginas, si el bot las ha tocado, se sustituyen."""
     data = _read_yaml(Path(path))
+    over_path = bot_settings_path(path)
+    if over_path.exists():
+        over = _read_yaml(over_path)
+        sources = {k: dict(v or {}) for k, v in (data.get("sources") or {}).items()}
+        for name, opts in (over.get("sources") or {}).items():
+            sources.setdefault(name, {}).update(opts or {})
+        data = {**data, "sources": sources}
+        for key in ("companies", "watch"):
+            if key in over:
+                data[key] = over[key] or []
     try:
         return Settings(**data)
     except ValidationError as exc:
         raise _spanish_errors(exc, str(path)) from None
+
+
+def save_bot_settings(config_path: Path, *, source_enabled: tuple[str, bool] | None = None,
+                      companies: list[dict] | None = None, watch: list[dict] | None = None) -> None:
+    """Guarda en ajustes_bot.yaml un cambio hecho desde el bot (config.yaml no se toca)."""
+    path = bot_settings_path(config_path)
+    data = _read_yaml(path) if path.exists() else {}
+    if source_enabled is not None:
+        name, enabled = source_enabled
+        data.setdefault("sources", {}).setdefault(name, {})["enabled"] = enabled
+    if companies is not None:
+        data["companies"] = companies
+    if watch is not None:
+        data["watch"] = watch
+    _atomic_write_yaml(path, data)
 
 
 def load_env(path: str | Path = ".env") -> dict:

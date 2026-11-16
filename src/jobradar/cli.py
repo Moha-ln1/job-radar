@@ -490,8 +490,21 @@ def cmd_ats(args, paths: Paths) -> int:
         if not paths.config.exists():
             _p("Error: no existe config.yaml (cópialo de config.example.yaml).")
             return 2
-        _p("Añadida a config.yaml (companies)." if _add_company(paths.config, found)
-           else "Esa empresa ya estaba en config.yaml.")
+        import yaml
+
+        from .config import bot_settings_path, load_settings, save_bot_settings
+        over = bot_settings_path(paths.config)
+        if over.exists() and "companies" in (yaml.safe_load(over.read_text(encoding="utf-8")) or {}):
+            # La lista ya se gestiona desde el bot (/empresas): se añade ahí para que no quede oculta
+            current = load_settings(paths.config).companies
+            if any(c.get("ats") == found["ats"] and c.get("slug") == found["slug"] for c in current):
+                _p("Esa empresa ya estaba en la lista.")
+            else:
+                save_bot_settings(paths.config, companies=[*current, found])
+                _p("Añadida a la lista de empresas (la misma que ves en /empresas).")
+        else:
+            _p("Añadida a config.yaml (companies)." if _add_company(paths.config, found)
+               else "Esa empresa ya estaba en config.yaml.")
     else:
         _p("Añádela con --add o pegando en config.yaml: "
            f"- {{name: {found['name']}, ats: {found['ats']}, slug: {found['slug']}}}")

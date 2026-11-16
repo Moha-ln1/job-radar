@@ -9,13 +9,12 @@ from bs4 import BeautifulSoup
 from . import health
 from .config import load_env
 from .dedup import similar
-from .http import SourceBlocked
-from .sources.official_apis import missing_keys
-from .http import Http
+from .http import Http, SourceBlocked
 from .models import JobOffer
 from .normalize import norm_company, norm_title
 from .paths import Paths
 from .sources import Fetcher, SourceContext
+from .sources.official_apis import missing_keys
 
 
 @dataclass
@@ -97,7 +96,13 @@ def _compare(offer: JobOffer, html: str) -> str | None:
 
 async def verify(paths: Paths, sample: int = 3, *, fetchers: dict[str, Fetcher] | None = None,
                  http: Http | None = None, only: list[str] | None = None) -> list[VerifyRow]:
-    from .radar import derive_locations, derive_terms, load_context, run_sources
+    from .radar import (
+        derive_combos,
+        derive_locations,
+        derive_terms,
+        load_context,
+        run_sources,
+    )
     settings, searches, _excl, syn, catalog = load_context(paths)
     if fetchers is None:
         from .sources import all_fetchers
@@ -108,6 +113,7 @@ async def verify(paths: Paths, sample: int = 3, *, fetchers: dict[str, Fetcher] 
         names = only or [n for n, o in settings.sources.items() if o.get("enabled", True)]
         ctx = SourceContext(http=http, settings=settings, terms=derive_terms(searches, syn, catalog),
                             locations=derive_locations(searches, catalog),
+                            combos=derive_combos(searches, syn, catalog),
                             env=load_env(paths.env) if paths.env.exists() else {})
         results = await run_sources(ctx, names, fetchers)
         rows = []

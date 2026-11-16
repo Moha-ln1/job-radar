@@ -210,9 +210,17 @@ def _parse_infojobs_api(data: dict) -> list[JobOffer]:
     return _dedup(offers)
 
 
+def _infojobs_terms(ctx: SourceContext) -> list[str]:
+    """InfoJobs bloquea a partir de unas 3 peticiones seguidas y "prácticas" a secas trae 20 ofertas de
+    cualquier sector: pocas búsquedas combinadas de tipo y área (sacadas de tus búsquedas). `keywords` en
+    config.yaml las sustituye si quieres fijarlas a mano."""
+    custom = ctx.options("infojobs").get("keywords")
+    return list(custom)[:3] if custom else (ctx.combos[:3] or _search_terms(ctx))
+
+
 async def _infojobs_html(ctx: SourceContext) -> list[JobOffer]:
     offers: list[JobOffer] = []
-    for term in _search_terms(ctx):
+    for term in _infojobs_terms(ctx):
         resp = await ctx.http.get(
             f"https://www.infojobs.net/jobsearch/search-results/list.xhtml?keyword={quote_plus(term)}")
         offers.extend(_parse_infojobs(resp.text))
@@ -224,7 +232,7 @@ async def fetch_infojobs(ctx: SourceContext) -> list[JobOffer]:
     if not (cid and secret):
         return await _infojobs_html(ctx)
     offers: list[JobOffer] = []
-    for term in _search_terms(ctx):
+    for term in _infojobs_terms(ctx):
         try:
             resp = await ctx.http.get(
                 "https://api.infojobs.net/api/9/offer",
@@ -293,7 +301,7 @@ def _parse_infoempleo(html: str) -> list[JobOffer]:
 
 async def fetch_infoempleo(ctx: SourceContext) -> list[JobOffer]:
     offers: list[JobOffer] = []
-    for term in _search_terms(ctx):
+    for term in ctx.combos[:3] or _search_terms(ctx):  # portal generalista: tipo + área
         resp = await ctx.http.get(f"https://www.infoempleo.com/trabajo/?q={quote_plus(term)}")
         offers.extend(_parse_infoempleo(resp.text))
     return _dedup(offers)

@@ -31,7 +31,7 @@ va al final. Las fuentes que necesitan clave gratuita se desactivan solas si no 
 
 ## Añadir empresas
 
-Las webs de empleo de empresas se detectan y se añaden con:
+Desde Telegram: `/empresas` → **➕ Añadir empresa** y pega el enlace de su página de ofertas. Desde la terminal:
 
 ```
 jobradar ats detect <url> --add
@@ -50,8 +50,11 @@ companies:
 
 ## Añadir páginas vigiladas
 
-Algunas páginas de programas no tienen listado de ofertas, pero publican novedades. Para ellas, añade un bloque
-`watch:` en `config.yaml`:
+Algunas páginas de programas no tienen listado de ofertas, pero publican novedades. Desde Telegram: `/paginas` →
+**➕ Añadir página** y pega el enlace (lo que ya hay en la página se marca como visto; solo te llegará lo nuevo). El
+botón 📢/🔎 de cada página cambia entre recibir todos sus enlaces nuevos o solo los que encajan con tus búsquedas.
+
+También puedes añadir un bloque `watch:` en `config.yaml`:
 
 ```yaml
 watch:
@@ -76,7 +79,8 @@ watch:
 
 ## Desactivar una fuente
 
-En `config.yaml`, bloque `sources:`, cambia `enabled` a `false`:
+Desde Telegram: `/fuentes` y pulsa la fuente. También puedes hacerlo en `config.yaml`, bloque `sources:`, cambiando
+`enabled` a `false`:
 
 ```yaml
 sources:

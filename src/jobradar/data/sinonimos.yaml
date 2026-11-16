@@ -32,6 +32,19 @@ practicas:
   - alternancia
   - practicum
   - estudiante en prácticas
+  - fct
+  - practicante
+  - estudiante universitario
+  - estudiante de grado
+  - estudiante de máster
+  - estudiante de último año
+  - student assistant
+  - student job
+  - student intern
+  - formación en centros de trabajo
+  - placement
+  - erasmus
+  - praktikant
 trainee:
   - trainee
   - management trainee
@@ -70,6 +83,8 @@ junior:
   - early career
   - nivel inicial
   - graduate
+  - primer empleo
+  - graduado
 programador:
   - programador
   - desarrollador
@@ -79,6 +94,11 @@ programador:
   - software engineer
   - software developer
   - ingeniero de software
+  - programación
+  - desarrollo web
+  - desarrollo de software
+  - desarrollo de aplicaciones
+  - web developer
   - full stack
   - fullstack
   - frontend
@@ -94,6 +114,39 @@ programador:
   - angular
   - golang
   - kotlin
+  - dam
+  - daw
+  - desarrollo de aplicaciones multiplataforma
+  - desarrollo de aplicaciones web
+  - ingeniería informática
+  - ingeniero informático
+  - salesforce
+  - servicenow
+  - sap
+  - abap
+  - cobol
+  - .net
+  - asp.net
+  - "c#"
+  - c++
+  - node
+  - nodejs
+  - vue
+  - django
+  - spring boot
+  - android
+  - ios
+  - flutter
+  - swift
+  - ruby
+  - rails
+  - scala
+  - rust
+  - aplicaciones móviles
+  - app developer
+  - mobile developer
+  - low code
+  - rpa
 data:
   - data
   - datos
@@ -121,6 +174,18 @@ data:
   - llm
   - ia generativa
   - generative ai
+  - "!ntt data"
+  - "!data entry"
+  - sql
+  - power bi
+  - tableau
+  - bi
+  - etl
+  - estadística
+  - statistics
+  - data science
+  - ciencia de datos
+  - analista bi
 ciberseguridad:
   - ciberseguridad
   - cybersecurity
@@ -129,6 +194,20 @@ ciberseguridad:
   - infosec
   - pentester
   - soc analyst
+  - security engineer
+  - security analyst
+  - seguridad de la información
+  - information security
+  - appsec
+  - cloud security
+  - seguridad ofensiva
+  - hacking ético
+  - ethical hacking
+  - red team
+  - blue team
+  - siem
+  - soc
+  - pentesting
 sistemas:
   - sistemas
   - sysadmin
@@ -165,6 +244,26 @@ sistemas:
   - it technician
   - microinformática
   - cau
+  - systems
+  - system administrator
+  - sysadmin linux
+  - sysops
+  - it
+  - tic
+  - ict
+  - technology
+  - tecnología
+  - tecnologías de la información
+  - asir
+  - smr
+  - administración de sistemas informáticos
+  - sistemas microinformáticos
+  - digitalización
+  - transformación digital
+  - service desk
+  - técnico de soporte
+  - soporte it
+  - erp
 qa:
   - qa
   - quality assurance
@@ -178,6 +277,9 @@ qa:
   - automatización de pruebas
   - pruebas de software
   - calidad de software
+  - selenium
+  - cypress
+  - qa analyst
 diseno:
   - diseño
   - diseno
@@ -187,6 +289,14 @@ diseno:
   - ui
   - diseñador
   - gráfico
+  - moda
+  - fashion
+  - textil
+  - patronaje
+  - ilustración
+  - illustrator
+  - motion graphics
+  - 3d
 marketing:
   - marketing
   - seo
@@ -196,6 +306,19 @@ marketing:
   - growth
   - contenidos
   - content
+  - publicidad
+  - publicitario
+  - creatividad
+  - creativo
+  - market research
+  - investigación de mercados
+  - market analyst
+  - e-commerce
+  - ecommerce
+  - digital commerce
+  - comercio electrónico
+  - branding
+  - brand
 administracion:
   - administración
   - administracion
@@ -206,6 +329,9 @@ administracion:
   - oficina
   - office
   - auxiliar administrativo
+  - data entry
+  - grabación de datos
+  - grabador de datos
   - secretaria
   - recepción
 finanzas:
@@ -231,6 +357,26 @@ finanzas:
   - economista
   - risk analyst
   - analista de riesgos
+  - campaña de la renta
+  - renta
+  - seguros
+  - insurance
+  - claims
+  - siniestros
+  - m&a
+  - corporate finance
+  - investment banking
+  - banca de inversión
+  - economía
+  - economics
+  - inversión
+  - investment
+  - actuarial
+  - actuario
+  - aml
+  - kyc
+  - crédito
+  - credit
 rrhh:
   - rrhh
   - recursos humanos
@@ -245,6 +391,13 @@ rrhh:
   - nóminas
   - payroll
   - people partner
+  - headhunting
+  - headhunter
+  - people operations
+  - people
+  - atracción de talento
+  - gestión del talento
+  - administración de personal
 ventas:
   - ventas
   - sales
@@ -262,6 +415,11 @@ ventas:
   - presales
   - retail
   - inside sales
+  - gerente de equipo
+  - agente comercial
+  - agente de seguros
+  - televenta
+  - promotor
 atencion_cliente:
   - atención al cliente
   - customer service
@@ -274,6 +432,11 @@ atencion_cliente:
   - teleoperador
   - recepcionista
   - gestor de clientes
+  - atención multilingüe
+  - atención al usuario
+  - servicio al cliente
+  - customer experience
+  - cx
 ingenieria:
   - ingeniería
   - engineering
@@ -302,6 +465,41 @@ ingenieria:
   - aerospace
   - calidad industrial
   - control de calidad
+  - calidad
+  - producción
+  - prl
+  - prevención de riesgos
+  - industria 4.0
+  - i4.0
+  - eléctrico
+  - electric
+  - electricista
+  - electrical
+  - mecánico
+  - mechanical
+  - mecatrónica
+  - mechatronics
+  - automoción
+  - automotive
+  - cad
+  - solidworks
+  - catia
+  - plm
+  - lean
+  - six sigma
+  - ingeniería técnica
+  - ingeniero técnico
+  - oficina técnica
+  - aeroespacial
+  - aeroestructuras
+  - qhsse
+  - qhse
+  - hse
+  - seguridad y salud
+  - medio ambiente y seguridad
+  - soldador
+  - operario
+  - técnico de mantenimiento
 electronica:
   - electrónica
   - electronics
@@ -333,6 +531,10 @@ producto:
   - business analyst
   - analista de negocio
   - analista funcional
+  - gestor de proyectos
+  - gestión de proyecto
+  - agile
+  - scrum
 consultoria:
   - consultoría
   - consultor
@@ -357,6 +559,11 @@ logistica:
   - comercio exterior
   - import export
   - aduanas
+  - transport
+  - comercio internacional
+  - international trade
+  - comprador
+  - shipping
 legal:
   - legal
   - jurídico
@@ -368,6 +575,11 @@ legal:
   - compliance
   - cumplimiento normativo
   - protección de datos
+  - laboral
+  - derecho laboral
+  - mercantil
+  - notaría
+  - propiedad intelectual
 comunicacion:
   - comunicación
   - communications
@@ -382,6 +594,16 @@ comunicacion:
   - audiovisual
   - editor de vídeo
   - video editor
+  - producción audiovisual
+  - fotografía
+  - fotógrafo
+  - photographer
+  - traductor
+  - translator
+  - traducción
+  - translation
+  - localización
+  - localization
 educacion:
   - educación
   - education
@@ -395,6 +617,19 @@ educacion:
   - pedagogía
   - enseñanza
   - orientador
+  - infantil
+  - educador
+  - maestro
+  - educación infantil
+  - e-learning
+  - elearning
+  - instructional design
+  - teaching
+  - psicopedagogo
+  - pedagogo
+  - clases particulares
+  - profesor particular
+  - logopeda
 salud:
   - salud
   - sanitario
@@ -414,6 +649,21 @@ salud:
   - clinical
   - psicólogo
   - nutricionista
+  - pharmacy
+  - dental
+  - dentista
+  - veterinario
+  - veterinary
+  - óptica
+  - optometrista
+  - odontología
+  - biomedical
+  - biomédico
+  - hospital
+  - clínica
+  - clinic
+  - psicología
+  - psychology
 ciencia:
   - laboratorio
   - laboratory
@@ -435,6 +685,15 @@ ciencia:
   - scientist
   - ciencias ambientales
   - medio ambiente
+  - física
+  - physics
+  - matemáticas
+  - mathematics
+  - geología
+  - agronomía
+  - tecnología de los alimentos
+  - tecnología de alimentos
+  - food science
 hosteleria:
   - hostelería
   - hospitality
@@ -451,6 +710,18 @@ hosteleria:
   - travel
   - viajes
   - guía turístico
+  - f&b
+  - food & beverage
+  - food and beverage
+  - kitchen
+  - restaurante
+  - restaurant
+  - revenue manager
+  - reservas
+  - reservations
+  - front office
+  - housekeeping
+  - barista
 arquitectura:
   - arquitectura
   - arquitecto
@@ -467,6 +738,26 @@ arquitectura:
   - autocad
   - interiorismo
   - topografía
+  - obra
+  - landscape
+  - paisajismo
+  - inmobiliaria
+  - inmobiliario
+  - real estate
+  - property
+  - gis
+  - arquitectura técnica
+  - aparejador
+  - edificación
+  - ingeniero de caminos
+  - ingeniería de caminos
+  - caminos, canales
+  - fontanero
+  - albañil
+  - carpintero
+  - pintor
+  - instalador
+  - climatización
 videojuegos:
   - videojuegos
   - videojuego

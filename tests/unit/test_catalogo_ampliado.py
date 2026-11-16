@@ -89,6 +89,34 @@ def test_espana_includes_towns_listed_only_in_provinces():
         {"modalidades": [], "ubicaciones": ["granada", "espana"]}, CAT)).lower()
 
 
+def test_unknown_area_passes_to_digest_but_other_area_is_rejected():
+    s = [Search(id="s", name="s", tipos=["practicas"], areas=["programador", "data"], prioridad="alta")]
+    unknown = build_offer(source="t", url="https://example.com/1", title="Estudiante en prácticas_Departamento TEF 7")
+    d = evaluate(unknown, s, Exclusions(), SYN, CAT, NOW)
+    assert d.ok and d.priority == "normal" and "área no indicada" in d.reasons[0]
+    other = build_offer(source="t", url="https://example.com/2", title="Prácticas en PRL")
+    assert not evaluate(other, s, Exclusions(), SYN, CAT, NOW).ok
+    known = build_offer(source="t", url="https://example.com/3", title="Prácticas Desarrollador Python")
+    assert evaluate(known, s, Exclusions(), SYN, CAT, NOW).priority == "alta"
+
+
+def test_desarrollo_web_is_programacion():
+    o = build_offer(source="t", url="https://example.com/1", title="PRÁCTICAS EN EMPRESA + DISEÑO Y DESARROLLO WEB")
+    assert evaluate(o, [Search(id="s", name="s", tipos=["practicas"], areas=["programador"])],
+                    Exclusions(), SYN, CAT, NOW).ok
+
+
+def test_infojobs_uses_configured_keywords_max_three():
+    from jobradar.config import Settings
+    from jobradar.sources import SourceContext
+    from jobradar.sources.html_portals import _infojobs_terms
+    ctx = SourceContext(http=None, settings=Settings(sources={"infojobs": {"keywords": ["a", "b", "c", "d"]}}),
+                        terms=["prácticas"])
+    assert _infojobs_terms(ctx) == ["a", "b", "c"]
+    ctx = SourceContext(http=None, settings=Settings(), terms=["prácticas", "intern"])
+    assert _infojobs_terms(ctx) == ["prácticas", "intern"]
+
+
 def test_tecnico_informatico_is_sistemas():
     o = build_offer(source="t", url="https://example.com/1", title="Técnico Informático Junior – Granada")
     assert evaluate(o, [Search(id="s", name="s", tipos=["junior"], areas=["sistemas"])],

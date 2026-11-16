@@ -81,6 +81,32 @@ def derive_terms(searches: list[Search], syn: Synonyms, catalog: Catalog) -> lis
     return out[:MAX_TERMS]
 
 
+# Orden de los tipos para portales generalistas: de más a menos ofertas publicadas
+_COMBO_ORDER = ("practicas", "junior", "trainee", "bootcamp")
+
+
+def derive_combos(searches: list[Search], syn: Synonyms, catalog: Catalog, limit: int = 6) -> list[str]:
+    """Búsquedas "tipo área" (p. ej. "prácticas programador") para portales generalistas, donde un tipo
+    a secas trae ofertas de cualquier sector. Primero las búsquedas de aviso al momento."""
+    first_area: dict[str, str | None] = {}
+    for s in sorted((s for s in searches if not s.paused), key=lambda s: s.prioridad != "alta"):
+        for t in s.tipos:
+            if fold(t) == "cualquiera":
+                continue
+            if first_area.get(t) is None:
+                first_area[t] = next((a for a in s.areas if fold(a) != "cualquiera"), None)
+    order = sorted(first_area, key=lambda t: _COMBO_ORDER.index(t) if t in _COMBO_ORDER else len(_COMBO_ORDER))
+    out: list[str] = []
+    for t in order:
+        tipo_word = _key_terms(t, syn, catalog)[0]
+        area = first_area[t]
+        area_word = catalog.portal_word(area) if area else None
+        phrase = f"{tipo_word} {area_word}" if area_word else tipo_word
+        if phrase not in out:
+            out.append(phrase)
+    return out[:limit]
+
+
 def derive_locations(searches: list[Search], catalog: Catalog) -> list[str]:
     out: list[str] = []
     for s in searches:
@@ -204,6 +230,7 @@ async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | N
         ctx = SourceContext(http=http, settings=settings,
                             terms=derive_terms(searches, syn, catalog),
                             locations=derive_locations(searches, catalog),
+                            combos=derive_combos(searches, syn, catalog),
                             env=load_env(paths.env) if paths.env.exists() else {})
         results = await run_sources(ctx, names, fetchers)
         for name, res in results.items():
@@ -254,6 +281,19 @@ async def init_baseline(paths: Paths, now: datetime | None = None, **kw) -> Scan
         store.close()
     report.new_matched = []
     return report
+
+
+def mark_seen(paths: Paths, offers: list[JobOffer], now: datetime) -> int:
+    """Guarda ofertas/enlaces como ya vistos, sin avisar (p. ej. al empezar a vigilar una página)."""
+    store = Store(paths.db)
+    try:
+        up = store.upsert(offers, now)
+        for job in up.new_jobs:
+            store.set_decision(job.id, watch_decision(job.offer_view()))
+            store.mark_notified(job.id, None, now)
+        return len(up.new_jobs)
+    finally:
+        store.close()
 
 
 def reevaluate(paths: Paths, search_ids: list[str], days: int = 14,

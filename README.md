@@ -33,6 +33,9 @@ También en InfoJobs
 - **Portales**: LinkedIn, InfoJobs, Tecnoempleo, Infoempleo y Primer Empleo.
 - **Vigilancia de páginas**: avisa cuando aparece algo nuevo en páginas de programas sin listado de ofertas.
 - **Filtros con botones y sinónimos**: tipo, área, modalidad y ubicación, en español e inglés.
+- **Todo se configura desde Telegram**: búsquedas, exclusiones, fuentes (`/fuentes`), webs de empresas (`/empresas`)
+  y páginas vigiladas (`/paginas`), sin editar archivos.
+- **Ante la duda, se incluye**: si una oferta no dice su área, su modalidad o una ubicación conocida, no se descarta.
 - **Ofertas repetidas**: una sola notificación con todos los enlaces.
 - **Revisión de descartes**: `/descartadas` muestra qué se ha descartado y por qué, y permite rescatar ofertas.
 
@@ -85,7 +88,7 @@ Si lo desactivaste o el bot no responde, arráncalo a mano desde la carpeta del 
 - JobRadar es una herramienta de uso personal. Cada usuario es responsable de cumplir las condiciones de uso de
   cada web que consulte.
 - LinkedIn prohíbe el scraping en sus condiciones. La fuente de LinkedIn viene activada, pero puedes desactivarla
-  en `config.yaml`.
+  con `/fuentes` en el bot.
 - RemoteOK exige citar y enlazar su web como fuente; si reenvías o publicas ofertas de RemoteOK, hazlo así.
 - JobRadar no evita CAPTCHAs ni bloqueos. Si una web bloquea las peticiones, la fuente se pausa.
 

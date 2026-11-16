@@ -31,10 +31,16 @@ def _variants(word: str) -> str:
         word = word[:-3]
     if not word or not word[-1].isalpha():
         return re.escape(word)
+    # Plural en la lista -> también el singular ("contenidos" casa con "contenido", "docentes" con
+    # "docente", "operaciones" con "operación", "events" con "event")
+    if len(word) - 2 >= 4 and word.endswith("es"):
+        return re.escape(word[:-2]) + "(?:es|e|s)?"
+    if len(word) > 4 and word.endswith("s") and not word.endswith("ss"):
+        word = word[:-1]
     if word[-1] in "oa":
         return re.escape(word[:-1]) + "(?:o|a|os|as)"
     if word[-1] == "r":
-        return re.escape(word) + "(?:a|es|as)?"
+        return re.escape(word) + "(?:a|es|as|s)?"  # programadora/es/as y careers/developers
     return re.escape(word) + "(?:s|es)?"
 
 
@@ -53,10 +59,19 @@ def word_pattern(terms: list[str], variants: bool = True) -> re.Pattern:
 
 
 class Synonyms:
+    """Grupos de sinónimos. Un término que empieza por "!" es una excepción del grupo: ese texto se
+    ignora antes de buscar (p. ej. "!ntt data" para que el nombre de la empresa no cuente como Datos)."""
+
     def __init__(self, groups: dict[str, list[str]]):
-        self.groups = {fold(k): list(dict.fromkeys([fold(k)] + [fold(t) for t in v]))
-                       for k, v in groups.items()}
+        self.groups: dict[str, list[str]] = {}
+        self.negatives: dict[str, list[str]] = {}
+        for k, v in groups.items():
+            terms = [str(t) for t in v or []]
+            self.groups[fold(k)] = list(dict.fromkeys(
+                [fold(k)] + [fold(t) for t in terms if not t.startswith("!")]))
+            self.negatives[fold(k)] = [fold(t[1:]) for t in terms if t.startswith("!") and t[1:].strip()]
         self._cache: dict[str, re.Pattern] = {}
+        self._neg_cache: dict[str, re.Pattern | None] = {}
 
     @classmethod
     def from_files(cls, base: Path, user: Path | None = None) -> "Synonyms":
@@ -79,6 +94,16 @@ class Synonyms:
             self._cache[t] = word_pattern(self.expand(t))
         return self._cache[t]
 
+    def search(self, term: str, text: str) -> re.Match | None:
+        """Busca el término (y sus sinónimos) en un texto ya plegado, quitando antes sus excepciones."""
+        t = fold(term)
+        if t not in self._neg_cache:
+            negs = [n for key, members in self.groups.items() if t == key or t in members
+                    for n in self.negatives.get(key, [])]
+            self._neg_cache[t] = word_pattern(negs, variants=False) if negs else None
+        neg = self._neg_cache[t]
+        return self.pattern(t).search(neg.sub(" ", text) if neg else text)
+
 
 class Catalog:
     def __init__(self, data: dict):
@@ -87,10 +112,18 @@ class Catalog:
         self.ubicaciones: dict[str, dict] = data.get("ubicaciones", {})
         self.remote_regions_ok: list[str] = data.get("remote_regions_ok", [])
         self.remote_regions_no: list[str] = data.get("remote_regions_no", [])
+        self.portal_words: dict[str, str] = data.get("consulta_portal", {})
         known = {fold(a) for e in self.ubicaciones.values() for a in e.get("aliases", [])}
         known |= {fold(k) for k in self.ubicaciones} | {fold(a) for a in data.get("otras_ubicaciones", [])}
         known -= _GENERIC_LOCATIONS
         self._known = word_pattern(sorted(known), variants=False) if known else None
+
+    def portal_word(self, area: str) -> str:
+        """Palabra con la que buscar un área en un portal ("programador", "data"...)."""
+        if area in self.portal_words:
+            return self.portal_words[area]
+        label = self.areas.get(area)
+        return label.split("/")[0].strip().lower() if label else area
 
     def known_place(self, location: str) -> bool:
         """¿La ubicación nombra algún lugar conocido (de cualquier región)?"""
@@ -117,7 +150,7 @@ def detect_modality(offer: JobOffer, syn: Synonyms) -> Modality | None:
         return offer.modality
     text = fold(f"{offer.title} {offer.location or ''}")
     for key in ("hibrido", "remoto", "presencial"):
-        if syn.pattern(key).search(text):
+        if syn.search(key, text):
             return key  # type: ignore[return-value]
     return None
 
@@ -125,7 +158,7 @@ def detect_modality(offer: JobOffer, syn: Synonyms) -> Modality | None:
 def _first_match(terms: list[str], text: str, syn: Synonyms) -> tuple[str, str] | None:
     """Primer término de la lista que encaja con el texto: (término, texto encontrado)."""
     for term in terms:
-        m = syn.pattern(term).search(text)
+        m = syn.search(term, text)
         if m:
             return term, m.group(0)
     return None
@@ -166,37 +199,56 @@ def _remote_region_ok(search: Search, region: str, catalog: Catalog) -> bool:
     return True  # región desconocida: pasa
 
 
+AREA_UNKNOWN = "área no indicada en el título"
+# Marcas de género que cortan frases: "Técnico/a de redes", "Ingeniero (a) de caminos", "becario/as"
+_GENDER = re.compile(r"(?<=[a-z])\s?(?:/\s?(?:a|as|o|os|es)|\(\s?(?:a|as|o|os|es)\s?\))(?![a-z])")
+
+
+def match_text(text: str) -> str:
+    """Texto plegado y sin marcas de género, listo para buscar sinónimos."""
+    return _GENDER.sub("", fold(text))
+
+
+def _any_area(text: str, syn: Synonyms, catalog: Catalog) -> bool:
+    return any(syn.search(key, text) for key in catalog.areas)
+
+
 def _eval_search(offer: JobOffer, s: Search, text: str, modality, syn: Synonyms,
-                 catalog: Catalog) -> tuple[bool, str]:
-    """(encaja, motivo) de una búsqueda concreta."""
+                 catalog: Catalog) -> tuple[bool, str, bool]:
+    """(encaja, motivo, dudosa) de una búsqueda concreta. Dudosa = pasa solo porque el título no
+    dice el área (p. ej. "Estudiante en prácticas Departamento TEF7"): ante la duda, se incluye."""
     parts: list[str] = []
+    uncertain = False
     tipo = _group_matches(s.tipos, text, syn, catalog.tipos)
     if tipo is False:
-        return False, f"búsqueda '{s.name}': ningún tipo de {s.tipos} reconocido en el título"
+        return False, f"búsqueda '{s.name}': ningún tipo de {s.tipos} reconocido en el título", False
     if tipo:
         parts.append(f"tipo '{tipo[0]}' ({tipo[1]})")
     area = _group_matches(s.areas, text, syn, catalog.areas)
     if area is False:
-        return False, f"búsqueda '{s.name}': ningún área de {s.areas} reconocida en el título"
-    if area:
+        if _any_area(text, syn, catalog):  # el título es de otra área conocida
+            return False, f"búsqueda '{s.name}': ningún área de {s.areas} reconocida en el título", False
+        parts.append(AREA_UNKNOWN)
+        uncertain = True
+    elif area:
         parts.append(f"área '{area[0]}' ({area[1]})")
     if s.modalidades and modality is not None and modality not in s.modalidades:
-        return False, f"búsqueda '{s.name}': modalidad '{modality}' no está en {s.modalidades}"
+        return False, f"búsqueda '{s.name}': modalidad '{modality}' no está en {s.modalidades}", False
     if modality == "remoto":
         # Sin campo de región, la región suele venir en la ubicación ("Remote (US only)").
         region = offer.remote_region or offer.location
         if region and not _remote_region_ok(s, region, catalog):
-            return False, f"búsqueda '{s.name}': región remota '{region}' no admitida"
+            return False, f"búsqueda '{s.name}': región remota '{region}' no admitida", False
     elif s.ubicaciones and offer.location and not _location_ok(s, offer.location, catalog):
         return False, (f"búsqueda '{s.name}': ubicación '{offer.location}' "
-                       f"no está en {s.ubicaciones}")
-    return True, f"encaja con '{s.name}'" + (": " + ", ".join(parts) if parts else "")
+                       f"no está en {s.ubicaciones}"), False
+    return True, f"encaja con '{s.name}'" + (": " + ", ".join(parts) if parts else ""), uncertain
 
 
 def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Synonyms,
              catalog: Catalog, now: datetime, max_age_days: int = 14) -> Decision:
-    title_fold = fold(offer.title)
-    text = fold(f"{offer.title} {offer.category or ''}")  # nunca la descripción
+    title_fold = match_text(offer.title)
+    text = match_text(f"{offer.title} {offer.category or ''}")  # nunca la descripción
     active = [s for s in searches if not s.paused]
     notes: list[str] = []
 
@@ -221,7 +273,7 @@ def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Syn
     is_company = excluded_by is not None
     if not excluded_by:
         for w in excl.words:
-            if syn.pattern(w).search(title_fold):
+            if syn.search(w, title_fold):
                 excluded_by = f"excluida por '{w}' en el título"
                 break
     if excluded_by:
@@ -242,11 +294,12 @@ def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Syn
     fails: list[str] = []
     priorities: set[str] = set()
     for s in active:
-        ok, why = _eval_search(offer, s, text, modality, syn, catalog)
+        ok, why, uncertain = _eval_search(offer, s, text, modality, syn, catalog)
         if ok:
             matched.append(s.id)
             reasons.append(why)
-            priorities.add(s.prioridad)
+            # Si solo encaja por no indicar el área, va al resumen diario: no se pierde, pero no interrumpe
+            priorities.add("normal" if uncertain else s.prioridad)
         else:
             fails.append(why)
     if matched:

@@ -30,6 +30,9 @@ COMMANDS = [
     ("start", "Saludo y primeros pasos"),
     ("busquedas", "Crear, editar, pausar o borrar búsquedas"),
     ("excluir", "Palabras y empresas excluidas"),
+    ("fuentes", "Activar o desactivar fuentes de ofertas"),
+    ("empresas", "Webs de empleo de empresas que se leen"),
+    ("paginas", "Páginas de academias y programas que se vigilan"),
     ("descartadas", "Ofertas descartadas en las últimas 24 h"),
     ("probar", "Probar un título: /probar <texto>"),
     ("recientes", "Ofertas encontradas últimamente"),
@@ -681,6 +684,10 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not waiting or not text:
         return
     kind = waiting[0]
+    if kind in ("empresa", "pagina"):
+        from . import bot_fuentes
+        await bot_fuentes.on_reply(update, context, waiting, text)
+        return
     if kind == "excl":
         searches, excl = _load(context)
         target = excl.words if waiting[1] == "aw" else excl.companies
@@ -753,12 +760,14 @@ def build_application(paths: Paths) -> Application:
                 "descartadas": cmd_descartadas, "probar": cmd_probar, "recientes": cmd_recientes,
                 "estado": cmd_estado, "silencio": cmd_silencio, "escanear": cmd_escanear,
                 "ayuda": cmd_ayuda}
+    from . import bot_fuentes
+    commands.update(bot_fuentes.HANDLERS)
     for name, fn in commands.items():
         app.add_handler(CommandHandler(name, fn, filters=auth))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & auth, on_text))
     for pattern, fn in [(r"^[hn]:\d+$", on_job_action), (r"^g:\d+$", on_era_buena), (r"^k:", on_token),
                         (r"^m:", on_group), (r"^v:", on_see), (r"^x:", on_exclusion),
-                        (r"^s:", on_search_action), (r"^w:", on_wizard)]:
+                        (r"^s:", on_search_action), (r"^w:", on_wizard), *bot_fuentes.CALLBACKS]:
         app.add_handler(CallbackQueryHandler(fn, pattern=pattern))
     app.add_error_handler(on_error)
     return app

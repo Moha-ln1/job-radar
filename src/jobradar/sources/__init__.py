@@ -25,6 +25,9 @@ class SourceContext:
     terms: list[str] = field(default_factory=list)       # p. ej. ["prácticas", "internship", "trainee"]
     locations: list[str] = field(default_factory=list)   # p. ej. ["Granada", "España"]
     env: dict[str, str] = field(default_factory=dict)    # claves opcionales de .env
+    # Tipo + área de tus búsquedas, p. ej. ["prácticas programador", "junior programador"]: para portales
+    # generalistas, donde "prácticas" a secas trae ofertas de cualquier sector.
+    combos: list[str] = field(default_factory=list)
 
     def options(self, name: str) -> dict:
         """Opciones de la fuente en config.yaml (``sources.<name>``)."""

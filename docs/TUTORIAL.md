@@ -93,6 +93,9 @@ Puedes tener varias búsquedas. Puedes editarlas, pausarlas o borrarlas desde `/
 |---|---|
 | `/busquedas` | Crear, editar, pausar o borrar búsquedas. |
 | `/excluir` | Añadir palabras o empresas que nunca quieres ver. |
+| `/fuentes` | Activar o desactivar cada fuente (LinkedIn, InfoJobs, portales de remoto...). |
+| `/empresas` | Añadir la web de empleo de una empresa pegando su enlace, o quitarla. |
+| `/paginas` | Vigilar la página de una academia o programa: te aviso cuando aparece un enlace nuevo. |
 | `/descartadas` | Ver las ofertas descartadas en las últimas 24 h, agrupadas por motivo. |
 | `/probar <texto>` | Comprobar si un título encaja con tus búsquedas. Ejemplo: `/probar Prácticas de marketing en Madrid`. |
 | `/recientes` | Ver las ofertas que encajan encontradas últimamente. |
@@ -102,6 +105,14 @@ Puedes tener varias búsquedas. Puedes editarlas, pausarlas o borrarlas desde `/
 | `/ayuda` | Ver la lista de comandos. |
 
 El bot solo responde al chat de Telegram que configuraste durante la instalación.
+
+No hace falta editar ningún archivo: lo que cambias con `/fuentes`, `/empresas` y `/paginas` se guarda en
+`ajustes_bot.yaml` y tiene prioridad sobre `config.yaml`.
+
+**Cómo se clasifican las ofertas.** Cada opción busca sus sinónimos en español e inglés en el título (y la
+categoría, si el portal la da), con plurales, femeninos y marcas como "Técnico/a". Si el título no indica el área
+(por ejemplo "Estudiante en prácticas – Departamento TEF7"), la oferta no se descarta: te llega en el resumen
+diario, para que no se pierda.
 
 ## 7. Botones de cada aviso
 
