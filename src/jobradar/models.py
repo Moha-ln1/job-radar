@@ -8,7 +8,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Literal
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from .normalize import fold
 
@@ -153,7 +153,7 @@ class Exclusions(BaseModel):
     words: list[str] = []
     companies: list[str] = []
     # Descarta si la descripción pide más años de experiencia que estos (None: sin límite)
-    experiencia_max: int | None = None
+    experiencia_max: int | None = Field(default=None, ge=0)
     # Palabras que descartan una oferta si salen en su descripción (p. ej. "SAP", "alemán nativo")
     en_descripcion: list[str] = []
 

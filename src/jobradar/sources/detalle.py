@@ -14,7 +14,7 @@ from ..http import Http
 _log = logging.getLogger("jobradar.detalle")
 
 # Fichas que se piden por escaneo, por dominio (LinkedIn bloquea con facilidad: muy pocas)
-LIMITS = {"www.linkedin.com": 5}
+LIMITS = {"linkedin.com": 5}
 DEFAULT_LIMIT = 25
 _LD_JSON = re.compile(r'<script[^>]*application/ld\+json[^>]*>(.*?)</script>', re.DOTALL | re.IGNORECASE)
 
@@ -26,8 +26,14 @@ def supports(source: str) -> bool:
 _PORTALS = {"tecnoempleo", "infoempleo", "primerempleo", "linkedin"}
 
 
+def budget_key(url: str) -> str:
+    """Dominio al que se cuenta la ficha: todos los subdominios de LinkedIn (es., www....) son uno."""
+    host = urlsplit(url).hostname or ""
+    return next((d for d in LIMITS if host == d or host.endswith("." + d)), host)
+
+
 def limit_for(url: str) -> int:
-    return LIMITS.get(urlsplit(url).hostname or "", DEFAULT_LIMIT)
+    return LIMITS.get(budget_key(url), DEFAULT_LIMIT)
 
 
 def _job_postings(html: str) -> list[dict]:
@@ -38,7 +44,8 @@ def _job_postings(html: str) -> list[dict]:
         except ValueError:
             continue
         items = data if isinstance(data, list) else data.get("@graph") or [data]
-        out += [i for i in items if isinstance(i, dict) and i.get("@type") == "JobPosting"]
+        out += [i for i in items if isinstance(i, dict)
+                and "JobPosting" in (i["@type"] if isinstance(i.get("@type"), list) else [i.get("@type")])]
     return out
 
 
@@ -50,9 +57,10 @@ def description_from_html(html: str) -> str | None:
             if posting.get(key):
                 parts.append(str(posting[key]))
         exp = posting.get("experienceRequirements")
-        if isinstance(exp, dict) and exp.get("monthsOfExperience"):
-            parts.append(f"{int(float(exp['monthsOfExperience']) // 12)} years of experience")
-        elif exp:
+        months = exp.get("monthsOfExperience") if isinstance(exp, dict) else None
+        if isinstance(months, (int, float, str)) and str(months).replace(".", "", 1).isdigit():
+            parts.append(f"{int(float(months) // 12)} years of experience")
+        elif exp and not isinstance(exp, dict):
             parts.append(f"experiencia: {exp}")
         text = "\n".join(p for p in parts if p.strip())
         if text.strip():

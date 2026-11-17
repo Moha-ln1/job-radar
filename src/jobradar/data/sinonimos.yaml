@@ -222,6 +222,10 @@ data:
   - tensorflow
   # "data" y "datos" sueltos fallan en estos casos
   - "!ntt data"
+  - "!bi-lingual"
+  - "!bi lingual"
+  - "!dl driver"
+  - "!rag picker"
   - "!data entry"
   - "!data center"
   - "!data centre"

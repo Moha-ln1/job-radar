@@ -8,7 +8,6 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from urllib.parse import urlsplit
 
 import httpx
 
@@ -243,7 +242,7 @@ async def _add_description(http: Http, store: Store, job: Job, excl: Exclusions,
         return False
     if excl.experiencia_max is None and not excl.en_descripcion:
         return False
-    domain = urlsplit(post.url).hostname or ""
+    domain = detalle.budget_key(post.url)
     if domain in budget.blocked or budget.used.get(domain, 0) >= detalle.limit_for(post.url):
         return False
     budget.used[domain] = budget.used.get(domain, 0) + 1
@@ -253,7 +252,7 @@ async def _add_description(http: Http, store: Store, job: Job, excl: Exclusions,
         budget.blocked.add(domain)
         _log.warning("detalle: %s bloquea las fichas; no se piden más en este escaneo", domain)
         return False
-    except (httpx.HTTPError, ValueError, KeyError, AttributeError) as exc:  # una ficha rota no tumba el escaneo
+    except (httpx.HTTPError, ValueError, KeyError, AttributeError, TypeError) as exc:  # una ficha rota no tumba el escaneo
         _log.warning("detalle: no se pudo leer %s: %s", post.url, exc)
         return False
     text = plain_text(text) if text else None

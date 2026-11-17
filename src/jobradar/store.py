@@ -170,6 +170,9 @@ class Store:
                     "INSERT INTO postings (job_id,source,url,posted_at,first_seen,raw_title,raw_company)"
                     " VALUES (?,?,?,?,?,?,?)",
                     (job_id, o.source, o.url, _iso(o.posted_at), _iso(now), o.title, o.company))
+                if not is_new and o.description:  # otra fuente de la misma oferta trae la descripción
+                    self.db.execute("UPDATE jobs SET description=? WHERE id=? AND description IS NULL",
+                                    (o.description, job_id))
                 job = self.get_job(job_id)
                 if is_new:
                     res.new_jobs.append(job)

@@ -26,12 +26,24 @@ CAT = Catalog.from_file(DATA / "catalogo.yaml")
     ("Tienes un año de experiencia como mínimo", 1),
     ("5+ years in the same process family", 5),
     ("We have over 10 years of experience building products. You have 2+ years of experience", 2),
+    ("Entre 2 y 4 años de experiencia", 2),
+    ("between 2 and 4 years of experience", 2),
+    ("Experiencia en Python (mínimo 2 años)", 2),
+    ("Bring your 3+ years of experience", 3),
+    ("Our client requires 3 years of experience", 3),
+    ("5 años de experiencia en Java, se valorará Kotlin", 5),
+    # los saltos de línea separan requisitos: "(valorable)" de una viñeta no anula la anterior
+    ("3 años de experiencia en Java\nInglés (valorable)", 3),
+    ("Requisitos:\n- 2 años de experiencia\n- Inglés B2 (valorable)", 2),
     # no cuentan: años de la empresa, contratos, cosas que solo se valoran
     ("0-2 years of experience", None),
     ("Valorable 1 año de experiencia", None),
     ("Empresa con más de 20 años de experiencia en el sector", None),
     ("Contamos con 10 años de experiencia", None),
     ("Contrato de 2 años", None),
+    ("Requisitos: 1,5 años de experiencia", None),
+    ("At least 2.5 years of experience", None),
+    ("No se requiere ningún año de experiencia", None),
     ("25 days per year to work remotely", None),
     ("Did the work within the last 3 years", None),
     ("2 years of experience is a plus", None),
@@ -68,3 +80,19 @@ def test_palabra_excluida_en_la_descripcion():
     d = _decide("Se valora SAP y alemán nativo", en_descripcion=["alemán nativo"])
     assert not d.ok and "alemán nativo" in d.reasons[-1]
     assert _decide("Trabajo con Python y SQL", en_descripcion=["alemán nativo"]).ok
+
+
+def test_json_ld_raro_no_rompe_y_se_lee_la_experiencia():
+    from jobradar.sources.detalle import description_from_html
+    raro = ('<script type="application/ld+json">{"@type": ["JobPosting"], "description": "Junior",'
+            ' "experienceRequirements": {"monthsOfExperience": [24]}}</script>')
+    assert description_from_html(raro) == "Junior"
+    ok = raro.replace("[24]", "36")
+    assert "3 years of experience" in description_from_html(ok)
+
+
+def test_linkedin_comparte_tope_entre_subdominios():
+    from jobradar.sources.detalle import budget_key, limit_for
+    assert budget_key("https://es.linkedin.com/jobs/view/x") == budget_key("https://www.linkedin.com/jobs/view/y")
+    assert limit_for("https://es.linkedin.com/jobs/view/x") == 5
+    assert limit_for("https://www.tecnoempleo.com/x") > 5
