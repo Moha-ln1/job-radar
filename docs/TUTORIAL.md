@@ -82,7 +82,14 @@ botones:
 1. **Tipo**: prácticas, trainee o junior.
 2. **Área**: programación, datos, ciberseguridad, sistemas, diseño, marketing, ventas, salud, hostelería,
    logística, limpieza y seguridad, social… (27 áreas, de cualquier sector). Si no eliges ninguna, vale
-   cualquier área.
+   cualquier área. Si el título de una oferta no dice su área ("Estudiante en prácticas departamento TEF7"),
+   se incluye igualmente; marca **🎯 Solo si el título dice el área** para que esas no te lleguen. Con ✏️ Otra…
+   puedes escribir un área propia (p. ej. `python`); sus sinónimos se añaden en `sinonimos_usuario.yaml`:
+
+   ```yaml
+   python: [python, django, flask, fastapi]
+   ia: [ia, machine learning, llm, deep learning, data scientist]
+   ```
 3. **Modalidad**: presencial, híbrido, remoto o cualquiera.
 4. **Ubicación**: la ciudad o región donde buscas (solo se aplica a presencial e híbrido). Cada zona incluye sus
    municipios: "Granada" incluye Armilla, Maracena, Las Gabias…; "España" incluye todas las provincias.

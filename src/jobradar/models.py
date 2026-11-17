@@ -130,6 +130,8 @@ class Search(BaseModel):
     ubicaciones: list[str] = []
     prioridad: Literal["alta", "normal"] = "alta"
     paused: bool = False
+    # Solo encajan ofertas cuyo título diga alguna de las áreas (sin la regla de "ante la duda, se incluye")
+    estricta: bool = False
 
 
 class Exclusions(BaseModel):

@@ -39,7 +39,8 @@ responde al aviso original:
 - **Bot listo de serie**: al primer arranque se pone nombre, foto de perfil y descripción.
 - **Todo se configura desde Telegram**: búsquedas, exclusiones, fuentes (`/fuentes`), webs de empresas (`/empresas`)
   y páginas vigiladas (`/paginas`), sin editar archivos.
-- **Ante la duda, se incluye**: si una oferta no dice su área, su modalidad o una ubicación conocida, no se descarta.
+- **Ante la duda, se incluye**: si una oferta no dice su área, su modalidad o una ubicación conocida, no se descarta
+  (salvo en las búsquedas marcadas con 🎯, que exigen que el título diga el área).
 - **Ofertas repetidas**: una sola notificación con todos los enlaces.
 - **Revisión de descartes**: `/descartadas` muestra qué se ha descartado y por qué, y permite rescatar ofertas.
 

@@ -50,6 +50,10 @@ def _looks_spanish(term: str) -> bool:
 def _key_terms(key: str, syn: Synonyms, catalog: Catalog) -> tuple[str, str | None]:
     """(término principal, equivalente en inglés) de un tipo o área."""
     members = syn.expand(key)
+    if fold(key) not in catalog.tipos and fold(key) not in catalog.areas:
+        # Grupo propio (sinonimos_usuario.yaml): su nombre es el término; el equivalente, su primer miembro
+        k = fold(key)
+        return k, next((m for m in members if m != k and len(m) > 2), None)
     es = next((m for m in members if _looks_spanish(m)), members[0])
     label = catalog.tipos.get(fold(key)) or catalog.areas.get(fold(key))
     # "Datos / IA" no sirve como término para un portal: solo etiquetas de una pieza
@@ -87,23 +91,26 @@ _COMBO_ORDER = ("practicas", "junior", "trainee")
 
 def derive_combos(searches: list[Search], syn: Synonyms, catalog: Catalog, limit: int = 6) -> list[str]:
     """Búsquedas "tipo área" (p. ej. "prácticas programador") para portales generalistas, donde un tipo
-    a secas trae ofertas de cualquier sector. Primero las búsquedas de aviso al momento."""
-    first_area: dict[str, str | None] = {}
+    a secas trae ofertas de cualquier sector. Primero las búsquedas de aviso al momento, y por rondas:
+    la primera área de cada tipo, luego la segunda... ("prácticas python", "junior python", "prácticas ia")."""
+    areas_of: dict[str, list[str]] = {}
     for s in sorted((s for s in searches if not s.paused), key=lambda s: s.prioridad != "alta"):
         for t in s.tipos:
             if fold(t) == "cualquiera":
                 continue
-            if first_area.get(t) is None:
-                first_area[t] = next((a for a in s.areas if fold(a) != "cualquiera"), None)
-    order = sorted(first_area, key=lambda t: _COMBO_ORDER.index(t) if t in _COMBO_ORDER else len(_COMBO_ORDER))
+            lst = areas_of.setdefault(t, [])
+            lst.extend(a for a in s.areas if fold(a) != "cualquiera" and a not in lst)
+    order = sorted(areas_of, key=lambda t: _COMBO_ORDER.index(t) if t in _COMBO_ORDER else len(_COMBO_ORDER))
     out: list[str] = []
-    for t in order:
-        tipo_word = _key_terms(t, syn, catalog)[0]
-        area = first_area[t]
-        area_word = catalog.portal_word(area) if area else None
-        phrase = f"{tipo_word} {area_word}" if area_word else tipo_word
-        if phrase not in out:
-            out.append(phrase)
+    for i in range(max([len(v) for v in areas_of.values()] + [1])):
+        for t in order:
+            areas = areas_of[t]
+            if i >= max(len(areas), 1):
+                continue
+            tipo_word = _key_terms(t, syn, catalog)[0]
+            phrase = f"{tipo_word} {catalog.portal_word(areas[i])}" if areas else tipo_word
+            if phrase not in out:
+                out.append(phrase)
     return out[:limit]
 
 

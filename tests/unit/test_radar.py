@@ -216,3 +216,14 @@ def test_enlaces_vigilados_convocatoria_urgente_y_resto_al_resumen():
     assert prio("Inscripciones abiertas", "https://factoriaf5.org/bootcamp-ia") == "alta"
     assert prio("Escríbenos", "https://spain.generation.org/contacto/") == "normal"
     assert prio("Más Prensa", "https://spain.generation.org/press/") == "normal"
+
+
+def test_combos_por_rondas_y_grupos_propios(tmp_path):
+    user = tmp_path / "u.yaml"
+    user.write_text("python:\n  - python\n  - pandas\nia:\n  - ia\n  - machine learning\n", encoding="utf-8")
+    syn = Synonyms.from_files(DATA / "sinonimos.yaml", user)
+    cat = Catalog.from_file(DATA / "catalogo.yaml")
+    s = [Search(id="a", name="a", tipos=["practicas", "junior"], areas=["python", "ia"])]
+    assert radar.derive_combos(s, syn, cat) == ["prácticas python", "junior python", "prácticas ia", "junior ia"]
+    terms = radar.derive_terms(s, syn, cat)
+    assert terms.index("python") < terms.index("pandas")  # el nombre del grupo va antes que su equivalente

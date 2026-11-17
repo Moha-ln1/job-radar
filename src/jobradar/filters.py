@@ -31,6 +31,8 @@ def _variants(word: str) -> str:
         word = word[:-3]
     if not word or not word[-1].isalpha():
         return re.escape(word)
+    if len(word) <= 3:  # siglas ("ia", "qa", "ml"): solo plural; "ia" no debe casar con "ios"
+        return re.escape(word) + "s?"
     # Plural en la lista -> también el singular ("contenidos" casa con "contenido", "docentes" con
     # "docente", "operaciones" con "operación", "events" con "event")
     if len(word) - 2 >= 4 and word.endswith("es"):
@@ -82,6 +84,8 @@ class Synonyms:
 
     def expand(self, term: str) -> list[str]:
         t = fold(term)
+        if t in self.groups:  # nombre de un grupo: solo ese grupo ("python" no arrastra todo "programador")
+            return list(dict.fromkeys(self.groups[t])) or [t]
         out: list[str] = []
         for key, members in self.groups.items():
             if t == key or t in members:
@@ -98,8 +102,8 @@ class Synonyms:
         """Busca el término (y sus sinónimos) en un texto ya plegado, quitando antes sus excepciones."""
         t = fold(term)
         if t not in self._neg_cache:
-            negs = [n for key, members in self.groups.items() if t == key or t in members
-                    for n in self.negatives.get(key, [])]
+            keys = [t] if t in self.groups else [k for k, members in self.groups.items() if t in members]
+            negs = [n for key in keys for n in self.negatives.get(key, [])]
             self._neg_cache[t] = word_pattern(negs, variants=False) if negs else None
         neg = self._neg_cache[t]
         return self.pattern(t).search(neg.sub(" ", text) if neg else text)
@@ -224,8 +228,11 @@ def _eval_search(offer: JobOffer, s: Search, text: str, modality, syn: Synonyms,
         return False, f"búsqueda '{s.name}': ningún tipo de {s.tipos} reconocido en el título", False
     if tipo:
         parts.append(f"tipo '{tipo[0]}' ({tipo[1]})")
-    area = _group_matches(s.areas, text, syn, catalog.areas)
+    # Estricta: el área tiene que estar en el título (la categoría del portal, p. ej. "Data & AI", no vale)
+    area = _group_matches(s.areas, match_text(offer.title) if s.estricta else text, syn, catalog.areas)
     if area is False:
+        if s.estricta:  # la búsqueda pide que el título diga el área
+            return False, f"búsqueda '{s.name}': el título no dice ningún área de {s.areas}", False
         if _any_area(text, syn, catalog):  # el título es de otra área conocida
             return False, f"búsqueda '{s.name}': ningún área de {s.areas} reconocida en el título", False
         parts.append(AREA_UNKNOWN)

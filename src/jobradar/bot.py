@@ -71,7 +71,7 @@ def new_id(existing_ids) -> str:
 def wizard_state_new(existing_ids=()) -> dict:
     return {"id": new_id(existing_ids), "name": "", "name_custom": False, "step": 0,
             "tipos": [], "areas": [], "modalidades": [], "ubicaciones": [], "prioridad": "alta",
-            "paused": False}
+            "paused": False, "estricta": False}
 
 
 def toggle(state: dict, field: str, value: str) -> dict:
@@ -113,7 +113,8 @@ def auto_name(state: dict, catalog: Catalog | None = None) -> str:
 
 STEP_HELP = {
     "tipos": "Qué tipo de puesto. Se busca en el título, en español e inglés.",
-    "areas": "De qué trata el puesto. Se busca en el título y la categoría de la oferta.",
+    "areas": ("De qué trata el puesto. Se busca en el título y la categoría de la oferta. Si el título no "
+              "dice el área, se incluye igualmente, salvo que marques 🎯."),
     "modalidades": "Si la oferta no indica modalidad, se incluye igualmente.",
     "ubicaciones": ("Cada zona incluye sus municipios. Si la ubicación de la oferta no se reconoce, "
                     "se incluye igualmente."),
@@ -176,14 +177,15 @@ def state_to_search(state: dict, catalog: Catalog | None = None) -> Search:
     name = state["name"] if state["name_custom"] and state["name"] else auto_name(state, catalog)
     return Search(id=state["id"], name=name, tipos=list(state["tipos"]), areas=list(state["areas"]),
                   modalidades=list(state["modalidades"]), ubicaciones=list(state["ubicaciones"]),
-                  prioridad=state["prioridad"], paused=state.get("paused", False))
+                  prioridad=state["prioridad"], paused=state.get("paused", False),
+                  estricta=bool(state.get("estricta")) and bool(state["areas"]))
 
 
 def search_to_state(search: Search, catalog: Catalog | None = None) -> dict:
     state = {"id": search.id, "name": search.name, "step": 0, "tipos": list(search.tipos),
              "areas": list(search.areas), "modalidades": list(search.modalidades),
              "ubicaciones": list(search.ubicaciones), "prioridad": search.prioridad,
-             "paused": search.paused}
+             "paused": search.paused, "estricta": search.estricta}
     state["name_custom"] = search.name != auto_name(state, catalog)
     state["orig"] = _content(state)
     return state
@@ -213,7 +215,8 @@ def advance(state: dict, delta: int) -> dict:
 def describe_lines(state: dict, catalog: Catalog) -> list[str]:
     def join(f: str) -> str:
         return ", ".join(_labels(state, f, catalog)) or "Cualquiera"
-    lines = [f"Tipo: {join('tipos')}", f"Área: {join('areas')}", f"Modalidad: {join('modalidades')}"]
+    area = join("areas") + (" (solo si el título lo dice)" if state.get("estricta") and state["areas"] else "")
+    lines = [f"Tipo: {join('tipos')}", f"Área: {area}", f"Modalidad: {join('modalidades')}"]
     if state["modalidades"] != ["remoto"]:
         lines.append(f"Ubicación: {join('ubicaciones')}")
     lines.append(f"Avisos: {PRIORIDADES[state['prioridad']]}")
@@ -266,6 +269,10 @@ def render_step(state: dict, catalog: Catalog) -> tuple[str, InlineKeyboardMarku
         free = [(i, v) for i, v in enumerate(state[field]) if v not in opts]
         kb += _rows([InlineKeyboardButton(f"✅ {v[:30]}", callback_data=f"w:f:{i}") for i, v in free])
         kb.append([InlineKeyboardButton("✏️ Otra…", callback_data="w:o")])
+        if field == "areas" and state["areas"]:
+            on = state.get("estricta")
+            kb.append([InlineKeyboardButton(f"{'✅' if on else '⬜'} 🎯 Solo si el título dice el área",
+                                            callback_data="w:strict")])
     back = (InlineKeyboardButton("✖ Cancelar", callback_data="w:x") if step == 0
             else InlineKeyboardButton("◀ Atrás", callback_data="w:b"))
     kb.append([back, InlineKeyboardButton("Siguiente ▶", callback_data="w:n")])
@@ -746,6 +753,8 @@ async def on_wizard(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     elif action == "auto":
         state["name_custom"] = False
+    elif action == "strict":
+        state["estricta"] = not state.get("estricta")
     elif action == "name":
         await _ask(update, context, ("wiz_name",), "Escribe el nombre de la búsqueda:")
         return

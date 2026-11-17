@@ -146,3 +146,17 @@ async def test_guard_stops_foreign_chat(tmp_path):
     await bot.guard(update_from(42), ctx)
     with pytest.raises(ApplicationHandlerStop):
         await bot.guard(update_from(99), ctx)
+
+
+def test_boton_estricta_en_el_paso_de_area():
+    s = bot.wizard_state_new()
+    s["step"] = 1
+    _, kb = bot.render_step(s, CAT)
+    assert "w:strict" not in all_callbacks(kb)  # sin áreas no tiene sentido
+    bot.toggle(s, "areas", "data")
+    _, kb = bot.render_step(s, CAT)
+    assert "w:strict" in all_callbacks(kb)
+    s["estricta"] = True
+    search = bot.state_to_search(s, CAT)
+    assert search.estricta and bot.search_to_state(search, CAT)["estricta"]
+    assert "solo si el título lo dice" in "; ".join(bot.describe_lines(s, CAT))

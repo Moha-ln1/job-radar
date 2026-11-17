@@ -123,3 +123,38 @@ def test_sinonimos():
     assert SYN.pattern("practicas") is SYN.pattern("practicas")
     assert SYN.pattern("becario").search("becarias en ti")
     assert SYN.pattern("work placement").search("work-placement 2027")
+
+
+# --- grupos propios y búsqueda estricta ---
+def _user_syn(tmp_path):
+    user = tmp_path / "sinonimos_usuario.yaml"
+    user.write_text("python:\n  - python\n  - django\nia:\n  - ia\n  - machine learning\n  - llm\n",
+                    encoding="utf-8")
+    return Synonyms.from_files(DATA / "sinonimos.yaml", user)
+
+
+def test_grupo_propio_no_arrastra_el_grupo_donde_ya_estaba(tmp_path):
+    syn = _user_syn(tmp_path)
+    assert "developer" not in syn.expand("python")  # "python" también está en programador
+    assert syn.search("python", "django backend") and not syn.search("python", "java developer")
+
+
+def test_siglas_sin_variantes_de_genero():
+    assert SYN.search("data", "ia generativa") and not SYN.search("data", "developer ios android")
+
+
+def _ok(title, search, syn, category=None):
+    offer = JobOffer(title=title, url="https://e.invalid/1", source="t", category=category)
+    return evaluate(offer, [search], Exclusions(), syn, CAT, datetime.now(timezone.utc)).ok
+
+
+def test_busqueda_estricta_exige_el_area_en_el_titulo(tmp_path):
+    syn = _user_syn(tmp_path)
+    laxa = Search(id="a", name="a", tipos=["practicas"], areas=["python", "ia"])
+    estricta = laxa.model_copy(update={"estricta": True})
+    sin_area = "Estudiante en prácticas departamento TEF7"
+    assert _ok(sin_area, laxa, syn) and not _ok(sin_area, estricta, syn)
+    assert _ok("Prácticas Machine Learning", estricta, syn)
+    assert _ok("Becario/a desarrollo Python", estricta, syn)
+    # la categoría del portal no cuenta en la estricta: "Data & AI" no hace de IA un puesto de analista
+    assert not _ok("Prácticas Business Analyst", estricta, syn, category="Data & AI")

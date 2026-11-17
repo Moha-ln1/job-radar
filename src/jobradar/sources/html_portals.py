@@ -138,7 +138,8 @@ async def fetch_linkedin(ctx: SourceContext) -> list[JobOffer]:
     base = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
     offers: list[JobOffer] = []
     try:
-        for term in ctx.terms[:int(opts.get("max_terms", 5))] or ["prácticas"]:
+        # tipo + área ("prácticas python"): un tipo a secas trae ofertas de cualquier sector
+        for term in (ctx.combos or ctx.terms)[:int(opts.get("max_terms", 5))] or ["prácticas"]:
             # 3 ubicaciones: p. ej. Granada y Málaga (presencial) + España (remoto/híbrido)
             for location in [linkedin_location(loc) for loc in ctx.locations[:max_locations]] or [""]:
                 for page in range(max_pages):
