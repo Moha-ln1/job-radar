@@ -148,44 +148,93 @@ programador:
 data:
   - data
   - datos
+  # Análisis de datos y BI
   - analista de datos
   - data analyst
+  - data analytics
+  - data analysis
+  - análisis de datos
+  - analytics
+  - analytics engineer
+  - business intelligence
+  - bi
+  - analista bi
+  - bi analyst
+  - bi developer
+  - power bi
+  - tableau
+  - looker
+  - sql
+  - etl
+  - estadística
+  - estadístico
+  - statistics
+  - statistician
+  - quantitative analyst
+  - quant
+  # Ciencia e ingeniería de datos
+  - data science
   - data scientist
+  - ciencia de datos
+  - científico de datos
   - data engineer
+  - data engineering
+  - ingeniero de datos
+  - ingeniería de datos
+  - big data
+  - spark
+  - pyspark
+  - databricks
   - applied science
   - applied scientist
-  - business intelligence
-  - machine learning
+  - research scientist
+  # IA, machine learning y deep learning
   - inteligencia artificial
-  - big data
-  - analytics
-  - ml
-  - ai
+  - artificial intelligence
   - ia
+  - ai
+  - machine learning
+  - aprendizaje automático
+  - ml
   - ml engineer
   - ai engineer
   - ingeniero de ia
   - mlops
   - deep learning
+  - aprendizaje profundo
+  - dl
+  - redes neuronales
+  - neural networks
   - computer vision
   - visión por computador
   - visión artificial
   - nlp
+  - procesamiento del lenguaje natural
   - llm
+  - llms
   - ia generativa
   - generative ai
+  - genai
+  - prompt engineer
+  - rag
+  - reinforcement learning
+  - pytorch
+  - tensorflow
+  # "data" y "datos" sueltos fallan en estos casos
   - "!ntt data"
   - "!data entry"
-  - sql
-  - power bi
-  - tableau
-  - bi
-  - etl
-  - estadística
-  - statistics
-  - data science
-  - ciencia de datos
-  - analista bi
+  - "!data center"
+  - "!data centre"
+  - "!datacenter"
+  - "!data protection"
+  - "!data privacy"
+  - "!protección de datos"
+  - "!introducción de datos"
+  - "!grabación de datos"
+  - "!grabador de datos"
+  - "!entrada de datos"
+  - "!datos personales"
+  - "!master data"
 ciberseguridad:
   - ciberseguridad
   - cybersecurity

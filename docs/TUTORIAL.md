@@ -88,8 +88,11 @@ botones:
 
    ```yaml
    python: [python, django, flask, fastapi]
-   ia: [ia, machine learning, llm, deep learning, data scientist]
    ```
+
+   El área **Datos / IA** de serie ya cubre análisis de datos y BI (data analyst, Power BI, SQL), ciencia e
+   ingeniería de datos (data scientist, data engineer, big data) e IA (machine learning, deep learning, ML, DL,
+   NLP, LLM, visión por computador, IA generativa). No cuentan "Data Entry", "Data Center" ni "Protección de datos".
 3. **Modalidad**: presencial, híbrido, remoto o cualquiera.
 4. **Ubicación**: la ciudad o región donde buscas (solo se aplica a presencial e híbrido). Cada zona incluye sus
    municipios: "Granada" incluye Armilla, Maracena, Las Gabias…; "España" incluye todas las provincias.

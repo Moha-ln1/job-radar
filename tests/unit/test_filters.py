@@ -143,6 +143,23 @@ def test_siglas_sin_variantes_de_genero():
     assert SYN.search("data", "ia generativa") and not SYN.search("data", "developer ios android")
 
 
+@pytest.mark.parametrize("title", [
+    "Junior Data Analyst", "Becario Data Science", "Prácticas analista de datos", "Junior BI Developer",
+    "Deep Learning Engineer Intern", "DL Researcher junior", "Junior ML Engineer", "Junior Data Engineer",
+    "NLP Engineer junior", "Becario/a Power BI", "Prácticas en IA generativa",
+])
+def test_area_datos_ia_cubre_analisis_ciencia_e_ia(title):
+    assert _ok(title, Search(id="d", name="d", areas=["data"], estricta=True), SYN)
+
+
+@pytest.mark.parametrize("title", [
+    "Data Entry Clerk junior", "Técnico de Protección de Datos junior", "Data Center Technician junior",
+    "Prácticas grabación de datos", "Master Data Specialist junior", "Desarrollador iOS junior",
+])
+def test_area_datos_ia_no_confunde_datos_sueltos(title):
+    assert not _ok(title, Search(id="d", name="d", areas=["data"], estricta=True), SYN)
+
+
 def _ok(title, search, syn, category=None):
     offer = JobOffer(title=title, url="https://e.invalid/1", source="t", category=category)
     return evaluate(offer, [search], Exclusions(), syn, CAT, datetime.now(timezone.utc)).ok
