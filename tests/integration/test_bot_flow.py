@@ -1,5 +1,6 @@
 """Recorrido completo del bot con la Application real y la API de Telegram simulada (sin red)."""
 import asyncio
+import itertools
 import json
 import re
 import time
@@ -11,8 +12,8 @@ from telegram import Update
 from telegram.request import BaseRequest
 
 from jobradar import bot, notify, radar
-from jobradar.config import load_searches
-from jobradar.models import Decision, JobOffer
+from jobradar.config import load_searches, save_searches
+from jobradar.models import Decision, Exclusions, JobOffer, Search
 from jobradar.paths import Paths
 from jobradar.radar import ScanReport
 from jobradar.store import Store
@@ -303,6 +304,47 @@ async def test_probar(h):
     assert "Esta oferta" in h.last_text()
     await h.say("/probar")
     assert "Uso:" in h.last_text()
+
+
+async def test_semana_menu_por_busqueda_y_todas_partidas_en_mensajes(h):
+    await h.say("/semana")
+    assert "No hay ofertas" in h.last_text()
+    save_searches(h.paths.searches, [Search(id="b1", name="Prácticas Granada", tipos=["practicas"]),
+                                     Search(id="b2", name="Junior remoto", tipos=["junior"])], Exclusions())
+    # empresas distintas: títulos iguales de la misma empresa se unirían como una sola oferta
+    companies = ["".join(p).capitalize() + " Labs" for p in itertools.product(
+        ["ba", "ce", "di", "fo"], ["gu", "la", "me"], ["ni", "ro", "su", "te", "vo"])]
+    store = Store(h.paths.db)
+    for i, company in enumerate(companies):  # 60: más de las que caben en un mensaje
+        jid = seed(h.paths, "Prácticas de desarrollo web con Python y Django", company, "Granada",
+                   "presencial", matched=["b1"])
+        if i % 2:  # la mitad al resumen
+            store.set_decision(jid, Decision(matched=["b1"], priority="normal", reasons=["ok"]))
+    seed(h.paths, "Junior Backend Developer", "Remota SA", "Madrid", "remoto", matched=["b2"])
+    seed(h.paths, "Descartada de la semana", "Otra SL", "Granada", "presencial")
+    store.close()
+
+    await h.say("/semana")
+    labels = [b["text"] for b in h.last_markup()[1]]
+    assert labels == ["📋 Todas (61)", "🔥 Solo las de aviso al momento (31)",
+                      "🔎 Prácticas Granada (60)", "🔎 Junior remoto (1)"]
+
+    mark = h.mark()
+    await h.press("Junior remoto")
+    texts = h.sent_texts(mark)
+    assert len(texts) == 1 and "Junior remoto" in texts[0] and "Junior Backend Developer" in texts[0]
+    assert "Labs" not in texts[0]
+
+    mark = h.mark()
+    await h.press("Todas")
+    texts = h.sent_texts(mark)
+    joined = "\n".join(texts)
+    assert len(texts) > 1 and all(len(t) <= 4096 for t in texts)
+    assert "(61)" in texts[0] and all(c in joined for c in companies)
+    assert "Descartada" not in joined
+    # dentro del día, primero las 🔥
+    icons = [line[0] for line in joined.splitlines() if line[:1] in ("🔥", "📰")]
+    assert icons == sorted(icons, key=lambda c: c != "🔥")
 
 
 async def test_recientes_and_discarded_flow(h):

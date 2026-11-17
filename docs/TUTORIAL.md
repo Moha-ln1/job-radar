@@ -118,6 +118,7 @@ la describe: pulsa **🔄 Nombre automático** o **✏️ Nombre** para cambiarl
 | `/descartadas` | Ver las ofertas descartadas en las últimas 24 h, agrupadas por motivo. |
 | `/probar <texto>` | Comprobar si un título encaja con tus búsquedas. Ejemplo: `/probar Prácticas de marketing en Madrid`. |
 | `/recientes` | Ver las ofertas que encajan encontradas últimamente. |
+| `/semana` | Todas las ofertas de los últimos 7 días. Eliges con botones: todas, solo las 🔥 o las de una búsqueda; salen por día y, dentro de cada día, primero las 🔥. |
 | `/estado` | Ver cada fuente: último escaneo, ofertas, % de datos completos, y si está en pausa, sin clave o apagada. |
 | `/silencio` | Silenciar los avisos durante un tiempo. |
 | `/escanear` | Buscar ofertas ahora, sin esperar al siguiente escaneo. |

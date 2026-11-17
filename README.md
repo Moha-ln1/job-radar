@@ -94,6 +94,7 @@ tipo, área, modalidad, ubicación y cuándo avisarte. No hace falta tocar ning�
 | Seguir la web de empleo de una empresa | `/empresas` |
 | Vigilar una página de convocatorias | `/paginas` |
 | Saber si un título me llegaría | `/probar <título>` |
+| Ver todas las ofertas de la semana, por búsqueda | `/semana` |
 | Ver qué se ha descartado y por qué | `/descartadas` |
 
 El [tutorial](docs/TUTORIAL.md#5-primer-uso-del-bot) lo explica paso a paso, con un ejemplo de búsquedas.

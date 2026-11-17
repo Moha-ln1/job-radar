@@ -108,6 +108,47 @@ def format_digest(items, title: str = "📰 Resumen de ofertas") -> list[str]:
     return _chunk(blocks, f"<b>{escape(title)}</b> ({len(items)})")
 
 
+_DIAS = ("Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo")
+
+
+def format_week(items, title: str = "Ofertas de la última semana") -> list[str]:
+    """Ofertas agrupadas por día (del más reciente al más antiguo; dentro de cada día, primero las 🔥)
+    y en formato corto (dos líneas por oferta, sin nombres de búsqueda): una semana cabe en pocos mensajes.
+    items: lista de (job, postings)."""
+    if not items:
+        return []
+
+    def order(item):
+        seen = item[0].first_seen
+        day = seen.astimezone().date().toordinal() if seen else 0
+        return (-day, item[0].priority != "alta", -(seen.timestamp() if seen else 0))
+
+    items = sorted(items, key=order)
+    hot = sum(1 for job, _ in items if job.priority == "alta")
+    header = (f"<b>📅 {escape(title)}</b> ({len(items)})\n"
+              f"🔥 {hot} al momento · 📰 {len(items) - hot} del resumen")
+    blocks: list[str] = []
+    day = None
+    for job, postings in items:
+        local = job.first_seen.astimezone() if job.first_seen else None
+        label = f"{_DIAS[local.weekday()]} {local:%d/%m}" if local else "Sin fecha"
+        if label != day:
+            day = label
+            blocks.append(f"<b>— {label} —</b>")
+        icon = "🔥" if job.priority == "alta" else "📰"
+        line = f"{icon} <b>{escape(job.title[:150])}</b>"
+        where = " · ".join(escape(x) for x in (job.company, job.location) if x)
+        if where:
+            line += f" — {where}"
+        if job.modality:
+            line += f" ({_MODALITY.get(job.modality, escape(job.modality))})"
+        links = _links(postings)
+        if links:
+            line += "\n   🔗 " + links
+        blocks.append(line if len(line) <= MAX_LEN - 200 else _compact(job, postings))
+    return _chunk(blocks, header)
+
+
 def format_new_portal(source: str) -> str:
     return f"➕ También en {escape(source_label(source))}"
 

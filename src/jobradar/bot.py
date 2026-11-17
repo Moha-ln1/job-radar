@@ -37,6 +37,7 @@ COMMANDS = [
     ("descartadas", "Ofertas descartadas en las últimas 24 h"),
     ("probar", "Probar un título: /probar <texto>"),
     ("recientes", "Ofertas encontradas últimamente"),
+    ("semana", "Todas las ofertas de la última semana"),
     ("estado", "Estado de las fuentes"),
     ("silencio", "Sin avisos hasta mañana a las 08:00"),
     ("escanear", "Escanear ahora"),
@@ -393,7 +394,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 # /ayuda agrupada; lo que no esté aquí sale al final
 _HELP_GROUPS = [
     ("🎯 Qué busco", ("busquedas", "excluir", "probar")),
-    ("📬 Ofertas", ("recientes", "descartadas", "escanear", "silencio")),
+    ("📬 Ofertas", ("recientes", "semana", "descartadas", "escanear", "silencio")),
     ("🛰 Dónde busco", ("fuentes", "empresas", "paginas", "estado")),
 ]
 
@@ -443,6 +444,57 @@ async def cmd_recientes(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     messages = notify.format_digest(items, "🕑 Ofertas de los últimos 3 días")
     if not messages:
         await _say(update, "No hay ofertas que encajen en los últimos 3 días.")
+    for m in messages:
+        await _say(update, m)
+
+
+WEEK_DAYS = 7
+
+
+def week_menu(jobs, searches: list[Search]) -> tuple[str, InlineKeyboardMarkup]:
+    """Menú de /semana: ver todas, solo las 🔥 o las de una búsqueda, con cuántas hay de cada."""
+    hot = sum(1 for j in jobs if j.priority == "alta")
+    rows = [[InlineKeyboardButton(f"📋 Todas ({len(jobs)})", callback_data="sem:all")]]
+    if hot:
+        rows.append([InlineKeyboardButton(f"🔥 Solo las de aviso al momento ({hot})", callback_data="sem:hot")])
+    for s in searches:
+        n = sum(1 for j in jobs if s.id in j.matched_searches)
+        if n:
+            name = s.name if len(s.name) <= 45 else s.name[:44] + "…"
+            rows.append([InlineKeyboardButton(f"🔎 {name} ({n})", callback_data=f"sem:s:{s.id}")])
+    text = (f"📅 <b>Última semana</b>: {len(jobs)} ofertas.\n"
+            "¿Cuáles quieres ver? Salen ordenadas por día y, dentro de cada día, primero las 🔥.")
+    return text, InlineKeyboardMarkup(rows)
+
+
+def week_selection(jobs, searches: list[Search], choice: str) -> tuple[list, str]:
+    """Ofertas y título para el botón pulsado ("all", "hot" o "s:<id>")."""
+    if choice == "hot":
+        return [j for j in jobs if j.priority == "alta"], "Última semana · 🔥 al momento"
+    if choice.startswith("s:"):
+        sid = choice[2:]
+        name = next((s.name for s in searches if s.id == sid), sid)
+        return [j for j in jobs if sid in j.matched_searches], f"Última semana · {name}"
+    return list(jobs), "Ofertas de la última semana"
+
+
+async def cmd_semana(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    jobs = _store(context).recent(WEEK_DAYS, _now(), "avisada")
+    if not jobs:
+        await _say(update, "No hay ofertas que encajen en los últimos 7 días.")
+        return
+    await _say(update, *week_menu(jobs, _load(context)[0]))
+
+
+async def on_week(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    await _answer(query)
+    store = _store(context)
+    jobs, title = week_selection(store.recent(WEEK_DAYS, _now(), "avisada"), _load(context)[0],
+                                 query.data.removeprefix("sem:"))
+    messages = notify.format_week([(j, store.postings(j.id)) for j in jobs], title)
+    if not messages:
+        await _say(update, "Ya no hay ofertas de ese grupo en los últimos 7 días.")
     for m in messages:
         await _say(update, m)
 
@@ -808,7 +860,7 @@ def build_application(paths: Paths) -> Application:
     auth = filters.Chat(chat_id=chat_id)
     app.add_handler(TypeHandler(Update, guard), group=-1)
     commands = {"start": cmd_start, "busquedas": cmd_busquedas, "excluir": cmd_excluir,
-                "descartadas": cmd_descartadas, "probar": cmd_probar, "recientes": cmd_recientes,
+                "descartadas": cmd_descartadas, "probar": cmd_probar, "recientes": cmd_recientes, "semana": cmd_semana,
                 "estado": cmd_estado, "silencio": cmd_silencio, "escanear": cmd_escanear,
                 "ayuda": cmd_ayuda}
     from . import bot_fuentes
@@ -818,7 +870,7 @@ def build_application(paths: Paths) -> Application:
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & auth, on_text))
     for pattern, fn in [(r"^[hn]:\d+$", on_job_action), (r"^g:\d+$", on_era_buena), (r"^k:", on_token),
                         (r"^m:", on_group), (r"^v:", on_see), (r"^x:", on_exclusion),
-                        (r"^s:", on_search_action), (r"^w:", on_wizard), *bot_fuentes.CALLBACKS]:
+                        (r"^s:", on_search_action), (r"^w:", on_wizard), (r"^sem:", on_week), *bot_fuentes.CALLBACKS]:
         app.add_handler(CallbackQueryHandler(fn, pattern=pattern))
     app.add_error_handler(on_error)
     return app
