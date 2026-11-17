@@ -34,6 +34,20 @@ def _fix_mojibake(v: str) -> str:
         return v
 
 
+DESCRIPTION_MAX = 20000
+_BLOCK_TAGS = re.compile(r"<\s*(?:br|/?p|/?li|/?ul|/?ol|/?div|/?h[1-6]|/?tr)\b[^>]*>", re.IGNORECASE)
+
+
+def plain_text(v: str) -> str | None:
+    """Descripción en texto plano: algunas APIs (Greenhouse) mandan el HTML escapado dos veces."""
+    for _ in range(2):
+        v = html.unescape(v)
+    v = _TAGS.sub(" ", _BLOCK_TAGS.sub("\n", v))
+    v = re.sub(r"[ \t\r\f\v ]+", " ", _fix_mojibake(v))
+    v = re.sub(r"\s*\n\s*", "\n", v).strip()
+    return v[:DESCRIPTION_MAX] or None
+
+
 def _clean_text(v: str) -> str:
     return re.sub(r"\s+", " ", _fix_mojibake(html.unescape(v))).strip()
 
@@ -48,7 +62,9 @@ class JobOffer(BaseModel):
     remote_region: str | None = None
     posted_at: datetime | None = None
     category: str | None = None
-    description: str | None = None  # NUNCA se usa para filtrar
+    # Solo para los años de experiencia y las palabras excluidas en la descripción; nunca para tipo,
+    # área o ubicación (un texto largo nombra de pasada medio catálogo).
+    description: str | None = None
 
     @field_validator(
         "title", "url", "source", "company", "location", "remote_region", "category",
@@ -66,8 +82,7 @@ class JobOffer(BaseModel):
     @field_validator("description", mode="before")
     @classmethod
     def _clean_description(cls, v):
-        # La descripción suele venir con HTML: solo se decodifica y se recorta.
-        return html.unescape(v).strip() or None if isinstance(v, str) else v
+        return plain_text(v) if isinstance(v, str) else v
 
     @field_validator("title")
     @classmethod
@@ -137,6 +152,10 @@ class Search(BaseModel):
 class Exclusions(BaseModel):
     words: list[str] = []
     companies: list[str] = []
+    # Descarta si la descripción pide más años de experiencia que estos (None: sin límite)
+    experiencia_max: int | None = None
+    # Palabras que descartan una oferta si salen en su descripción (p. ej. "SAP", "alemán nativo")
+    en_descripcion: list[str] = []
 
 
 class Decision(BaseModel):

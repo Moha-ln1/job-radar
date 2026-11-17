@@ -42,6 +42,8 @@ responde al aviso original:
 - **Ante la duda, se incluye**: si una oferta no dice su área, su modalidad o una ubicación conocida, no se descarta
   (salvo en las búsquedas marcadas con 🎯, que exigen que el título diga el área).
 - **Ofertas repetidas**: una sola notificación con todos los enlaces.
+- **Experiencia pedida**: si la descripción de una oferta «junior» exige más años de los que admites, se descarta
+  (en las fuentes que envían la descripción).
 - **Revisión de descartes**: `/descartadas` muestra qué se ha descartado y por qué, y permite rescatar ofertas.
 
 ## Inicio rápido
@@ -90,7 +92,7 @@ tipo, área, modalidad, ubicación y cuándo avisarte. No hace falta tocar ning�
 | Quiero… | Comando |
 |---|---|
 | Elegir qué ofertas me llegan | `/busquedas` |
-| No ver nunca una palabra o una empresa | `/excluir` |
+| No ver nunca una palabra o una empresa, o descartar ofertas que piden demasiados años de experiencia | `/excluir` |
 | Apagar LinkedIn u otra fuente | `/fuentes` |
 | Seguir la web de empleo de una empresa | `/empresas` |
 | Vigilar una página de convocatorias | `/paginas` |

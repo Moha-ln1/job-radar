@@ -302,12 +302,19 @@ def searches_view(searches: list[Search], catalog: Catalog) -> tuple[str, Inline
 def exclusions_view(excl: Exclusions) -> tuple[str, InlineKeyboardMarkup]:
     lines = ["<b>Exclusiones</b>",
              "Palabras (en el título): " + (escape(", ".join(excl.words)) or "ninguna"),
-             "Empresas: " + (escape(", ".join(excl.companies)) or "ninguna")]
+             "Empresas: " + (escape(", ".join(excl.companies)) or "ninguna"),
+             "Palabras (en la descripción): " + (escape(", ".join(excl.en_descripcion)) or "ninguna"),
+             "Experiencia que piden: " + (f"hasta {excl.experiencia_max} años"
+                                          if excl.experiencia_max is not None else "sin límite")]
     kb = [[InlineKeyboardButton(f"❌ {w[:28]}", callback_data=f"x:w:{i}")] for i, w in enumerate(excl.words)]
     kb += [[InlineKeyboardButton(f"❌ 🏢 {c[:26]}", callback_data=f"x:c:{i}")]
            for i, c in enumerate(excl.companies)]
+    kb += [[InlineKeyboardButton(f"❌ 📄 {w[:25]}", callback_data=f"x:d:{i}")]
+           for i, w in enumerate(excl.en_descripcion)]
     kb.append([InlineKeyboardButton("➕ Palabra", callback_data="x:aw"),
                InlineKeyboardButton("➕ Empresa", callback_data="x:ac")])
+    kb.append([InlineKeyboardButton("➕ Palabra en la descripción", callback_data="x:ad")])
+    kb.append([InlineKeyboardButton("🎓 Cambiar la experiencia máxima", callback_data="x:exp")])
     return "\n".join(lines), InlineKeyboardMarkup(kb)
 
 
@@ -668,18 +675,25 @@ async def on_see(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 async def on_exclusion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
     _, kind, *rest = query.data.split(":")
-    if kind in ("aw", "ac"):
+    if kind in ("aw", "ac", "ad"):
         await _answer(query)
-        what = "palabra" if kind == "aw" else "empresa"
+        what = {"aw": "palabra", "ac": "empresa", "ad": "palabra (se busca en la descripción de la oferta)"}[kind]
         await _ask(update, context, ("excl", kind), f"Escribe la {what} que quieres excluir:")
         return
     searches, excl = _load(context)
-    items = excl.words if kind == "w" else excl.companies
-    idx = int(rest[0])
-    if idx < len(items):
-        items.pop(idx)
+    if kind == "exp":  # sin límite → 0 (solo sin experiencia) → 1 → 2 → 3 → 5 → sin límite
+        steps = [None, 0, 1, 2, 3, 5]
+        current = steps.index(excl.experiencia_max) if excl.experiencia_max in steps else -1
+        excl.experiencia_max = steps[(current + 1) % len(steps)]
         _save(context, searches, excl)
-    await _answer(query, "Quitada")
+        await _answer(query, "Hecho")
+    else:
+        items = {"w": excl.words, "c": excl.companies, "d": excl.en_descripcion}[kind]
+        idx = int(rest[0])
+        if idx < len(items):
+            items.pop(idx)
+            _save(context, searches, excl)
+        await _answer(query, "Quitada")
     text, kb = exclusions_view(excl)
     await _edit(context.bot, query.message.chat_id, query.message.message_id, text, kb)
 
@@ -801,7 +815,7 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         return
     if kind == "excl":
         searches, excl = _load(context)
-        target = excl.words if waiting[1] == "aw" else excl.companies
+        target = {"aw": excl.words, "ac": excl.companies, "ad": excl.en_descripcion}[waiting[1]]
         if fold(text) not in {fold(x) for x in target}:
             target.append(text)
             _save(context, searches, excl)

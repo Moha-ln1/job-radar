@@ -33,7 +33,7 @@ def _parse_remotive(data: dict) -> list[JobOffer]:
         title=j.get("title"), url=j.get("url"), source="remotive", company=j.get("company_name"),
         modality="remoto", remote_region=j.get("candidate_required_location"),
         posted_at=_iso(j.get("publication_date")), category=j.get("category"),
-        expected_domains={"remotive.com"}) for j in data.get("jobs", [])])
+        description=j.get("description"), expected_domains={"remotive.com"}) for j in data.get("jobs", [])])
 
 
 async def fetch_remotive(ctx: SourceContext) -> list[JobOffer]:
@@ -52,7 +52,7 @@ def _parse_remoteok(data: list) -> list[JobOffer]:
     return _keep([build_offer(
         title=j.get("position"), url=j.get("url"), source="remoteok", company=j.get("company"),
         modality="remoto", remote_region=j.get("location"),
-        posted_at=_iso(j.get("date")) or _epoch(j.get("epoch")),
+        posted_at=_iso(j.get("date")) or _epoch(j.get("epoch")), description=j.get("description"),
         expected_domains={"remoteok.com"}) for j in data if isinstance(j, dict) and j.get("position")])
 
 
@@ -79,7 +79,7 @@ def _parse_weworkremotely(xml: bytes | str) -> list[JobOffer]:
         offers.append(build_offer(
             title=title, url=text("link"), source="weworkremotely", company=company, modality="remoto",
             remote_region=text("region"), posted_at=posted, category=text("category"),
-            expected_domains={"weworkremotely.com"}))
+            description=text("description"), expected_domains={"weworkremotely.com"}))
     return _keep(offers)
 
 
@@ -98,7 +98,7 @@ def _parse_himalayas(data: dict) -> list[JobOffer]:
             title=j.get("title"), url=j.get("applicationLink") or j.get("guid"), source="himalayas",
             company=j.get("companyName"), modality="remoto", remote_region=region,
             posted_at=_epoch(j.get("pubDate")), category=parents[0] if parents else None,
-            expected_domains={"himalayas.app"}))
+            description=j.get("description"), expected_domains={"himalayas.app"}))
     return _keep(offers)
 
 
@@ -121,7 +121,7 @@ def _parse_arbeitnow(data: dict) -> list[JobOffer]:
             title=j.get("title"), url=j.get("url"), source="arbeitnow", company=j.get("company_name"),
             location=None if remote else j.get("location"), modality="remoto" if remote else None,
             remote_region=j.get("location") if remote else None, posted_at=_epoch(j.get("created_at")),
-            expected_domains=_ARBEITNOW_DOMAINS))
+            description=j.get("description"), expected_domains=_ARBEITNOW_DOMAINS))
     return _keep(offers)
 
 

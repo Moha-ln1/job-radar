@@ -36,9 +36,13 @@ def test_fechas():
     assert ok(posted_at=now - timedelta(days=3)).posted_at is not None
 
 
-def test_description_no_se_rechaza():
+def test_description_no_se_rechaza_y_se_guarda_como_texto():
     o = JobOffer(title="Becario", url="https://x.com/1", source="x", description="<p>Hola</p>")
-    assert o.description == "<p>Hola</p>"
+    assert o.description == "Hola"
+    # Greenhouse manda el HTML escapado
+    o = JobOffer(title="Becario", url="https://x.com/1", source="x",
+                 description="&lt;ul&gt;&lt;li&gt;3+ years&lt;/li&gt;&lt;li&gt;SQL&lt;/li&gt;&lt;/ul&gt;")
+    assert o.description == "3+ years\nSQL"
 
 
 def test_decision_ok():

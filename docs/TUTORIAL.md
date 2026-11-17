@@ -121,7 +121,7 @@ la describe: pulsa **🔄 Nombre automático** o **✏️ Nombre** para cambiarl
 | Comando | Para qué sirve |
 |---|---|
 | `/busquedas` | Crear, editar, pausar o borrar búsquedas. |
-| `/excluir` | Añadir palabras o empresas que nunca quieres ver. |
+| `/excluir` | Añadir palabras o empresas que nunca quieres ver, palabras que descartan una oferta si salen en su descripción, y el máximo de años de experiencia que admites. |
 | `/fuentes` | Activar o desactivar cada fuente (LinkedIn, InfoJobs, portales de remoto...). |
 | `/empresas` | Añadir la web de empleo de una empresa pegando su enlace, o quitarla. |
 | `/paginas` | Vigilar una página de convocatorias (p. ej. la de prácticas de tu universidad): te aviso cuando aparece un enlace nuevo. |
@@ -251,6 +251,11 @@ de prueba, repite `jobradar telegram link` (o, a mano, `jobradar telegram chat-i
 **Me llegan ofertas que no tienen nada que ver con lo que busco.** Pulsa 👎 en el aviso. Si se repite una palabra
 ("sommelier") o una empresa, añádela con `/excluir` o pulsa 🚫 Ocultar empresa. Si viene de una página vigilada,
 en `/paginas` pulsa 🔎 para que solo lleguen los enlaces que encajan con tus búsquedas.
+
+**Pone «junior» pero piden años de experiencia.** En `/excluir` pulsa 🎓 y elige el máximo (sin límite, 0, 1, 2, 3 o 5
+años). Si la descripción de la oferta pide más, se descarta, y aparece en `/descartadas` con el motivo. Funciona en
+las fuentes que envían la descripción (Greenhouse, Lever, Ashby, Recruitee, Personio, Teamtailor, Remotive,
+RemoteOK, We Work Remotely, Himalayas, Arbeitnow, Adzuna). En LinkedIn, InfoJobs y el resto no se lee todavía.
 
 **Quiero saber por qué no ha llegado una oferta.** Usa `/descartadas` en el bot o `jobradar descartadas` en la terminal.
 Ahí aparece el motivo exacto de cada descarte.

@@ -48,6 +48,12 @@ def _keep(offers: list[JobOffer | None]) -> list[JobOffer]:
     return [o for o in offers if o is not None]
 
 
+def _lever_text(j: dict) -> str | None:
+    """Descripción de Lever: el texto principal, sus listas (requisitos) y el cierre."""
+    lists = " ".join(f"{x.get('text', '')} {x.get('content', '')}" for x in j.get("lists") or [])
+    return " ".join(filter(None, (j.get("descriptionPlain"), lists, j.get("additionalPlain")))) or None
+
+
 # --- Greenhouse -------------------------------------------------------------------------------------------
 
 def _parse_greenhouse(data: dict, company: str, slug: str) -> list[JobOffer]:
@@ -55,7 +61,7 @@ def _parse_greenhouse(data: dict, company: str, slug: str) -> list[JobOffer]:
         title=j.get("title"), url=j.get("absolute_url"), source=f"greenhouse:{slug}", company=company,
         location=(j.get("location") or {}).get("name"),
         posted_at=_iso(j.get("first_published")) or _iso(j.get("updated_at")),
-        category=_first(j.get("departments"), "name"),
+        category=_first(j.get("departments"), "name"), description=j.get("content"),
         # Sin comprobar dominio: la API devuelve la web de empleo de la empresa si la tiene
         # (p. ej. careers.datadoghq.com), y el enlace viene de la API oficial, no de leer HTML.
         expected_domains=None,
@@ -77,7 +83,7 @@ def _parse_lever(data: list, company: str, slug: str) -> list[JobOffer]:
             title=j.get("text"), url=j.get("hostedUrl"), source=f"lever:{slug}", company=company,
             location=cats.get("location"), modality=_modality(j.get("workplaceType")),
             posted_at=_epoch_ms(j.get("createdAt")), category=cats.get("team"),
-            expected_domains={"lever.co"}))
+            description=_lever_text(j), expected_domains={"lever.co"}))
     return _keep(offers)
 
 
@@ -98,7 +104,8 @@ def _parse_ashby(data: dict, company: str, slug: str) -> list[JobOffer]:
         offers.append(build_offer(
             title=j.get("title"), url=j.get("jobUrl"), source=f"ashby:{slug}", company=company,
             location=j.get("location"), modality=modality, posted_at=_iso(j.get("publishedAt")),
-            category=j.get("department"), expected_domains={"ashbyhq.com"}))
+            category=j.get("department"), description=j.get("descriptionPlain") or j.get("descriptionHtml"),
+            expected_domains={"ashbyhq.com"}))
     return _keep(offers)
 
 
@@ -202,7 +209,9 @@ def _parse_recruitee(data: dict, company: str, slug: str) -> list[JobOffer]:
         offers.append(build_offer(
             title=j.get("title"), url=url, source=f"recruitee:{slug}", company=company,
             location=j.get("location") or j.get("city"), modality=modality,
-            posted_at=_iso(j.get("published_at")), category=j.get("department"), expected_domains=domains))
+            posted_at=_iso(j.get("published_at")), category=j.get("department"),
+            description=" ".join(filter(None, (j.get("description"), j.get("requirements")))) or None,
+            expected_domains=domains))
     return _keep(offers)
 
 
@@ -224,6 +233,7 @@ def _parse_personio(xml: bytes | str, company: str, slug: str) -> list[JobOffer]
             title=text("name"), url=f"https://{slug}.jobs.personio.de/job/{text('id')}",
             source=f"personio:{slug}", company=company, location=text("office"),
             posted_at=_iso(text("createdAt")), category=text("department"),
+            description=" ".join(" ".join(d.itertext()) for d in pos.iter("jobDescription")) or None,
             expected_domains={"personio.de", "personio.com"}))
     return _keep(offers)
 
@@ -258,7 +268,8 @@ def _parse_teamtailor(xml: bytes | str, company: str, slug: str) -> list[JobOffe
         offers.append(build_offer(
             title=text("title"), url=text("link"), source=f"teamtailor:{slug}", company=company,
             location=" / ".join(p for p in places if p) or None, modality=_modality(text("remoteStatus")),
-            posted_at=posted, category=text(_TT + "department"), expected_domains={"teamtailor.com"}))
+            posted_at=posted, category=text(_TT + "department"), description=text("description"),
+            expected_domains={"teamtailor.com"}))
     return _keep(offers)
 
 

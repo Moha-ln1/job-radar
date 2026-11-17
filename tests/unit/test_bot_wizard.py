@@ -102,7 +102,9 @@ def test_views():
     assert {"s:e:b1", "s:p:b1", "s:d:b1", "s:new"} <= set(all_callbacks(kb))
     assert "⏸" in text
     _, kb = bot.exclusions_view(Exclusions(words=["senior"], companies=["Acme"]))
-    assert {"x:w:0", "x:c:0", "x:aw", "x:ac"} == set(all_callbacks(kb))
+    assert {"x:w:0", "x:c:0", "x:aw", "x:ac", "x:ad", "x:exp"} == set(all_callbacks(kb))
+    _, kb = bot.exclusions_view(Exclusions(en_descripcion=["sap"], experiencia_max=2))
+    assert "x:d:0" in all_callbacks(kb)
 
 
 def test_title_tokens():

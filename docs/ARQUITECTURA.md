@@ -20,7 +20,10 @@ Ante la duda, **se incluye**: es preferible una oferta de más que perder una co
 2. **Lo que falta no descarta.** Modalidad, región del remoto, ubicación o fecha desconocidas → la oferta pasa.
 3. **El tipo y el área se buscan en el título y en los campos de categoría o departamento**, nunca en la
    descripción: allí "buenas prácticas" o "trabajarás con perfiles senior" generarían falsos positivos y falsos
-   descartes.
+   descartes. La descripción solo se usa después, para descartar una oferta que ya encaja por el título: si pide
+   más años de experiencia de los que admites (`experiencia_max`) o nombra una palabra de `en_descripcion`
+   (`src/jobradar/experiencia.py`). Solo cuentan los años que se piden al candidato, no los de la empresa ni
+   los que "se valoran". Sin descripción, la oferta no se descarta.
 4. **Las exclusiones solo miran el título**, y si el título contiene a la vez un término de tipo de la búsqueda
    (p. ej., "Junior/Senior Developer"), la oferta no se excluye: el caso ambiguo se incluye.
 5. **Revisable**: `/descartadas` en el bot (y `jobradar descartadas`) muestra lo descartado en las últimas 24 h

@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   company_norm TEXT NOT NULL DEFAULT '', location TEXT, modality TEXT, remote_region TEXT,
   category TEXT, first_seen TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending',
   priority TEXT, reasons TEXT NOT NULL DEFAULT '[]', matched_searches TEXT NOT NULL DEFAULT '[]',
-  notified_at TEXT, tg_message_id INTEGER
+  notified_at TEXT, tg_message_id INTEGER, description TEXT
 );
 CREATE INDEX IF NOT EXISTS jobs_key ON jobs(key);
 CREATE INDEX IF NOT EXISTS jobs_company ON jobs(company_norm);
@@ -80,6 +80,7 @@ class Job:
     matched_searches: list[str] = field(default_factory=list)
     notified_at: datetime | None = None
     tg_message_id: int | None = None
+    description: str | None = None
     # Primer enlace del job; lo usa offer_view().
     first_posting: Posting | None = field(default=None, repr=False, compare=False)
 
@@ -90,7 +91,7 @@ class Job:
             title=self.title, url=p.url if p else "", source=p.source if p else "",
             company=self.company, location=self.location, modality=self.modality,
             remote_region=self.remote_region, posted_at=p.posted_at if p else None,
-            category=self.category, description=None,
+            category=self.category, description=self.description,
         )
 
 
@@ -105,6 +106,8 @@ class Store:
         self.db = sqlite3.connect(str(path), check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.executescript(_SCHEMA)
+        if "description" not in {r["name"] for r in self.db.execute("PRAGMA table_info(jobs)")}:
+            self.db.execute("ALTER TABLE jobs ADD COLUMN description TEXT")  # bases de datos antiguas
 
     def close(self) -> None:
         self.db.close()
@@ -118,6 +121,7 @@ class Store:
             first_seen=_parse(row["first_seen"]), status=row["status"], priority=row["priority"],
             reasons=json.loads(row["reasons"]), matched_searches=json.loads(row["matched_searches"]),
             notified_at=_parse(row["notified_at"]), tg_message_id=row["tg_message_id"],
+            description=row["description"],
         )
         job.first_posting = (self.postings(job.id) or [None])[0]
         return job
@@ -157,9 +161,9 @@ class Store:
                 if is_new:
                     cur = self.db.execute(
                         "INSERT INTO jobs (key,title,company,company_norm,location,modality,"
-                        "remote_region,category,first_seen) VALUES (?,?,?,?,?,?,?,?,?)",
+                        "remote_region,category,first_seen,description) VALUES (?,?,?,?,?,?,?,?,?,?)",
                         (key, o.title, o.company, cnorm, o.location, o.modality, o.remote_region,
-                         o.category, _iso(now)))
+                         o.category, _iso(now), o.description))
                     job_id = cur.lastrowid
                     created.add(job_id)
                 cur = self.db.execute(

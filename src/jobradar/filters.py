@@ -7,6 +7,7 @@ from pathlib import Path
 
 import yaml
 
+from .experiencia import required_years
 from .models import Decision, Exclusions, JobOffer, Modality, Search
 from .normalize import fold, norm_company
 
@@ -261,6 +262,22 @@ def _excluded(word: str, text: str, syn: Synonyms, catalog: Catalog) -> bool:
     return bool(syn.search(word, text))
 
 
+def _description_rejects(offer: JobOffer, excl: Exclusions, syn: Synonyms, catalog: Catalog) -> str | None:
+    """Motivo para descartar una oferta que ya encaja por el título, según su descripción: pide más
+    años de experiencia de los que admites, o nombra una palabra excluida para las descripciones."""
+    if not offer.description:
+        return None
+    if excl.experiencia_max is not None:
+        years = required_years(offer.description)
+        if years is not None and years > excl.experiencia_max:
+            return f"la descripción pide {years} años de experiencia (máximo {excl.experiencia_max})"
+    text = match_text(offer.description)
+    for w in excl.en_descripcion:
+        if _excluded(w, text, syn, catalog):
+            return f"la descripción nombra '{w}', excluida"
+    return None
+
+
 def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Synonyms,
              catalog: Catalog, now: datetime, max_age_days: int = 14) -> Decision:
     title_fold = match_text(offer.title)
@@ -319,6 +336,9 @@ def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Syn
         else:
             fails.append(why)
     if matched:
+        why_not = _description_rejects(offer, excl, syn, catalog)
+        if why_not:
+            return Decision(matched=[], priority=None, reasons=notes + [why_not])
         priority = "alta" if "alta" in priorities else "normal"
         return Decision(matched=matched, priority=priority, reasons=notes + reasons)
     return Decision(matched=[], priority=None, reasons=notes + fails)
