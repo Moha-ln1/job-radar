@@ -187,6 +187,10 @@ class Store:
                  json.dumps(decision.reasons, ensure_ascii=False),
                  json.dumps(decision.matched, ensure_ascii=False), job_id))
 
+    def set_description(self, job_id: int, description: str | None) -> None:
+        with self.db:
+            self.db.execute("UPDATE jobs SET description=? WHERE id=?", (description, job_id))
+
     def mark_notified(self, job_id: int, tg_message_id: int | None, now: datetime) -> None:
         with self.db:
             self.db.execute("UPDATE jobs SET notified_at=?, tg_message_id=? WHERE id=?",

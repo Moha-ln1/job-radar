@@ -227,3 +227,49 @@ def test_combos_por_rondas_y_grupos_propios(tmp_path):
     assert radar.derive_combos(s, syn, cat) == ["prácticas python", "junior python", "prácticas ia", "junior ia"]
     terms = radar.derive_terms(s, syn, cat)
     assert terms.index("python") < terms.index("pandas")  # el nombre del grupo va antes que su equivalente
+
+
+_FICHAS = {
+    "/oferta/pide-años": '<script type="application/ld+json">{"@type": "JobPosting", "description": '
+                         '"<p>Buscamos junior con +3 años de experiencia</p>"}</script>',
+    "/oferta/sin-años": '<script type="application/ld+json">{"@type": "JobPosting", "description": '
+                        '"<p>Te formamos desde cero</p>"}</script>',
+}
+
+
+async def test_ficha_de_portal_descarta_por_anos_de_experiencia(paths):
+    save_searches(paths.searches, [Search(id="s1", name="Dev", tipos=["practicas"], areas=["programador"])],
+                  Exclusions(experiencia_max=2))
+    pedidas = []
+
+    def handler(request):
+        pedidas.append(request.url.path)
+        return httpx.Response(200, text=_FICHAS[request.url.path], headers={"content-type": "text/html"})
+
+    http = Http(HttpSettings(delay_seconds=[0, 0]), transport=httpx.MockTransport(handler))
+    caro = offer("Becario Developer", "https://portal.test/oferta/pide-años", source="tecnoempleo")
+    barato = offer("Becaria Developer en Madrid", "https://portal.test/oferta/sin-años", source="tecnoempleo",
+                   company="Otra")
+    sin_ficha = offer("Becario Developer Java", "https://portal.test/otra/1", source="fuente-desconocida",
+                      company="Tercera")
+    rep = await scan(paths, NOW, only=["a"], fetchers={"a": fixed(caro, barato, sin_ficha)}, http=http)
+    assert [j.company for j in rep.new_matched] == ["Otra", "Tercera"]
+    assert rep.new_discarded == 1
+    assert len(pedidas) == 2  # solo las fichas de las dos ofertas del portal, no la de la fuente desconocida
+    store = Store(paths.db)
+    assert "3 años" in store.get_job(rep.new_jobs[0].id).reasons[-1]
+    assert store.get_job(rep.new_jobs[1].id).description == "Te formamos desde cero"
+    store.close()
+
+
+async def test_sin_limite_de_experiencia_no_se_piden_fichas(paths):
+    pedidas = []
+
+    def handler(request):
+        pedidas.append(request.url)
+        return httpx.Response(200)
+
+    http = Http(HttpSettings(delay_seconds=[0, 0]), transport=httpx.MockTransport(handler))
+    o = offer("Becario Developer", "https://portal.test/oferta/pide-años", source="tecnoempleo")
+    rep = await scan(paths, NOW, only=["a"], fetchers={"a": fixed(o)}, http=http)
+    assert len(rep.new_matched) == 1 and pedidas == []

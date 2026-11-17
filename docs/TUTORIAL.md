@@ -255,7 +255,9 @@ en `/paginas` pulsa 🔎 para que solo lleguen los enlaces que encajan con tus b
 **Pone «junior» pero piden años de experiencia.** En `/excluir` pulsa 🎓 y elige el máximo (sin límite, 0, 1, 2, 3 o 5
 años). Si la descripción de la oferta pide más, se descarta, y aparece en `/descartadas` con el motivo. Funciona en
 las fuentes que envían la descripción (Greenhouse, Lever, Ashby, Recruitee, Personio, Teamtailor, Remotive,
-RemoteOK, We Work Remotely, Himalayas, Arbeitnow, Adzuna). En LinkedIn, InfoJobs y el resto no se lee todavía.
+RemoteOK, We Work Remotely, Himalayas, Arbeitnow, Adzuna). En Tecnoempleo, Infoempleo, Primer Empleo, Workday,
+SmartRecruiters y LinkedIn se abre la ficha, pero solo de las ofertas que ya encajan por el título y con un tope por
+escaneo (25 por web, 5 en LinkedIn, que bloquea con facilidad). InfoJobs web bloquea las fichas y no se lee.
 
 **Quiero saber por qué no ha llegado una oferta.** Usa `/descartadas` en el bot o `jobradar descartadas` en la terminal.
 Ahí aparece el motivo exacto de cada descarte.

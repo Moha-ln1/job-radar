@@ -8,15 +8,18 @@ import time
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from urllib.parse import urlsplit
+
+import httpx
 
 from . import health
 from .config import Settings, load_env, load_searches, load_settings
 from .filters import Catalog, Synonyms, evaluate
 from .http import Http, SourceBlocked
-from .models import Decision, JobOffer, Search
+from .models import Decision, Exclusions, JobOffer, Search, plain_text
 from .normalize import fold
 from .paths import Paths
-from .sources import Fetcher, SourceContext
+from .sources import Fetcher, SourceContext, detalle
 from .store import Job, Posting, Store
 
 _log = logging.getLogger("jobradar.radar")
@@ -224,6 +227,42 @@ def load_context(paths: Paths):
     return settings, searches, excl, syn, catalog
 
 
+class _DetailBudget:
+    """Fichas ya pedidas en este escaneo, por dominio, y dominios que nos han bloqueado."""
+
+    def __init__(self) -> None:
+        self.used: dict[str, int] = {}
+        self.blocked: set[str] = set()
+
+
+async def _add_description(http: Http, store: Store, job: Job, excl: Exclusions, budget: _DetailBudget) -> bool:
+    """Para una oferta que ya encaja por el título y no trae descripción, abre su ficha y la guarda, si hay
+    algo que comprobar en ella (años de experiencia o palabras excluidas). True si se ha guardado una."""
+    post = job.first_posting
+    if job.description or post is None or not detalle.supports(post.source):
+        return False
+    if excl.experiencia_max is None and not excl.en_descripcion:
+        return False
+    domain = urlsplit(post.url).hostname or ""
+    if domain in budget.blocked or budget.used.get(domain, 0) >= detalle.limit_for(post.url):
+        return False
+    budget.used[domain] = budget.used.get(domain, 0) + 1
+    try:
+        text = await detalle.fetch_description(http, post.source, post.url)
+    except SourceBlocked:
+        budget.blocked.add(domain)
+        _log.warning("detalle: %s bloquea las fichas; no se piden más en este escaneo", domain)
+        return False
+    except (httpx.HTTPError, ValueError, KeyError, AttributeError) as exc:  # una ficha rota no tumba el escaneo
+        _log.warning("detalle: no se pudo leer %s: %s", post.url, exc)
+        return False
+    text = plain_text(text) if text else None
+    if not text:
+        return False
+    store.set_description(job.id, text)
+    return True
+
+
 async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | None = None,
                dry_run: bool = False, fetchers: dict[str, Fetcher] | None = None,
                http: Http | None = None) -> ScanReport:
@@ -236,6 +275,7 @@ async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | N
     own_http = http is None
     http = http or Http(settings.http)
     report = ScanReport()
+    detail = _DetailBudget()
     try:
         names = only if only is not None else due_sources(settings, store, now)
         ctx = SourceContext(http=http, settings=settings,
@@ -263,8 +303,13 @@ async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | N
                 if src.startswith("watch:") and src not in filtered:
                     store.set_decision(job.id, watch_decision(job.offer_view()))
                 else:
-                    store.set_decision(job.id, evaluate(job.offer_view(), searches, excl, syn, catalog,
-                                                        now, settings.scan.max_age_days))
+                    decision = evaluate(job.offer_view(), searches, excl, syn, catalog,
+                                        now, settings.scan.max_age_days)
+                    if decision.ok and await _add_description(http, store, job, excl, detail):
+                        job = store.get_job(job.id)
+                        decision = evaluate(job.offer_view(), searches, excl, syn, catalog,
+                                            now, settings.scan.max_age_days)
+                    store.set_decision(job.id, decision)
                 job = store.get_job(job.id)
                 report.new_jobs.append(job)
                 if job.status == "avisada":
