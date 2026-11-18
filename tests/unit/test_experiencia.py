@@ -152,3 +152,29 @@ def test_ciudad_sin_modalidad_no_vale_como_remota():
     assert decide(location="España").ok                  # ubicación genérica: ante la duda, pasa
     assert decide(location="Madrid", modality="remoto").ok
     assert decide(location="Madrid", description="Puesto 100% remoto").ok
+
+
+def test_busqueda_de_sitios_concretos_no_acepta_localidades_desconocidas():
+    s = Search(id="g", name="g", areas=["data"], ubicaciones=["granada", "malaga"], estricta=True)
+    now = datetime.now(timezone.utc)
+
+    def decide(location, title="Junior Data Analyst"):
+        return evaluate(JobOffer(title=title, url="https://e.invalid/7", source="t", location=location),
+                        [s], Exclusions(), SYN, CAT, now).ok
+    assert decide("Granada") and decide("Málaga") and decide("España")
+    assert not decide("Cassà de la Selva") and not decide("Madrid")
+    # una búsqueda amplia sigue dejando pasar lo desconocido
+    wide = Search(id="e", name="e", areas=["data"], ubicaciones=["espana"], estricta=True)
+    assert evaluate(JobOffer(title="Junior Data Analyst", url="https://e.invalid/8", source="t",
+                             location="Cassà de la Selva"), [wide], Exclusions(), SYN, CAT, now).ok
+
+
+def test_idiomas_excluidos_no_se_rescatan_por_el_tipo():
+    s = Search(id="d", name="d", tipos=["trainee"], areas=["data"], estricta=True)
+    now = datetime.now(timezone.utc)
+
+    def decide(title, words):
+        return evaluate(JobOffer(title=title, url="https://e.invalid/6", source="t", location="Madrid"),
+                        [s], Exclusions(words=words), SYN, CAT, now).ok
+    assert not decide("Graduate Data Analyst - French Native", ["french"])
+    assert decide("Senior Data Analyst Trainee", ["senior"])          # de nivel: sigue siendo ambiguo

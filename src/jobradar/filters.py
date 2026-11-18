@@ -16,7 +16,8 @@ LIVE_BOARDS = ("greenhouse:", "lever:", "ashby:", "smartrecruiters:", "workday:"
                "personio:", "teamtailor:")
 # Ubicaciones demasiado genéricas para descartar una búsqueda por ciudad: se incluyen.
 _GENERIC_LOCATIONS = {"spain", "espana", "europe", "europa", "emea", "remote", "remoto",
-                      "hybrid", "hibrido", "worldwide", "anywhere", "global"}
+                      "hybrid", "hibrido", "worldwide", "anywhere", "global", "location negotiable",
+                      "multiple locations", "various locations", "varias ubicaciones"}
 
 
 def _load_yaml(path: Path | None) -> dict:
@@ -181,13 +182,31 @@ def _group_matches(terms: list[str], text: str, syn: Synonyms, labels: dict[str,
     return labels.get(fold(term), term), found
 
 
-def _location_ok(search: Search, location: str, catalog: Catalog) -> bool:
+# Palabras excluidas que no se rescatan aunque el título encaje con un tipo ("Graduate ... French Native"):
+# idiomas exigidos y roles que no son técnicos. Las de nivel (senior, lead...) sí son ambiguas ("Senior Trainee").
+_FIRM_WORDS = frozenset(fold(w) for w in (
+    "french", "francés", "frances", "chinese", "hebrew", "german speaking", "alemán", "aleman", "italian",
+    "italiano", "portuguese", "portugués", "portugues", "dutch", "japanese", "korean", "arabic",
+    "creative strategist", "creative engineer", "social media", "recruiter"))
+
+# Ubicaciones amplias: una búsqueda que solo lista sitios concretos (Granada, Málaga) es "estricta"
+_BROAD = {"espana", "europa", "europe", "spain", "cualquiera", "remoto", "remote"}
+
+
+def _strict_places(search: Search) -> bool:
+    return bool(search.ubicaciones) and not any(fold(u) in _BROAD for u in search.ubicaciones)
+
+
+def _location_ok(search: Search, location: str, catalog: Catalog, title: str = "") -> bool:
     loc = fold(location)
     if loc in _GENERIC_LOCATIONS:
         return True
     if any(word_pattern(catalog.location_terms(u), variants=False).search(loc)
            for u in search.ubicaciones):
         return True
+    if _strict_places(search):
+        # Búsqueda de sitios concretos (Granada, Málaga): una localidad que no reconocemos tampoco vale
+        return False
     # Solo se descarta si la ubicación se reconoce como de otro sitio. Una ubicación
     # desconocida (municipio pequeño, "Location Negotiable"...) pasa: ante la duda, se incluye.
     return not catalog.known_place(loc)
@@ -243,7 +262,8 @@ def _eval_search(offer: JobOffer, s: Search, text: str, modality, syn: Synonyms,
         parts.append(f"área '{area[0]}' ({area[1]})")
     if s.modalidades and modality is not None and modality not in s.modalidades:
         return False, f"búsqueda '{s.name}': modalidad '{modality}' no está en {s.modalidades}", False
-    if modality is None and s.modalidades and set(s.modalidades) == {"remoto"} and offer.location             and fold(offer.location) not in _GENERIC_LOCATIONS and catalog.known_place(fold(offer.location)):
+    if modality is None and s.modalidades and set(s.modalidades) == {"remoto"} and offer.location \
+            and fold(offer.location) not in _GENERIC_LOCATIONS:
         # Una ciudad concreta sin modalidad indicada es casi siempre presencial o híbrida: no vale como remota
         return False, f"búsqueda '{s.name}': '{offer.location}' sin modalidad indicada, no consta como remoto", False
     if modality == "remoto":
@@ -251,7 +271,7 @@ def _eval_search(offer: JobOffer, s: Search, text: str, modality, syn: Synonyms,
         region = offer.remote_region or offer.location
         if region and not _remote_region_ok(s, region, catalog):
             return False, f"búsqueda '{s.name}': región remota '{region}' no admitida", False
-    elif s.ubicaciones and offer.location and not _location_ok(s, offer.location, catalog):
+    elif s.ubicaciones and offer.location and not _location_ok(s, offer.location, catalog, offer.title):
         return False, (f"búsqueda '{s.name}': ubicación '{offer.location}' "
                        f"no está en {s.ubicaciones}"), False
     return True, f"encaja con '{s.name}'" + (": " + ", ".join(parts) if parts else ""), uncertain
@@ -316,7 +336,8 @@ def evaluate(offer: JobOffer, searches: list[Search], excl: Exclusions, syn: Syn
     if excluded_by:
         tipo_terms = [t for s in active for t in s.tipos if fold(t) != "cualquiera"]
         hit = _first_match(tipo_terms, title_fold, syn)
-        if hit and not is_company:
+        firm = any(fold(w) in _FIRM_WORDS and _excluded(w, title_fold, syn, catalog) for w in excl.words)
+        if hit and not is_company and not firm:
             notes.append(f"{excluded_by}, pero el título también encaja con el tipo "
                          f"'{hit[0]}': caso ambiguo, se incluye")
         else:
