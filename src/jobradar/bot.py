@@ -48,19 +48,15 @@ STALE_MENU = "Este menú ha caducado, vuelve a abrir /busquedas"
 _catalog_cache: Catalog | None = None
 
 COMMANDS = [
-    ("start", "Saludo y primeros pasos"),
+    ("menu", "Menú general con todo a un toque"),
     ("busquedas", "Crear, editar, pausar o borrar búsquedas"),
     ("excluir", "Palabras y empresas excluidas"),
     ("fuentes", "Activar o desactivar fuentes de ofertas"),
-    ("empresas", "Webs de empleo de empresas que se leen"),
-    ("paginas", "Páginas de convocatorias que se vigilan"),
     ("aplicadas", "Seguimiento de tus candidaturas"),
+    ("favoritas", "Tus ofertas favoritas"),
     ("candidatura", "Tus datos para preparar solicitudes"),
-    ("estadisticas", "Resumen de los últimos 30 días"),
-    ("exportar", "Exportar ofertas a CSV"),
     ("descartadas", "Ofertas descartadas en las últimas 24 h"),
     ("probar", "Probar un título: /probar <texto>"),
-    ("recientes", "Ofertas encontradas últimamente"),
     ("semana", "Todas las ofertas de la última semana"),
     ("estado", "Estado de las fuentes"),
     ("silencio", "Sin avisos hasta mañana a las 08:00"),
@@ -421,20 +417,27 @@ def _save(context, searches: list[Search], excl: Exclusions) -> None:
 
 # --- comandos ---
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    from . import bot_menu
     await _say(update, "📡 <b>Job Radar</b>\n"
                        "Rastreo portales y webs de empresas en busca de prácticas, trainee y empleo junior.\n\n"
                        "🔥 Lo que encaja con tus búsquedas te llega al momento.\n"
                        "📰 Lo demás, en un resumen diario.\n\n"
                        "👉 Empieza con /busquedas para decirme qué buscas.\n"
-                       "❓ /ayuda lista todos los comandos.")
+                       "❓ /ayuda lista todos los comandos.",
+               bot_menu.menu_keyboard())
+
+
+async def cmd_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    from . import bot_menu
+    await _say(update, bot_menu.menu_text(_store(context), _now()), bot_menu.menu_keyboard())
 
 
 # /ayuda agrupada; lo que no esté aquí sale al final
 _HELP_GROUPS = [
     ("🎯 Qué busco", ("busquedas", "excluir", "probar")),
-    ("📬 Ofertas", ("recientes", "semana", "descartadas", "escanear", "silencio")),
-    ("📨 Mis candidaturas", ("aplicadas", "candidatura", "estadisticas", "exportar")),
-    ("🛰 Dónde busco", ("fuentes", "empresas", "paginas", "estado")),
+    ("📬 Ofertas", ("menu", "semana", "descartadas", "escanear", "silencio")),
+    ("📨 Mis candidaturas", ("aplicadas", "favoritas", "candidatura")),
+    ("🛰 Dónde busco", ("fuentes", "estado")),
 ]
 
 
@@ -624,7 +627,13 @@ async def on_job_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await _answer(query, f"🚫 {job.company} ocultada")
     else:
         store.set_decision(job.id, Decision(matched=[], reasons=["usuario: no me interesa"]))
-        await _answer(query, "👎 Descartada")
+        store.set_track(job.id, None, _now())
+        await _answer(query, "🗑 Fuera (la empresa sigue activa)")
+        try:
+            await query.message.delete()
+        except BadRequest:
+            await query.edit_message_reply_markup(None)
+        return
     await query.edit_message_reply_markup(None)
 
 
@@ -911,11 +920,11 @@ def build_application(paths: Paths) -> Application:
     app.bot_data.update(paths=paths, chat_id=chat_id, store=Store(paths.db))
     auth = filters.Chat(chat_id=chat_id)
     app.add_handler(TypeHandler(Update, guard), group=-1)
-    commands = {"start": cmd_start, "busquedas": cmd_busquedas, "excluir": cmd_excluir,
-                "descartadas": cmd_descartadas, "probar": cmd_probar, "recientes": cmd_recientes, "semana": cmd_semana,
+    commands = {"start": cmd_start, "menu": cmd_menu, "busquedas": cmd_busquedas, "excluir": cmd_excluir,
+                "descartadas": cmd_descartadas, "probar": cmd_probar, "semana": cmd_semana,
                 "estado": cmd_estado, "silencio": cmd_silencio, "escanear": cmd_escanear,
                 "ayuda": cmd_ayuda}
-    from . import bot_fuentes, bot_seguimiento
+    from . import bot_fuentes, bot_menu, bot_seguimiento
     commands.update(bot_fuentes.HANDLERS)
     commands.update(bot_seguimiento.HANDLERS)
     for name, fn in commands.items():
@@ -925,7 +934,7 @@ def build_application(paths: Paths) -> Application:
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & auth, on_text))
     for pattern, fn in [(r"^[hn]:\d+$", on_job_action), (r"^g:\d+$", on_era_buena), (r"^k:", on_token),
                         (r"^m:", on_group), (r"^v:", on_see), (r"^x:", on_exclusion),
-                        (r"^s:", on_search_action), (r"^w:", on_wizard), (r"^sem:", on_week), *bot_fuentes.CALLBACKS, *bot_seguimiento.CALLBACKS]:
+                        (r"^s:", on_search_action), (r"^mn:", bot_menu.on_menu), (r"^w:", on_wizard), (r"^sem:", on_week), *bot_fuentes.CALLBACKS, *bot_seguimiento.CALLBACKS]:
         app.add_handler(CallbackQueryHandler(fn, pattern=pattern))
     app.add_error_handler(on_error)
     return app

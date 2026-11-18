@@ -70,7 +70,7 @@ def test_new_portal_health_status_summary():
 def test_keyboard_callback_data_short():
     kb = notify.job_keyboard(2 ** 40)
     data = [b.callback_data for row in kb.inline_keyboard for b in row]
-    assert data == [f"a:{2 ** 40}", f"t:guardada:{2 ** 40}", f"h:{2 ** 40}", f"n:{2 ** 40}"]
+    assert data == [f"a:{2 ** 40}", f"t:guardada:{2 ** 40}", f"fv:{2 ** 40}", f"n:{2 ** 40}", f"h:{2 ** 40}"]
     assert all(len(d.encode()) <= 64 for d in data)
 
 

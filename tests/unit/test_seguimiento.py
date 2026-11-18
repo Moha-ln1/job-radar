@@ -79,7 +79,7 @@ def test_candidatura_se_guarda_y_ignora_basura(tmp_path):
 def test_botones_de_seguimiento_caben_en_callback():
     kb = track_keyboard(2 ** 40, "aplicada")
     data = [b.callback_data for row in kb.inline_keyboard for b in row]
-    assert "t:aplicada:%d" % 2 ** 40 not in data and f"t:x:{2 ** 40}" in data
+    assert f"t:aplicada:{2 ** 40}" not in data and f"t:x:{2 ** 40}" in data
     assert all(len(d.encode()) <= 64 for d in data)
 
 

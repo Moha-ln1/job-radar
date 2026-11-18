@@ -204,7 +204,7 @@ async def send_reminders(bot, chat_id, paths: Paths, now: datetime) -> int:
     try:
         for job in store.due_reminders(now, seguimiento.REMINDER_DAYS):
             if await _safely(telegram_io.send_text(bot, chat_id, seguimiento.reminder_text(job, now),
-                                                   reply_markup=track_keyboard(job.id, job.track)),
+                                                   reply_markup=track_keyboard(job.id, job.track, job.fav)),
                              f"el recordatorio de {job.id}"):
                 store.mark_reminded(job.id)
                 sent += 1

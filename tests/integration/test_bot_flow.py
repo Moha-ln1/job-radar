@@ -348,10 +348,10 @@ async def test_semana_menu_por_busqueda_y_todas_partidas_en_mensajes(h):
 
 
 async def test_recientes_and_discarded_flow(h):
-    await h.say("/recientes")
+    await h.press("", data="mn:recientes", message_id=90)
     assert "No hay ofertas" in h.last_text()
     seed(h.paths, "Prácticas Python", "Acme", "Granada", "presencial", matched=["b1"])
-    await h.say("/recientes")
+    await h.press("", data="mn:recientes", message_id=91)
     assert "Prácticas Python" in h.last_text()
     bad = seed(h.paths, "Becaria Estadística avanzada", "Otra SL", "Granada", "presencial")
     await h.say("/descartadas")
@@ -371,7 +371,7 @@ async def test_job_buttons_hide_company_and_dislike(h):
     a = seed(h.paths, "Prácticas A", "Empresa Uno", "Granada", "presencial", matched=["b1"])
     b = seed(h.paths, "Prácticas B", "Empresa Dos", "Granada", "presencial", matched=["b1"])
     cbs = [x.callback_data for x in notify.job_keyboard(a).inline_keyboard[1]]
-    assert cbs == [f"h:{a}", f"n:{a}"]
+    assert cbs == [f"n:{a}", f"h:{a}"]
     await h.press("", data=f"h:{a}", message_id=50)
     assert load_searches(h.paths.searches)[1].companies == ["Empresa Uno"]
     await h.press("", data=f"n:{b}", message_id=51)
@@ -556,7 +556,31 @@ async def test_candidatura_estadisticas_y_exportar_vacio(h):
     await h.press("", data="c:nombre", message_id=70)
     await h.say("Ana Pérez")
     assert "Ana Pérez" in h.last_text()
-    await h.say("/estadisticas")
+    await h.press("", data="mn:estadisticas", message_id=71)
     assert "Últimos 30 días" in h.last_text()
     await h.say("/exportar")
     assert "No hay ofertas que exportar" in h.last_text()
+
+
+async def test_menu_favoritas_y_pasar_de_ella(h):
+    a = seed(h.paths, "Prácticas A", "Empresa Uno", "Granada", "presencial", matched=["b1"])
+    await h.say("/menu")
+    assert "Menú" in h.last_text() and "0 favoritas" in h.last_text()
+    await h.press("", data=f"fv:{a}", message_id=80)
+    store = Store(h.paths.db)
+    assert store.get_job(a).fav
+    store.close()
+    await h.press("Favoritas")
+    assert "Prácticas A" in h.last_text() and f"/oferta_{a}" in h.last_text()
+    await h.say(f"/oferta_{a}")
+    assert any("Quitar favorita" in b["text"] for b in h.last_markup()[1])
+    await h.press("", data=f"fv:{a}", message_id=81)
+    store = Store(h.paths.db)
+    assert not store.get_job(a).fav
+    store.close()
+    # pasar de ella: la oferta sale, la empresa sigue sin ocultarse
+    await h.press("", data=f"n:{a}", message_id=82)
+    store = Store(h.paths.db)
+    assert store.get_job(a).status == "descartada"
+    store.close()
+    assert load_searches(h.paths.searches)[1].companies == []

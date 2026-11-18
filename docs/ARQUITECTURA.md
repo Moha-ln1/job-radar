@@ -120,7 +120,7 @@ beca, pasantía, work placement, FP dual…). Sin distinguir mayúsculas ni tild
 
 ### 4.3 Configuración con botones
 - **Bot**: `/busquedas` (crear, editar, pausar, borrar en 5 pasos con botones), `/excluir`, `/descartadas`,
-  `/probar <texto>`, `/recientes`, `/semana`, `/estado`, `/silencio`, `/escanear`. Botones en cada aviso:
+  `/probar <texto>`, `/menu`, `/favoritas`, `/semana`, `/estado`, `/silencio`, `/escanear`. Botones en cada aviso:
   `[🚫 Ocultar empresa] [👎 No me interesa]`. **Solo responde al `chat_id` configurado.**
 - **Asistente de instalación**: `jobradar configurar` (questionary), mismas preguntas, mismo catálogo.
 - Archivos que escribe la app (no hace falta tocarlos): `busquedas.yaml`, `sinonimos_usuario.yaml`.

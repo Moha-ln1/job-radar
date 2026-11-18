@@ -44,6 +44,8 @@ responde al aviso original:
 - **Ofertas repetidas**: una sola notificación con todos los enlaces.
 - **Experiencia pedida**: si la descripción de una oferta «junior» exige más años de los que admites, se descarta
   (en las fuentes que envían la descripción).
+- **Menú general** (`/menu`): todo a un toque, con tus cifras del día. Cada aviso trae ⭐ favorita y 🗑 Pasar de
+  ella (quita la oferta sin ocultar la empresa); cualquier oferta de una lista se abre con `/oferta_N`.
 - **Seguimiento de candidaturas**: cada aviso trae 📝 Aplicar (enlace, carta corta y respuestas habituales listas
   para copiar) y 💾 Guardar. `/aplicadas` agrupa tus ofertas por estado (guardada, aplicada, entrevista, oferta,
   rechazada) y a la semana de aplicar te recuerda preguntar. El bot no envía nada por ti.

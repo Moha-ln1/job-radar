@@ -84,6 +84,7 @@ class Job:
     track: str | None = None          # seguimiento: guardada, aplicada, entrevista, oferta, rechazada
     track_at: datetime | None = None
     reminded: bool = False
+    fav: bool = False
     # Primer enlace del job; lo usa offer_view().
     first_posting: Posting | None = field(default=None, repr=False, compare=False)
 
@@ -111,7 +112,8 @@ class Store:
         self.db.executescript(_SCHEMA)
         cols = {r["name"] for r in self.db.execute("PRAGMA table_info(jobs)")}
         for name, ddl in (("description", "TEXT"), ("track", "TEXT"), ("track_at", "TEXT"),
-                          ("reminded", "INTEGER NOT NULL DEFAULT 0")):
+                          ("reminded", "INTEGER NOT NULL DEFAULT 0"),
+                          ("fav", "INTEGER NOT NULL DEFAULT 0")):
             if name not in cols:  # bases de datos antiguas
                 self.db.execute(f"ALTER TABLE jobs ADD COLUMN {name} {ddl}")
 
@@ -128,7 +130,7 @@ class Store:
             reasons=json.loads(row["reasons"]), matched_searches=json.loads(row["matched_searches"]),
             notified_at=_parse(row["notified_at"]), tg_message_id=row["tg_message_id"],
             description=row["description"], track=row["track"], track_at=_parse(row["track_at"]),
-            reminded=bool(row["reminded"]),
+            reminded=bool(row["reminded"]), fav=bool(row["fav"]),
         )
         job.first_posting = (self.postings(job.id) or [None])[0]
         return job
@@ -206,6 +208,13 @@ class Store:
         with self.db:
             self.db.execute("UPDATE jobs SET track=?, track_at=?, reminded=0 WHERE id=?",
                             (track, _iso(now) if track else None, job_id))
+
+    def set_fav(self, job_id: int, fav: bool) -> None:
+        with self.db:
+            self.db.execute("UPDATE jobs SET fav=? WHERE id=?", (int(fav), job_id))
+
+    def favorites(self) -> list[Job]:
+        return [self._job(r) for r in self.db.execute("SELECT * FROM jobs WHERE fav=1 ORDER BY id DESC")]
 
     def tracked(self, track: str | None = None) -> list[Job]:
         """Ofertas con seguimiento (o de un estado), las más recientes primero."""

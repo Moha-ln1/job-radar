@@ -29,19 +29,49 @@ async def _say(update: Update, text: str, markup=None):
         text, parse_mode="HTML", reply_markup=markup, link_preview_options=telegram_io._NO_PREVIEW)
 
 
-def track_keyboard(job_id: int, current: str | None = None) -> InlineKeyboardMarkup:
-    """Botones para pasar la oferta a otro estado de seguimiento."""
+def track_keyboard(job_id: int, current: str | None = None, fav: bool = False) -> InlineKeyboardMarkup:
+    """Botones de la ficha: favorita, pasar de ella y los estados de seguimiento."""
+    top = [InlineKeyboardButton("☆ Quitar favorita" if fav else "⭐ Favorita", callback_data=f"fv:{job_id}"),
+           InlineKeyboardButton("🗑 Pasar de ella", callback_data=f"n:{job_id}")]
     states = [InlineKeyboardButton(label, callback_data=f"t:{key}:{job_id}")
               for key, label in TRACKS.items() if key != current]
-    rows = [states[i:i + 2] for i in range(0, len(states), 2)]
+    rows = [top] + [states[i:i + 2] for i in range(0, len(states), 2)]
     if current:
         rows.append([InlineKeyboardButton("🗑 Quitar del seguimiento", callback_data=f"t:x:{job_id}")])
     return InlineKeyboardMarkup(rows)
 
 
 async def cmd_aplicadas(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    for text in seguimiento.format_tracked(_store(context).tracked(), _now()):
+    texts = seguimiento.format_tracked(_store(context).tracked(), _now())
+    for i, text in enumerate(texts):
+        last = i == len(texts) - 1
+        await _say(update, text, InlineKeyboardMarkup([[
+            InlineKeyboardButton("⭐ Favoritas", callback_data="mn:favoritas"),
+            InlineKeyboardButton("📊 Estadísticas", callback_data="mn:estadisticas"),
+            InlineKeyboardButton("📤 Exportar", callback_data="mn:exportar")]]) if last else None)
+
+
+async def cmd_favoritas(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    for text in seguimiento.format_favorites(_store(context).favorites(), _now()):
         await _say(update, text)
+
+
+async def on_fav(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    store = _store(context)
+    job = store.get_job(int(query.data.split(":")[1]))
+    if job is None:
+        await query.answer("Esa oferta ya no existe.")
+        return
+    store.set_fav(job.id, not job.fav)
+    await query.answer("⭐ Añadida a favoritas" if not job.fav else "Quitada de favoritas")
+    markup = query.message.reply_markup if query.message else None
+    buttons = [b.callback_data or "" for row in markup.inline_keyboard for b in row] if markup else []
+    if buttons and not any(c.startswith("h:") for c in buttons):  # el aviso original conserva sus botones
+        try:
+            await query.edit_message_reply_markup(track_keyboard(job.id, job.track, not job.fav))
+        except BadRequest:
+            pass
 
 
 async def cmd_oferta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -55,7 +85,7 @@ async def cmd_oferta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     text = notify.format_job(job, store.postings(job.id), [])
     if job.track:
         text += f"\n{TRACKS[job.track]} · {seguimiento._days(_now(), job.track_at)}"
-    await _say(update, text, track_keyboard(job.id, job.track))
+    await _say(update, text, track_keyboard(job.id, job.track, job.fav))
 
 
 async def on_track(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -79,7 +109,7 @@ async def on_track(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     buttons = [b.callback_data or "" for row in markup.inline_keyboard for b in row] if markup else []
     if buttons and not any(c.startswith("h:") for c in buttons):  # el aviso original conserva sus botones
         try:
-            await query.edit_message_reply_markup(track_keyboard(job.id, new))
+            await query.edit_message_reply_markup(track_keyboard(job.id, new, job.fav))
         except BadRequest:
             pass
 
@@ -153,7 +183,7 @@ async def cmd_exportar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
                                               caption=f"{len(ordered)} ofertas (últimos 30 días y las que sigues)")
 
 
-HANDLERS = {"aplicadas": cmd_aplicadas, "candidatura": cmd_candidatura,
+HANDLERS = {"aplicadas": cmd_aplicadas, "favoritas": cmd_favoritas, "candidatura": cmd_candidatura,
             "estadisticas": cmd_estadisticas, "exportar": cmd_exportar}
-CALLBACKS = [(r"^t:(x|[a-z]+):\d+$", on_track), (r"^a:\d+$", on_apply), (r"^c:[a-z]+$", on_candidatura)]
+CALLBACKS = [(r"^fv:\d+$", on_fav), (r"^t:(x|[a-z]+):\d+$", on_track), (r"^a:\d+$", on_apply), (r"^c:[a-z]+$", on_candidatura)]
 OFERTA_PATTERN = r"^/oferta_\d+"

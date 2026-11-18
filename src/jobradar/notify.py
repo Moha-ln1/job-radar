@@ -68,7 +68,7 @@ def format_job(job, postings, matched_names: list[str]) -> str:
     if any(p.source == "remoteok" for p in postings):
         links += " · vía RemoteOK"
     if links:
-        lines.append("🔗 " + links)
+        lines.append("🔗 " + links + f" · /oferta_{job.id}")
     return "\n".join(lines)
 
 
@@ -144,7 +144,7 @@ def format_week(items, title: str = "Ofertas de la última semana") -> list[str]
             line += f" ({_MODALITY.get(job.modality, escape(job.modality))})"
         links = _links(postings)
         if links:
-            line += "\n   🔗 " + links
+            line += "\n   🔗 " + links + f" · /oferta_{job.id}"
         blocks.append(line if len(line) <= MAX_LEN - 200 else _compact(job, postings))
     return _chunk(blocks, header)
 
@@ -201,8 +201,9 @@ def format_summary(report) -> str:
 def job_keyboard(job_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([[
         InlineKeyboardButton("📝 Aplicar", callback_data=f"a:{job_id}"),
-        InlineKeyboardButton("💾 Guardar", callback_data=f"t:guardada:{job_id}"),
+        InlineKeyboardButton("💾 Seguir", callback_data=f"t:guardada:{job_id}"),
+        InlineKeyboardButton("⭐", callback_data=f"fv:{job_id}"),
     ], [
+        InlineKeyboardButton("🗑 Pasar de ella", callback_data=f"n:{job_id}"),
         InlineKeyboardButton("🚫 Ocultar empresa", callback_data=f"h:{job_id}"),
-        InlineKeyboardButton("👎 No me interesa", callback_data=f"n:{job_id}"),
     ]])

@@ -96,6 +96,25 @@ def format_tracked(jobs, now: datetime, limit: int = 3800) -> list[str]:
     return messages
 
 
+def format_favorites(jobs, now: datetime, limit: int = 3800) -> list[str]:
+    """Mensajes de /favoritas: una línea por oferta, con su estado de seguimiento si lo tiene."""
+    if not jobs:
+        return ["Aún no tienes favoritas. Pulsa ⭐ en un aviso o en la ficha de una oferta."]
+    lines = [f"<b>⭐ Favoritas</b> ({len(jobs)})"]
+    for j in jobs:
+        state = f" · {TRACKS[j.track]}" if j.track in TRACKS else ""
+        lines.append(f"• {escape(j.title)}" + (f" — {escape(j.company)}" if j.company else "")
+                     + f"{state}  /oferta_{j.id}")
+    messages, current = [], ""
+    for line in lines:
+        if len(current) + len(line) + 1 > limit and current:
+            messages.append(current.strip())
+            current = ""
+        current += line + "\n"
+    messages.append(current.strip())
+    return messages
+
+
 def format_stats(stats: dict, days: int = 30) -> str:
     tr = stats["seguimiento"]
     lines = [f"📊 <b>Últimos {days} días</b>",
