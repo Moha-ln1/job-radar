@@ -7,6 +7,7 @@ import re
 from datetime import datetime, timezone
 
 from telegram import ForceReply, InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 from . import notify, seguimiento, telegram_io
@@ -39,7 +40,8 @@ def track_keyboard(job_id: int, current: str | None = None) -> InlineKeyboardMar
 
 
 async def cmd_aplicadas(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    await _say(update, seguimiento.format_tracked(_store(context).tracked(), _now()))
+    for text in seguimiento.format_tracked(_store(context).tracked(), _now()):
+        await _say(update, text)
 
 
 async def cmd_oferta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -64,8 +66,22 @@ async def on_track(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if job is None or (state != "x" and state not in TRACKS):
         await query.answer("Esa oferta ya no existe.")
         return
-    store.set_track(job.id, None if state == "x" else state, _now())
+    if state == job.track:
+        await query.answer(f"Ya está como {TRACKS[state]}")  # no reinicia la fecha ni el recordatorio
+        return
+    if state == "guardada" and job.track:
+        await query.answer(f"Ya la sigues como {TRACKS[job.track]}")  # un botón antiguo no hace retroceder
+        return
+    new = None if state == "x" else state
+    store.set_track(job.id, new, _now())
     await query.answer("Quitada del seguimiento" if state == "x" else TRACKS[state])
+    markup = query.message.reply_markup if query.message else None
+    buttons = [b.callback_data or "" for row in markup.inline_keyboard for b in row] if markup else []
+    if buttons and not any(c.startswith("h:") for c in buttons):  # el aviso original conserva sus botones
+        try:
+            await query.edit_message_reply_markup(track_keyboard(job.id, new))
+        except BadRequest:
+            pass
 
 
 async def on_apply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -114,7 +130,7 @@ async def on_candidatura_reply(update: Update, context: ContextTypes.DEFAULT_TYP
     if text.strip() == "-":
         data.pop(field, None)
     else:
-        data[field] = text.strip()[:500]
+        data[field] = text.strip()[:300]
     seguimiento.save_candidatura(paths, data)
     await _say(update, *candidatura_view(data))
 

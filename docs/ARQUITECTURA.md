@@ -131,7 +131,7 @@ beca, pasantía, work placement, FP dual…). Sin distinguir mayúsculas ni tild
 `seguimiento.py` (lógica pura: carta, estadísticas, CSV) y `bot_seguimiento.py` (comandos y botones). El estado vive
 en columnas de `jobs` (`track`, `track_at`, `reminded`; migradas con `ALTER TABLE`). Los datos personales están en
 `candidatura.yaml` (fuera del repo). Nada se envía a los portales: el bot prepara y recuerda. El recordatorio
-(`scheduler.reminders`, 10:30) avisa una vez por candidatura a los 7 días y se reinicia al cambiar de estado.
+(`scheduler._daily_reminders`, desde las 10:00 y una vez al día; si el PC estaba apagado, al arrancar) avisa una vez por candidatura a los 7 días y se reinicia al cambiar de estado.
 
 ## 5. Ejecución
 

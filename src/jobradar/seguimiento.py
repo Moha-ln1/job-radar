@@ -75,21 +75,25 @@ def _days(now: datetime, since: datetime | None) -> str:
     return "hoy" if n <= 0 else f"hace {n} d"
 
 
-def format_tracked(jobs, now: datetime) -> str:
-    """Lista de /aplicadas agrupada por estado."""
+def format_tracked(jobs, now: datetime, limit: int = 3800) -> list[str]:
+    """Mensajes de /aplicadas, agrupados por estado y partidos para no pasar el límite de Telegram."""
     if not jobs:
-        return "Aún no sigues ninguna oferta. Pulsa 💾 Guardar o 📝 Aplicar en un aviso."
-    blocks = []
+        return ["Aún no sigues ninguna oferta. Pulsa 💾 Guardar o 📝 Aplicar en un aviso."]
+    lines: list[str] = []
     for track, label in TRACKS.items():
         group = [j for j in jobs if j.track == track]
-        if not group:
-            continue
-        lines = [f"<b>{label} ({len(group)})</b>"]
-        for j in group:
-            lines.append(f"• {escape(j.title)}" + (f" — {escape(j.company)}" if j.company else "")
-                         + f" · {_days(now, j.track_at)}  /oferta_{j.id}")
-        blocks.append("\n".join(lines))
-    return "\n\n".join(blocks)
+        if group:
+            lines += ["", f"<b>{label} ({len(group)})</b>"]
+            lines += [f"• {escape(j.title)}" + (f" — {escape(j.company)}" if j.company else "")
+                      + f" · {_days(now, j.track_at)}  /oferta_{j.id}" for j in group]
+    messages, current = [], ""
+    for line in lines:
+        if len(current) + len(line) + 1 > limit and current.strip():
+            messages.append(current.strip())
+            current = ""
+        current += line + "\n"
+    messages.append(current.strip())
+    return messages
 
 
 def format_stats(stats: dict, days: int = 30) -> str:
@@ -100,7 +104,7 @@ def format_stats(stats: dict, days: int = 30) -> str:
         lines.append("Por fuente: " + ", ".join(f"{escape(notify.source_label(s))} {n}"
                                                  for s, n in stats["fuentes"][:8]))
     if tr:
-        lines.append("Seguimiento: " + " · ".join(f"{TRACKS[t]} {n}" for t, n in tr.items() if t in TRACKS))
+        lines.append("Seguimiento (total): " + " · ".join(f"{TRACKS[t]} {n}" for t, n in tr.items() if t in TRACKS))
         sent = sum(tr.get(t, 0) for t in ("aplicada", "entrevista", "oferta", "rechazada"))
         replies = sum(tr.get(t, 0) for t in ("entrevista", "oferta"))
         if sent:
@@ -114,12 +118,17 @@ def reminder_text(job, now: datetime) -> str:
             + ". ¿Qué ha pasado?")
 
 
+def _safe(value: str) -> str:
+    """Evita que una hoja de cálculo ejecute como fórmula un texto que empieza por = + - @."""
+    return "'" + value if value[:1] in ("=", "+", "-", "@") else value
+
+
 def to_csv(jobs, store) -> str:
     out = io.StringIO()
     w = csv.writer(out)
     w.writerow(["estado", "fecha", "puesto", "empresa", "ubicación", "enlace"])
     for j in jobs:
         posts = store.postings(j.id)
-        w.writerow([j.track or "", (j.track_at or j.first_seen).date().isoformat(), j.title,
-                    j.company or "", j.location or "", posts[0].url if posts else ""])
+        w.writerow([j.track or "", (j.track_at or j.first_seen).date().isoformat(), _safe(j.title),
+                    _safe(j.company or ""), _safe(j.location or ""), posts[0].url if posts else ""])
     return out.getvalue()

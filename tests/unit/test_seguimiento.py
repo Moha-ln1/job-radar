@@ -81,3 +81,40 @@ def test_botones_de_seguimiento_caben_en_callback():
     data = [b.callback_data for row in kb.inline_keyboard for b in row]
     assert "t:aplicada:%d" % 2 ** 40 not in data and f"t:x:{2 ** 40}" in data
     assert all(len(d.encode()) <= 64 for d in data)
+
+
+def test_aplicadas_se_parte_en_mensajes_y_csv_es_seguro(tmp_path):
+    s = Store(tmp_path / "g.db")
+    s.upsert([JobOffer(title=f"=Puesto {i} " + "x" * 80, url=f"https://e.invalid/{i}", source="t",
+                       company=f"Empresa{i}" + "C" * 40) for i in range(80)], NOW)
+    for j in range(1, 81):
+        s.set_decision(j, Decision(matched=["b1"], reasons=[]))
+        s.set_track(j, "rechazada", NOW)
+    msgs = seguimiento.format_tracked(s.tracked(), NOW)
+    assert len(msgs) > 1 and all(len(m) <= 4096 for m in msgs)
+    assert "'=Puesto" in seguimiento.to_csv(s.tracked(), s)
+
+
+def test_estado_repetido_o_antiguo_no_pisa_el_seguimiento(tmp_path):
+    import asyncio
+    from types import SimpleNamespace
+
+    from jobradar.bot_seguimiento import on_track
+    s = _store(tmp_path)
+    s.set_track(1, "aplicada", NOW - timedelta(days=8))
+    s.set_track(2, "entrevista", NOW)
+    answers = []
+
+    class Q:
+        message = None
+
+        def __init__(self, data):
+            self.data = data
+
+        async def answer(self, text=None):
+            answers.append(text)
+    ctx = SimpleNamespace(bot_data={"store": s})
+    asyncio.run(on_track(SimpleNamespace(callback_query=Q("t:aplicada:1")), ctx))
+    assert [j.id for j in s.due_reminders(NOW, 7)] == [1] and "Ya está" in answers[-1]
+    asyncio.run(on_track(SimpleNamespace(callback_query=Q("t:guardada:2")), ctx))
+    assert s.get_job(2).track == "entrevista"

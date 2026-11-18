@@ -176,6 +176,7 @@ async def tick(context) -> None:
     paths = app.bot_data["paths"]
     now = datetime.now(timezone.utc)
     try:
+        await _daily_reminders(app, paths, now)
         if not is_due(paths, now):
             return
         # Primera ejecución: línea base (lo existente queda como visto, sin avisos).
@@ -194,24 +195,33 @@ async def daily_digest(context) -> None:
         _log.exception("el resumen diario ha fallado")
 
 
-async def reminders(context) -> None:
+async def send_reminders(bot, chat_id, paths: Paths, now: datetime) -> int:
     """Avisa de las candidaturas enviadas hace una semana sin novedades (una sola vez cada una)."""
-    app = context.application
-    paths, now = app.bot_data["paths"], datetime.now(timezone.utc)
     if silenced_until(paths, now):
-        return
+        return 0
     store = Store(paths.db)
+    sent = 0
     try:
         for job in store.due_reminders(now, seguimiento.REMINDER_DAYS):
-            if await _safely(telegram_io.send_text(app.bot, app.bot_data["chat_id"],
-                                                   seguimiento.reminder_text(job, now),
+            if await _safely(telegram_io.send_text(bot, chat_id, seguimiento.reminder_text(job, now),
                                                    reply_markup=track_keyboard(job.id, job.track)),
                              f"el recordatorio de {job.id}"):
                 store.mark_reminded(job.id)
+                sent += 1
     except sqlite3.Error:
         _log.exception("los recordatorios han fallado")
     finally:
         store.close()
+    return sent
+
+
+async def _daily_reminders(app, paths: Paths, now: datetime) -> None:
+    """Una vez al día pasadas las 10:00; si el PC estaba apagado a esa hora, al arrancar."""
+    local = now.astimezone(_local_tz())
+    if local.hour < 10 or read_state(paths).get("last_reminders") == local.date().isoformat():
+        return
+    await send_reminders(app.bot, app.bot_data["chat_id"], paths, now)
+    update_state(paths, last_reminders=local.date().isoformat())
 
 
 def _digest_time(paths: Paths) -> time:
@@ -227,4 +237,3 @@ def register_jobs(app, paths: Paths) -> None:
     queue = app.job_queue
     queue.run_repeating(tick, interval=TICK_SECONDS, first=5, name="tick")  # también recupera tras suspensión
     queue.run_daily(daily_digest, _digest_time(paths), name="digest")
-    queue.run_daily(reminders, time(10, 30, tzinfo=_local_tz()), name="reminders")
