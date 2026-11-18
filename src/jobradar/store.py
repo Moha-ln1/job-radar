@@ -8,6 +8,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from .dedup import SIMILARITY, job_key, similar
+from .modalidad import modality_from_text
 from .models import Decision, JobOffer
 from .normalize import norm_company
 
@@ -171,7 +172,8 @@ class Store:
                     cur = self.db.execute(
                         "INSERT INTO jobs (key,title,company,company_norm,location,modality,"
                         "remote_region,category,first_seen,description) VALUES (?,?,?,?,?,?,?,?,?,?)",
-                        (key, o.title, o.company, cnorm, o.location, o.modality, o.remote_region,
+                        (key, o.title, o.company, cnorm, o.location, o.modality or modality_from_text(o.description),
+                         o.remote_region,
                          o.category, _iso(now), o.description))
                     job_id = cur.lastrowid
                     created.add(job_id)
@@ -202,6 +204,9 @@ class Store:
     def set_description(self, job_id: int, description: str | None) -> None:
         with self.db:
             self.db.execute("UPDATE jobs SET description=? WHERE id=?", (description, job_id))
+            found = modality_from_text(description)
+            if found:  # la ficha puede decir lo que el listado no decía
+                self.db.execute("UPDATE jobs SET modality=? WHERE id=? AND modality IS NULL", (found, job_id))
 
     def set_track(self, job_id: int, track: str | None, now: datetime) -> None:
         """Estado de seguimiento de la oferta (None lo quita). Cambiar de estado reinicia el recordatorio."""

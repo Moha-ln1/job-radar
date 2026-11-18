@@ -8,6 +8,7 @@ from pathlib import Path
 import yaml
 
 from .experiencia import required_years
+from .modalidad import modality_from_text
 from .models import Decision, Exclusions, JobOffer, Modality, Search
 from .normalize import fold, norm_company
 
@@ -157,7 +158,7 @@ def detect_modality(offer: JobOffer, syn: Synonyms) -> Modality | None:
     for key in ("hibrido", "remoto", "presencial"):
         if syn.search(key, text):
             return key  # type: ignore[return-value]
-    return None
+    return modality_from_text(offer.description)  # type: ignore[return-value]
 
 
 def _first_match(terms: list[str], text: str, syn: Synonyms) -> tuple[str, str] | None:
@@ -242,6 +243,9 @@ def _eval_search(offer: JobOffer, s: Search, text: str, modality, syn: Synonyms,
         parts.append(f"área '{area[0]}' ({area[1]})")
     if s.modalidades and modality is not None and modality not in s.modalidades:
         return False, f"búsqueda '{s.name}': modalidad '{modality}' no está en {s.modalidades}", False
+    if modality is None and s.modalidades and set(s.modalidades) == {"remoto"} and offer.location             and fold(offer.location) not in _GENERIC_LOCATIONS and catalog.known_place(fold(offer.location)):
+        # Una ciudad concreta sin modalidad indicada es casi siempre presencial o híbrida: no vale como remota
+        return False, f"búsqueda '{s.name}': '{offer.location}' sin modalidad indicada, no consta como remoto", False
     if modality == "remoto":
         # Sin campo de región, la región suele venir en la ubicación ("Remote (US only)").
         region = offer.remote_region or offer.location

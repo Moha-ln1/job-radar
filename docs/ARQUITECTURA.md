@@ -126,6 +126,14 @@ beca, pasantía, work placement, FP dual…). Sin distinguir mayúsculas ni tild
 - Archivos que escribe la app (no hace falta tocarlos): `busquedas.yaml`, `sinonimos_usuario.yaml`.
   `config.yaml` = ajustes técnicos, ya listo para usar.
 
+### 4.3 bis Modalidad
+
+`modalidad.py` lee remoto / híbrido / presencial de la descripción solo con frases claras ("100 % remoto", "modelo
+híbrido"); "teletrabajo" o "remote" sueltos no cuentan. Se guarda al insertar la oferta o al leer su ficha, y los
+filtros la usan si la fuente no la dio. En una búsqueda de solo remoto, una ciudad concreta sin modalidad no pasa.
+LinkedIn hace además una pasada con `f_WT=2` (opciones `remote_pass`, `remote_terms`, `remote_pages`) y etiqueta esas
+ofertas como remotas.
+
 ### 4.4 Seguimiento de candidaturas
 
 `seguimiento.py` (lógica pura: carta, estadísticas, CSV) y `bot_seguimiento.py` (comandos y botones). El estado vive

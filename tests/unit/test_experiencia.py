@@ -128,3 +128,27 @@ def test_probar_con_descripcion(tmp_path):
                   Exclusions(experiencia_max=2))
     assert radar.probe(paths, "Junior Data Analyst").ok
     assert not radar.probe(paths, "Junior Data Analyst", description="3+ años de experiencia").ok
+
+
+def test_modalidad_desde_la_descripcion():
+    from jobradar.modalidad import modality_from_text as m
+    assert m("Puesto 100% remoto desde España") == "remoto"
+    assert m("Modelo híbrido: 3 días a la semana en oficina") == "hibrido"
+    assert m("Trabajo presencial en Madrid") == "presencial"
+    assert m("Posibilidad de teletrabajo ocasional") is None       # ambiguo: no se adivina
+    assert m("No es un puesto presencial") is None
+    assert m("We work with remote teams") is None
+    assert m(None) is None
+
+
+def test_ciudad_sin_modalidad_no_vale_como_remota():
+    s = Search(id="r", name="remoto", areas=["data"], modalidades=["remoto"], ubicaciones=["espana"], estricta=True)
+    now = datetime.now(timezone.utc)
+
+    def decide(**kw):
+        offer = JobOffer(title="Junior Data Analyst", url="https://e.invalid/9", source="t", **kw)
+        return evaluate(offer, [s], Exclusions(), SYN, CAT, now)
+    assert not decide(location="Madrid").ok
+    assert decide(location="España").ok                  # ubicación genérica: ante la duda, pasa
+    assert decide(location="Madrid", modality="remoto").ok
+    assert decide(location="Madrid", description="Puesto 100% remoto").ok

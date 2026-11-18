@@ -138,6 +138,19 @@ async def fetch_linkedin(ctx: SourceContext) -> list[JobOffer]:
     base = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search"
     offers: list[JobOffer] = []
     try:
+        # Primero lo que LinkedIn marca como remoto (f_WT=2): el listado no trae la modalidad y, como
+        # _dedup se queda con la primera, estas ofertas conservan su etiqueta "remoto".
+        remote_terms = (ctx.combos or ctx.terms)[:int(opts.get("remote_terms", 3))]
+        for term in remote_terms if opts.get("remote_pass", True) else []:
+            for page in range(int(opts.get("remote_pages", 2))):
+                if time.monotonic() > deadline:
+                    break
+                url = (f"{base}?keywords={quote_plus(term)}&location={quote_plus(linkedin_location('españa'))}"
+                       f"&start={page * 10}&f_TPR=r604800&f_WT=2&sortBy=DD")
+                cards = _parse_linkedin((await ctx.http.get(url)).text)
+                offers.extend(o.model_copy(update={"modality": "remoto"}) for o in cards)
+                if len(cards) < 10:
+                    break
         # tipo + área ("prácticas python"): un tipo a secas trae ofertas de cualquier sector
         for term in (ctx.combos or ctx.terms)[:int(opts.get("max_terms", 5))] or ["prácticas"]:
             # 3 ubicaciones: p. ej. Granada y Málaga (presencial) + España (remoto/híbrido)

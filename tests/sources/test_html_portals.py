@@ -153,7 +153,7 @@ async def test_linkedin_pagina_hasta_tarjetas_menores_de_10():
         start = int(req.url.params["start"])
         return httpx.Response(200, text=_linkedin_page(10 if start < 10 else 4, start))
 
-    offers = await run(hp.fetch_linkedin, handler, sources={"linkedin": {"max_pages": 5}})
+    offers = await run(hp.fetch_linkedin, handler, sources={"linkedin": {"max_pages": 5, "remote_pass": False}})
     assert [p["start"] for p in seen] == ["0", "10"]
     assert seen[0]["keywords"] == "prácticas" and seen[0]["location"] == "Granada, Spain" and seen[0]["f_TPR"] == "r604800"
     assert len(offers) == 14
@@ -167,7 +167,7 @@ async def test_linkedin_respeta_max_pages_y_limita_combinaciones():
         return httpx.Response(200, text=_linkedin_page(10, int(req.url.params["start"])))
 
     await run(hp.fetch_linkedin, handler, terms=list("abcdef"), locations=["Granada", "España", "Madrid"],
-              sources={"linkedin": {"max_pages": 2}})
+              sources={"linkedin": {"max_pages": 2, "remote_pass": False}})
     assert len(seen) == 5 * 3 * 2  # 5 términos × 3 ubicaciones × 2 páginas
     assert {s[0] for s in seen} == set("abcde") and {s[1] for s in seen} == {"Granada, Spain", "Spain", "Madrid, Spain"}
 
@@ -248,3 +248,13 @@ async def test_primerempleo_consulta_portada_y_etiquetas_sin_repetir():
 
 def test_registro_de_fuentes():
     assert set(hp.FETCHERS) == {"linkedin", "infojobs", "tecnoempleo", "infoempleo", "primerempleo"}
+
+
+async def test_linkedin_pasada_de_remotas_etiqueta_la_modalidad():
+    def handler(req: httpx.Request) -> httpx.Response:
+        start = int(req.url.params["start"])
+        remote = req.url.params.get("f_WT") == "2"
+        return httpx.Response(200, text=_linkedin_page(3 if remote else 0, start if not remote else 100))
+
+    offers = await run(hp.fetch_linkedin, handler, terms=["python"], locations=["Madrid"])
+    assert offers and all(o.modality == "remoto" for o in offers)

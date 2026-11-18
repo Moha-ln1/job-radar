@@ -498,8 +498,8 @@
   remote_region: null
   category: null
   posted_at: '2026-11-10T00:00:00+00:00'
-  expected: true
-  note: 'J: junior programacion, modalidad desconocida'
+  expected: false
+  note: 'J (solo remoto): ciudad concreta sin modalidad indicada, no consta como remoto'
 - source: linkedin
   title: Apprentice
   company: Fujitsu
@@ -518,8 +518,8 @@
   remote_region: null
   category: null
   posted_at: '2026-11-09T00:00:00+00:00'
-  expected: true
-  note: 'J: junior programacion, modalidad desconocida'
+  expected: false
+  note: 'J (solo remoto): ciudad concreta sin modalidad indicada, no consta como remoto'
 - source: linkedin
   title: Apprentice
   company: Fujitsu

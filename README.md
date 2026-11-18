@@ -48,6 +48,9 @@ responde al aviso original:
   ella (quita la oferta sin ocultar la empresa); cualquier oferta de una lista se abre con `/oferta_N`.
 - **Detalles de la descripción**: el aviso muestra 🎓 los años de experiencia que pide la oferta, y si aflojas
   una exclusión en `/excluir` vuelven las ofertas descartadas que ahora encajan.
+- **Modalidad mejor detectada**: si la fuente no la da, se lee de la descripción ("100 % remoto", "híbrido"...); LinkedIn
+  hace una pasada con su filtro de remoto para etiquetarlas, y una ciudad concreta sin modalidad indicada ya no cuenta como
+  remota en las búsquedas de solo remoto.
 - **Seguimiento de candidaturas**: cada aviso trae 📝 Aplicar (enlace, carta corta y respuestas habituales listas
   para copiar) y 💾 Guardar. `/aplicadas` agrupa tus ofertas por estado (guardada, aplicada, entrevista, oferta,
   rechazada) y a la semana de aplicar te recuerda preguntar. El bot no envía nada por ti.

@@ -56,6 +56,8 @@ def description_from_html(html: str) -> str | None:
         for key in ("qualifications", "skills", "responsibilities"):
             if posting.get(key):
                 parts.append(str(posting[key]))
+        if "TELECOMMUTE" in str(posting.get("jobLocationType") or "").upper():
+            parts.append("Trabajo 100% remoto")
         exp = posting.get("experienceRequirements")
         months = exp.get("monthsOfExperience") if isinstance(exp, dict) else None
         if isinstance(months, (int, float, str)) and str(months).replace(".", "", 1).isdigit():
