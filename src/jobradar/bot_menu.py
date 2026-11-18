@@ -50,9 +50,9 @@ async def on_menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     import importlib
     query = update.callback_query
     key = query.data.removeprefix("mn:")
+    from .bot import _answer
+    await _answer(query)
     if key not in _ACTIONS:
-        await query.answer()
         return
-    await query.answer()
     _, module, func = _ACTIONS[key]
     await getattr(importlib.import_module(f"jobradar.{module}"), func)(update, context)

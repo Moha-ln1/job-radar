@@ -198,11 +198,11 @@ def format_summary(report) -> str:
     return escape("\n".join(lines))
 
 
-def job_keyboard(job_id: int) -> InlineKeyboardMarkup:
+def job_keyboard(job_id: int, fav: bool = False) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([[
         InlineKeyboardButton("📝 Aplicar", callback_data=f"a:{job_id}"),
         InlineKeyboardButton("💾 Seguir", callback_data=f"t:guardada:{job_id}"),
-        InlineKeyboardButton("⭐", callback_data=f"fv:{job_id}"),
+        InlineKeyboardButton("★" if fav else "⭐", callback_data=f"fv:{job_id}"),
     ], [
         InlineKeyboardButton("🗑 Pasar de ella", callback_data=f"n:{job_id}"),
         InlineKeyboardButton("🚫 Ocultar empresa", callback_data=f"h:{job_id}"),

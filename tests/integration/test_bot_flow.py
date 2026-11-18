@@ -584,3 +584,25 @@ async def test_menu_favoritas_y_pasar_de_ella(h):
     assert store.get_job(a).status == "descartada"
     store.close()
     assert load_searches(h.paths.searches)[1].companies == []
+
+
+async def test_pasar_de_ella_no_deja_rastro_y_se_puede_recuperar(h):
+    a = seed(h.paths, "Prácticas A", "Empresa Uno", "Granada", "presencial", matched=["b1"])
+    b = seed(h.paths, "Prácticas B", "Empresa Dos", "Granada", "presencial", matched=["b1"])
+    await h.press("", data=f"fv:{a}", message_id=95)
+    await h.press("", data=f"n:{a}", message_id=96)
+    store = Store(h.paths.db)
+    assert not store.get_job(a).fav and store.favorites() == []
+    store.close()
+    await h.say(f"/oferta_{a}")
+    assert "Descartada" in h.last_text()
+    await h.press("Recuperar")
+    store = Store(h.paths.db)
+    assert store.get_job(a).status == "avisada"
+    # una candidatura en curso no se tira por error
+    store.set_track(b, "aplicada", datetime.now(timezone.utc))
+    store.close()
+    await h.press("", data=f"n:{b}", message_id=97)
+    store = Store(h.paths.db)
+    assert store.get_job(b).status == "avisada" and store.get_job(b).track == "aplicada"
+    store.close()

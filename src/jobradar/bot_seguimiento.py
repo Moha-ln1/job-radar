@@ -11,9 +11,20 @@ from telegram.error import BadRequest
 from telegram.ext import ContextTypes
 
 from . import notify, seguimiento, telegram_io
+from .models import Decision
 from .seguimiento import CAND_FIELDS, TRACKS
 
 _log = logging.getLogger("jobradar.bot")
+
+
+async def _answer(query, text: str | None = None) -> None:
+    """Responde a la pulsación; una pulsación antigua no debe impedir que se aplique lo pedido."""
+    try:
+        await query.answer(text)
+    except BadRequest as exc:
+        if "too old" not in str(exc).lower() and "invalid" not in str(exc).lower():
+            raise
+        _log.info("pulsación sin responder: %s", exc)
 
 
 def _now() -> datetime:
@@ -61,15 +72,17 @@ async def on_fav(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     store = _store(context)
     job = store.get_job(int(query.data.split(":")[1]))
     if job is None:
-        await query.answer("Esa oferta ya no existe.")
+        await _answer(query, "Esa oferta ya no existe.")
         return
     store.set_fav(job.id, not job.fav)
-    await query.answer("⭐ Añadida a favoritas" if not job.fav else "Quitada de favoritas")
+    await _answer(query, "⭐ Añadida a favoritas" if not job.fav else "Quitada de favoritas")
     markup = query.message.reply_markup if query.message else None
     buttons = [b.callback_data or "" for row in markup.inline_keyboard for b in row] if markup else []
-    if buttons and not any(c.startswith("h:") for c in buttons):  # el aviso original conserva sus botones
+    is_alert = any(c.startswith("h:") for c in buttons)
+    if buttons:
+        keyboard = notify.job_keyboard(job.id, fav=not job.fav) if is_alert             else track_keyboard(job.id, job.track, not job.fav)
         try:
-            await query.edit_message_reply_markup(track_keyboard(job.id, job.track, not job.fav))
+            await query.edit_message_reply_markup(keyboard)
         except BadRequest:
             pass
 
@@ -85,7 +98,25 @@ async def cmd_oferta(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     text = notify.format_job(job, store.postings(job.id), [])
     if job.track:
         text += f"\n{TRACKS[job.track]} · {seguimiento._days(_now(), job.track_at)}"
-    await _say(update, text, track_keyboard(job.id, job.track, job.fav))
+    markup = track_keyboard(job.id, job.track, job.fav)
+    if job.status == "descartada":
+        text += "\n🗑 Descartada"
+        markup = InlineKeyboardMarkup([[InlineKeyboardButton("↩️ Recuperar", callback_data=f"rv:{job.id}")],
+                                       *markup.inline_keyboard])
+    await _say(update, text, markup)
+
+
+async def on_recover(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Recupera una oferta que quitaste con 🗑 Pasar de ella."""
+    query = update.callback_query
+    store = _store(context)
+    job = store.get_job(int(query.data.split(":")[1]))
+    if job is None:
+        await _answer(query, "Esa oferta ya no existe.")
+        return
+    store.set_decision(job.id, Decision(matched=["usuario"], priority="normal", reasons=["usuario: recuperada"]))
+    await _answer(query, "↩️ Recuperada")
+    await query.edit_message_reply_markup(track_keyboard(job.id, job.track, job.fav))
 
 
 async def on_track(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -94,17 +125,17 @@ async def on_track(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     store = _store(context)
     job = store.get_job(int(raw))
     if job is None or (state != "x" and state not in TRACKS):
-        await query.answer("Esa oferta ya no existe.")
+        await _answer(query, "Esa oferta ya no existe.")
         return
     if state == job.track:
-        await query.answer(f"Ya está como {TRACKS[state]}")  # no reinicia la fecha ni el recordatorio
+        await _answer(query, f"Ya está como {TRACKS[state]}")  # no reinicia la fecha ni el recordatorio
         return
     if state == "guardada" and job.track:
-        await query.answer(f"Ya la sigues como {TRACKS[job.track]}")  # un botón antiguo no hace retroceder
+        await _answer(query, f"Ya la sigues como {TRACKS[job.track]}")  # un botón antiguo no hace retroceder
         return
     new = None if state == "x" else state
     store.set_track(job.id, new, _now())
-    await query.answer("Quitada del seguimiento" if state == "x" else TRACKS[state])
+    await _answer(query, "Quitada del seguimiento" if state == "x" else TRACKS[state])
     markup = query.message.reply_markup if query.message else None
     buttons = [b.callback_data or "" for row in markup.inline_keyboard for b in row] if markup else []
     if buttons and not any(c.startswith("h:") for c in buttons):  # el aviso original conserva sus botones
@@ -119,9 +150,9 @@ async def on_apply(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     store = _store(context)
     job = store.get_job(int(query.data.split(":")[1]))
     if job is None:
-        await query.answer("Esa oferta ya no existe.")
+        await _answer(query, "Esa oferta ya no existe.")
         return
-    await query.answer()
+    await _answer(query)
     data = seguimiento.load_candidatura(context.bot_data["paths"])
     kb = InlineKeyboardMarkup([[
         InlineKeyboardButton("📨 Ya he aplicado", callback_data=f"t:aplicada:{job.id}"),
@@ -146,9 +177,9 @@ async def on_candidatura(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     query = update.callback_query
     field = query.data.split(":")[1]
     if field not in CAND_FIELDS:
-        await query.answer()
+        await _answer(query)
         return
-    await query.answer()
+    await _answer(query)
     context.user_data["await"] = ("cand", field)
     await update.effective_chat.send_message(f"{CAND_FIELDS[field]}: escríbelo (o '-' para borrarlo).",
                                              reply_markup=ForceReply(selective=True))
@@ -185,5 +216,5 @@ async def cmd_exportar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 HANDLERS = {"aplicadas": cmd_aplicadas, "favoritas": cmd_favoritas, "candidatura": cmd_candidatura,
             "estadisticas": cmd_estadisticas, "exportar": cmd_exportar}
-CALLBACKS = [(r"^fv:\d+$", on_fav), (r"^t:(x|[a-z]+):\d+$", on_track), (r"^a:\d+$", on_apply), (r"^c:[a-z]+$", on_candidatura)]
+CALLBACKS = [(r"^rv:\d+$", on_recover), (r"^fv:\d+$", on_fav), (r"^t:(x|[a-z]+):\d+$", on_track), (r"^a:\d+$", on_apply), (r"^c:[a-z]+$", on_candidatura)]
 OFERTA_PATTERN = r"^/oferta_\d+"

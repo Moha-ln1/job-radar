@@ -316,7 +316,7 @@ async def scan(paths: Paths, now: datetime | None = None, *, only: list[str] | N
                 else:
                     report.new_discarded += 1
             report.new_postings_for_notified += [(j, p) for j, p in up.new_postings
-                                                 if j.notified_at is not None]
+                                                 if j.notified_at is not None and j.status == "avisada"]
     finally:
         store.close()
         if own_http:
@@ -361,6 +361,8 @@ def reevaluate(paths: Paths, search_ids: list[str], days: int = 14,
     try:
         found = []
         for job in store.recent(days, now, "descartada"):
+            if "usuario: no me interesa" in job.reasons:
+                continue  # lo que has quitado tú no vuelve por editar una búsqueda
             d = evaluate(job.offer_view(), chosen, excl, syn, catalog, now, settings.scan.max_age_days)
             if d.ok:
                 store.set_decision(job.id, d)

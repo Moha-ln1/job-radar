@@ -626,8 +626,12 @@ async def on_job_action(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
             _save(context, searches, excl)
         await _answer(query, f"🚫 {job.company} ocultada")
     else:
+        if job.track in ("aplicada", "entrevista", "oferta"):
+            await _answer(query, f"La sigues como {job.track}: quítala del seguimiento antes de pasar de ella.")
+            return
         store.set_decision(job.id, Decision(matched=[], reasons=["usuario: no me interesa"]))
         store.set_track(job.id, None, _now())
+        store.set_fav(job.id, False)
         await _answer(query, "🗑 Fuera (la empresa sigue activa)")
         try:
             await query.message.delete()
@@ -920,7 +924,7 @@ def build_application(paths: Paths) -> Application:
     app.bot_data.update(paths=paths, chat_id=chat_id, store=Store(paths.db))
     auth = filters.Chat(chat_id=chat_id)
     app.add_handler(TypeHandler(Update, guard), group=-1)
-    commands = {"start": cmd_start, "menu": cmd_menu, "busquedas": cmd_busquedas, "excluir": cmd_excluir,
+    commands = {"start": cmd_start, "menu": cmd_menu, "recientes": cmd_recientes, "busquedas": cmd_busquedas, "excluir": cmd_excluir,
                 "descartadas": cmd_descartadas, "probar": cmd_probar, "semana": cmd_semana,
                 "estado": cmd_estado, "silencio": cmd_silencio, "escanear": cmd_escanear,
                 "ayuda": cmd_ayuda}

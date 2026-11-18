@@ -138,7 +138,7 @@ def test_only_configured_chat_is_authorized(tmp_path):
     commands = [h for group in app.handlers.values() for h in group if isinstance(h, CommandHandler)]
     names = {next(iter(h.commands)) for h in commands}
     # los comandos del menú de Telegram, más los que solo se abren desde /menu o por compatibilidad
-    assert names - {c for c, _ in bot.COMMANDS} == {"start", "empresas", "paginas", "estadisticas", "exportar"}
+    assert names - {c for c, _ in bot.COMMANDS} == {"start", "recientes", "empresas", "paginas", "estadisticas", "exportar"}
     assert {c for c, _ in bot.COMMANDS} <= names
     for h in commands:
         assert h.filters.check_update(own)
