@@ -96,3 +96,35 @@ def test_linkedin_comparte_tope_entre_subdominios():
     assert budget_key("https://es.linkedin.com/jobs/view/x") == budget_key("https://www.linkedin.com/jobs/view/y")
     assert limit_for("https://es.linkedin.com/jobs/view/x") == 5
     assert limit_for("https://www.tecnoempleo.com/x") > 5
+
+
+def test_aviso_muestra_los_anos_que_piden():
+    from types import SimpleNamespace
+
+    from jobradar import notify
+    job = SimpleNamespace(id=1, title="Junior Data Analyst", company="Acme", location="Madrid",
+                          modality=None, priority="alta", description="Buscamos 2+ años de experiencia")
+    assert "🎓 Piden 2 años de experiencia" in notify.format_job(job, [], [])
+    job.description = "Sin requisitos"
+    assert "🎓" not in notify.format_job(job, [], [])
+
+
+def test_master_data_analyst_ya_no_se_excluye():
+    from jobradar.models import Exclusions
+    s = Search(id="d", name="d", areas=["data"], estricta=True)
+    ok = evaluate(JobOffer(title="Master Data Analyst", url="https://e.invalid/2", source="t"),
+                  [s], Exclusions(), SYN, CAT, datetime.now(timezone.utc))
+    no = evaluate(JobOffer(title="Master Data Management Specialist", url="https://e.invalid/3", source="t"),
+                  [s], Exclusions(), SYN, CAT, datetime.now(timezone.utc))
+    assert ok.ok and not no.ok
+
+
+def test_probar_con_descripcion(tmp_path):
+    from jobradar import radar
+    from jobradar.paths import Paths
+    paths = Paths(tmp_path)
+    from jobradar.config import save_searches
+    save_searches(paths.searches, [Search(id="b1", name="B", areas=["data"], estricta=True)],
+                  Exclusions(experiencia_max=2))
+    assert radar.probe(paths, "Junior Data Analyst").ok
+    assert not radar.probe(paths, "Junior Data Analyst", description="3+ años de experiencia").ok

@@ -466,11 +466,12 @@ async def cmd_excluir(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
 
 async def cmd_probar(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    text = " ".join(context.args or []).strip()
+    title, _, description = " ".join(context.args or []).partition("|")
+    text = title.strip()
     if not text:
-        await _say(update, "Uso: /probar &lt;título de una oferta&gt;")
+        await _say(update, "Uso: /probar &lt;título&gt; o /probar &lt;título&gt; | &lt;fragmento de la descripción&gt;")
         return
-    decision = radar.probe(_paths(context), text)
+    decision = radar.probe(_paths(context), text, description=description.strip() or None)
     if decision is None:
         await _say(update, "Ese texto no es un título válido (3 a 200 caracteres, sin HTML).")
         return
@@ -722,16 +723,24 @@ async def on_exclusion(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     if kind == "exp":  # sin límite → 0 (solo sin experiencia) → 1 → 2 → 3 → 5 → sin límite
         steps = [None, 0, 1, 2, 3, 5]
         current = steps.index(excl.experiencia_max) if excl.experiencia_max in steps else -1
+        old = excl.experiencia_max
         excl.experiencia_max = steps[(current + 1) % len(steps)]
         _save(context, searches, excl)
+        loosened = excl.experiencia_max is None or (old is not None and excl.experiencia_max > old)
         await _answer(query, "Hecho")
     else:
         items = {"w": excl.words, "c": excl.companies, "d": excl.en_descripcion}[kind]
         idx = int(rest[0])
-        if idx < len(items):
+        loosened = idx < len(items)
+        if loosened:
             items.pop(idx)
             _save(context, searches, excl)
         await _answer(query, "Quitada")
+    if loosened:  # lo que se descartó por esa regla vuelve si ahora encaja
+        found = radar.reevaluate(_paths(context), [s.id for s in searches])
+        if found:
+            await _say(update, f"♻️ {len(found)} ofertas descartadas antes vuelven a encajar; "
+                               "llegarán en el próximo resumen (o míralas en /semana).")
     text, kb = exclusions_view(excl)
     await _edit(context.bot, query.message.chat_id, query.message.message_id, text, kb)
 

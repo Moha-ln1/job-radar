@@ -372,10 +372,12 @@ def reevaluate(paths: Paths, search_ids: list[str], days: int = 14,
         store.close()
 
 
-def probe(paths: Paths, text: str, now: datetime | None = None) -> Decision | None:
-    """Evalúa un texto como si fuera el título de una oferta; None si no es un título válido."""
+def probe(paths: Paths, text: str, now: datetime | None = None, description: str | None = None) -> Decision | None:
+    """Evalúa un texto como si fuera el título de una oferta (y, si se da, su descripción);
+    None si no es un título válido."""
     from .models import build_offer
-    offer = build_offer(title=text, url="https://ejemplo.invalid/prueba", source="probar")
+    offer = build_offer(title=text, url="https://ejemplo.invalid/prueba", source="probar",
+                        description=description)
     if offer is None:
         return None
     settings, searches, excl, syn, catalog = load_context(paths)

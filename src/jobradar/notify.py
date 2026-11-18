@@ -6,6 +6,7 @@ from html import escape
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
+from .experiencia import required_years
 from .models import Search
 
 MAX_LEN = 4096
@@ -64,6 +65,9 @@ def format_job(job, postings, matched_names: list[str]) -> str:
     lines = [head]
     if matched_names:
         lines.append("🔎 Búsqueda: " + escape(", ".join(matched_names)))
+    years = required_years(getattr(job, "description", None))
+    if years:
+        lines.append(f"🎓 Piden {years} {'año' if years == 1 else 'años'} de experiencia")
     links = _links(postings)
     if any(p.source == "remoteok" for p in postings):
         links += " · vía RemoteOK"

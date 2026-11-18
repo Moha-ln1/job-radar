@@ -130,7 +130,7 @@ la describe: pulsa **🔄 Nombre automático** o **✏️ Nombre** para cambiarl
 | `/estadisticas` (desde `/menu`) | Ofertas vistas y que encajan en 30 días, por fuente, y tu tasa de respuesta. |
 | `/exportar` (desde `/menu`) | Te envía un CSV con las ofertas de 30 días y las que sigues. |
 | `/descartadas` | Ver las ofertas descartadas en las últimas 24 h, agrupadas por motivo. |
-| `/probar <texto>` | Comprobar si un título encaja con tus búsquedas. Ejemplo: `/probar Prácticas de marketing en Madrid`. |
+| `/probar <texto>` | Comprobar si un título encaja con tus búsquedas. Ejemplo: `/probar Prácticas de marketing en Madrid`. Para ver también el filtro de la descripción: `/probar Junior Data Analyst | pedimos 3 años de experiencia`. |
 | `/menu` | Menú general con todo a un toque: ofertas de los últimos días, semana, favoritas, seguimiento, estadísticas, exportar, búsquedas, fuentes, empresas, páginas, estado, silencio y escanear. Arriba te resume cuántas hay hoy, tus favoritas y tus candidaturas. Es también lo que abre `/start`. |
 | `/favoritas` | Tus ofertas marcadas con ⭐ (botón de cada aviso y de cada ficha `/oferta_N`). |
 | `/semana` | Todas las ofertas de los últimos 7 días. Eliges con botones: todas, solo las 🔥 o las de una búsqueda; salen por día y, dentro de cada día, primero las 🔥. |
