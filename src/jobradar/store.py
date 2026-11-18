@@ -81,6 +81,9 @@ class Job:
     notified_at: datetime | None = None
     tg_message_id: int | None = None
     description: str | None = None
+    track: str | None = None          # seguimiento: guardada, aplicada, entrevista, oferta, rechazada
+    track_at: datetime | None = None
+    reminded: bool = False
     # Primer enlace del job; lo usa offer_view().
     first_posting: Posting | None = field(default=None, repr=False, compare=False)
 
@@ -106,8 +109,11 @@ class Store:
         self.db = sqlite3.connect(str(path), check_same_thread=False)
         self.db.row_factory = sqlite3.Row
         self.db.executescript(_SCHEMA)
-        if "description" not in {r["name"] for r in self.db.execute("PRAGMA table_info(jobs)")}:
-            self.db.execute("ALTER TABLE jobs ADD COLUMN description TEXT")  # bases de datos antiguas
+        cols = {r["name"] for r in self.db.execute("PRAGMA table_info(jobs)")}
+        for name, ddl in (("description", "TEXT"), ("track", "TEXT"), ("track_at", "TEXT"),
+                          ("reminded", "INTEGER NOT NULL DEFAULT 0")):
+            if name not in cols:  # bases de datos antiguas
+                self.db.execute(f"ALTER TABLE jobs ADD COLUMN {name} {ddl}")
 
     def close(self) -> None:
         self.db.close()
@@ -121,7 +127,8 @@ class Store:
             first_seen=_parse(row["first_seen"]), status=row["status"], priority=row["priority"],
             reasons=json.loads(row["reasons"]), matched_searches=json.loads(row["matched_searches"]),
             notified_at=_parse(row["notified_at"]), tg_message_id=row["tg_message_id"],
-            description=row["description"],
+            description=row["description"], track=row["track"], track_at=_parse(row["track_at"]),
+            reminded=bool(row["reminded"]),
         )
         job.first_posting = (self.postings(job.id) or [None])[0]
         return job
@@ -193,6 +200,41 @@ class Store:
     def set_description(self, job_id: int, description: str | None) -> None:
         with self.db:
             self.db.execute("UPDATE jobs SET description=? WHERE id=?", (description, job_id))
+
+    def set_track(self, job_id: int, track: str | None, now: datetime) -> None:
+        """Estado de seguimiento de la oferta (None lo quita). Cambiar de estado reinicia el recordatorio."""
+        with self.db:
+            self.db.execute("UPDATE jobs SET track=?, track_at=?, reminded=0 WHERE id=?",
+                            (track, _iso(now) if track else None, job_id))
+
+    def tracked(self, track: str | None = None) -> list[Job]:
+        """Ofertas con seguimiento (o de un estado), las más recientes primero."""
+        sql = "SELECT * FROM jobs WHERE " + ("track=?" if track else "track IS NOT NULL")
+        sql += " ORDER BY track_at DESC"
+        return [self._job(r) for r in self.db.execute(sql, (track,) if track else ())]
+
+    def due_reminders(self, now: datetime, days: int = 7) -> list[Job]:
+        """Aplicadas hace `days` días o más sin novedades y aún sin recordar."""
+        rows = self.db.execute("SELECT * FROM jobs WHERE track='aplicada' AND reminded=0 AND track_at<=?",
+                               (_iso(now - timedelta(days=days)),))
+        return [self._job(r) for r in rows]
+
+    def mark_reminded(self, job_id: int) -> None:
+        with self.db:
+            self.db.execute("UPDATE jobs SET reminded=1 WHERE id=?", (job_id,))
+
+    def stats(self, now: datetime, days: int = 30) -> dict:
+        """Cifras de los últimos `days` días: ofertas que encajan por fuente y seguimiento."""
+        since = _iso(now - timedelta(days=days))
+        found = self.db.execute("SELECT COUNT(*) n FROM jobs WHERE first_seen>=? AND status='avisada'",
+                                (since,)).fetchone()["n"]
+        seen = self.db.execute("SELECT COUNT(*) n FROM jobs WHERE first_seen>=?", (since,)).fetchone()["n"]
+        sources = self.db.execute(
+            "SELECT p.source s, COUNT(DISTINCT j.id) n FROM jobs j JOIN postings p ON p.job_id=j.id "
+            "WHERE j.first_seen>=? AND j.status='avisada' GROUP BY p.source ORDER BY n DESC", (since,))
+        tracks = self.db.execute("SELECT track t, COUNT(*) n FROM jobs WHERE track IS NOT NULL GROUP BY track")
+        return {"vistas": seen, "encajan": found, "fuentes": [(r["s"], r["n"]) for r in sources],
+                "seguimiento": {r["t"]: r["n"] for r in tracks}}
 
     def mark_notified(self, job_id: int, tg_message_id: int | None, now: datetime) -> None:
         with self.db:

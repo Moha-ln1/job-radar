@@ -370,7 +370,7 @@ async def test_recientes_and_discarded_flow(h):
 async def test_job_buttons_hide_company_and_dislike(h):
     a = seed(h.paths, "Prácticas A", "Empresa Uno", "Granada", "presencial", matched=["b1"])
     b = seed(h.paths, "Prácticas B", "Empresa Dos", "Granada", "presencial", matched=["b1"])
-    cbs = [x.callback_data for x in notify.job_keyboard(a).inline_keyboard[0]]
+    cbs = [x.callback_data for x in notify.job_keyboard(a).inline_keyboard[1]]
     assert cbs == [f"h:{a}", f"n:{a}"]
     await h.press("", data=f"h:{a}", message_id=50)
     assert load_searches(h.paths.searches)[1].companies == ["Empresa Uno"]
@@ -530,3 +530,33 @@ async def test_paginas_add_marks_existing_links_seen_then_toggle_and_delete(h, m
     assert load_settings(h.paths.config).watch[0]["filtrar"] is True
     await h.press("🗑")
     assert load_settings(h.paths.config).watch == []
+
+
+async def test_aplicar_guardar_y_aplicadas(h):
+    a = seed(h.paths, "Prácticas A", "Empresa Uno", "Granada", "presencial", matched=["b1"])
+    await h.say("/aplicadas")
+    assert "Aún no sigues" in h.last_text()
+    await h.press("", data=f"a:{a}", message_id=60)
+    assert "Carta" in h.last_text() and "/candidatura" in h.last_text()
+    await h.press("", data=f"t:aplicada:{a}", message_id=61)
+    store = Store(h.paths.db)
+    assert store.get_job(a).track == "aplicada"
+    store.close()
+    await h.say("/aplicadas")
+    assert "Aplicada (1)" in h.last_text() and f"/oferta_{a}" in h.last_text()
+    await h.say(f"/oferta_{a}")
+    assert "Prácticas A" in h.last_text()
+    await h.press("", data=f"t:x:{a}", message_id=62)
+    store = Store(h.paths.db)
+    assert store.get_job(a).track is None
+    store.close()
+
+
+async def test_candidatura_estadisticas_y_exportar_vacio(h):
+    await h.press("", data="c:nombre", message_id=70)
+    await h.say("Ana Pérez")
+    assert "Ana Pérez" in h.last_text()
+    await h.say("/estadisticas")
+    assert "Últimos 30 días" in h.last_text()
+    await h.say("/exportar")
+    assert "No hay ofertas que exportar" in h.last_text()

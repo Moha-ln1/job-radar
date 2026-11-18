@@ -200,6 +200,9 @@ def format_summary(report) -> str:
 
 def job_keyboard(job_id: int) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup([[
+        InlineKeyboardButton("📝 Aplicar", callback_data=f"a:{job_id}"),
+        InlineKeyboardButton("💾 Guardar", callback_data=f"t:guardada:{job_id}"),
+    ], [
         InlineKeyboardButton("🚫 Ocultar empresa", callback_data=f"h:{job_id}"),
         InlineKeyboardButton("👎 No me interesa", callback_data=f"n:{job_id}"),
     ]])

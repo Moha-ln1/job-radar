@@ -125,6 +125,10 @@ la describe: pulsa **🔄 Nombre automático** o **✏️ Nombre** para cambiarl
 | `/fuentes` | Activar o desactivar cada fuente (LinkedIn, InfoJobs, portales de remoto...). |
 | `/empresas` | Añadir la web de empleo de una empresa pegando su enlace, o quitarla. |
 | `/paginas` | Vigilar una página de convocatorias (p. ej. la de prácticas de tu universidad): te aviso cuando aparece un enlace nuevo. |
+| `/aplicadas` | Tus ofertas seguidas, agrupadas por estado (💾 Guardada, 📨 Aplicada, 🗣 Entrevista, 🎉 Oferta, ❌ Rechazada). Pulsa `/oferta_N` en una para cambiar su estado. A los 7 días de aplicar, el bot te lo recuerda una vez. |
+| `/candidatura` | Tus datos (nombre, presentación, disponibilidad, salario, idiomas) para la carta y las respuestas de 📝 Aplicar. Lo que dejes vacío se omite. |
+| `/estadisticas` | Ofertas vistas y que encajan en 30 días, por fuente, y tu tasa de respuesta. |
+| `/exportar` | Te envía un CSV con las ofertas de 30 días y las que sigues. |
 | `/descartadas` | Ver las ofertas descartadas en las últimas 24 h, agrupadas por motivo. |
 | `/probar <texto>` | Comprobar si un título encaja con tus búsquedas. Ejemplo: `/probar Prácticas de marketing en Madrid`. |
 | `/recientes` | Ver las ofertas que encajan encontradas últimamente. |

@@ -4,9 +4,11 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import sqlite3
 from datetime import datetime, time, timedelta, timezone
 
-from . import notify, radar, telegram_io
+from . import notify, radar, seguimiento, telegram_io
+from .bot_seguimiento import track_keyboard
 from .config import ConfigError, load_searches, load_settings
 from .paths import Paths
 from .store import Store
@@ -192,6 +194,26 @@ async def daily_digest(context) -> None:
         _log.exception("el resumen diario ha fallado")
 
 
+async def reminders(context) -> None:
+    """Avisa de las candidaturas enviadas hace una semana sin novedades (una sola vez cada una)."""
+    app = context.application
+    paths, now = app.bot_data["paths"], datetime.now(timezone.utc)
+    if silenced_until(paths, now):
+        return
+    store = Store(paths.db)
+    try:
+        for job in store.due_reminders(now, seguimiento.REMINDER_DAYS):
+            if await _safely(telegram_io.send_text(app.bot, app.bot_data["chat_id"],
+                                                   seguimiento.reminder_text(job, now),
+                                                   reply_markup=track_keyboard(job.id, job.track)),
+                             f"el recordatorio de {job.id}"):
+                store.mark_reminded(job.id)
+    except sqlite3.Error:
+        _log.exception("los recordatorios han fallado")
+    finally:
+        store.close()
+
+
 def _digest_time(paths: Paths) -> time:
     try:
         hour, minute = (int(x) for x in _settings(paths).scan.digest_time.split(":"))
@@ -205,3 +227,4 @@ def register_jobs(app, paths: Paths) -> None:
     queue = app.job_queue
     queue.run_repeating(tick, interval=TICK_SECONDS, first=5, name="tick")  # también recupera tras suspensión
     queue.run_daily(daily_digest, _digest_time(paths), name="digest")
+    queue.run_daily(reminders, time(10, 30, tzinfo=_local_tz()), name="reminders")

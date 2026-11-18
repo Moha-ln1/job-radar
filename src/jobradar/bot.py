@@ -8,14 +8,34 @@ import re
 from datetime import datetime, timezone
 from html import escape
 
-from telegram import (BotCommand, ForceReply, InlineKeyboardButton, InlineKeyboardMarkup, Update)
+from telegram import (
+    BotCommand,
+    ForceReply,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    Update,
+)
 from telegram.constants import ParseMode
 from telegram.error import BadRequest, NetworkError
-from telegram.ext import (Application, ApplicationHandlerStop, CallbackQueryHandler, CommandHandler,
-                          ContextTypes, MessageHandler, TypeHandler, filters)
+from telegram.ext import (
+    Application,
+    ApplicationHandlerStop,
+    CallbackQueryHandler,
+    CommandHandler,
+    ContextTypes,
+    MessageHandler,
+    TypeHandler,
+    filters,
+)
 
 from . import notify, perfil, radar, scheduler, telegram_io
-from .config import (ConfigError, add_user_synonym, load_env, load_searches, save_searches)
+from .config import (
+    ConfigError,
+    add_user_synonym,
+    load_env,
+    load_searches,
+    save_searches,
+)
 from .filters import Catalog
 from .models import Decision, Exclusions, Search
 from .normalize import fold, norm_company
@@ -34,6 +54,10 @@ COMMANDS = [
     ("fuentes", "Activar o desactivar fuentes de ofertas"),
     ("empresas", "Webs de empleo de empresas que se leen"),
     ("paginas", "Páginas de convocatorias que se vigilan"),
+    ("aplicadas", "Seguimiento de tus candidaturas"),
+    ("candidatura", "Tus datos para preparar solicitudes"),
+    ("estadisticas", "Resumen de los últimos 30 días"),
+    ("exportar", "Exportar ofertas a CSV"),
     ("descartadas", "Ofertas descartadas en las últimas 24 h"),
     ("probar", "Probar un título: /probar <texto>"),
     ("recientes", "Ofertas encontradas últimamente"),
@@ -409,6 +433,7 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 _HELP_GROUPS = [
     ("🎯 Qué busco", ("busquedas", "excluir", "probar")),
     ("📬 Ofertas", ("recientes", "semana", "descartadas", "escanear", "silencio")),
+    ("📨 Mis candidaturas", ("aplicadas", "candidatura", "estadisticas", "exportar")),
     ("🛰 Dónde busco", ("fuentes", "empresas", "paginas", "estado")),
 ]
 
@@ -813,6 +838,10 @@ async def on_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         from . import bot_fuentes
         await bot_fuentes.on_reply(update, context, waiting, text)
         return
+    if kind == "cand":
+        from . import bot_seguimiento
+        await bot_seguimiento.on_candidatura_reply(update, context, waiting[1], text)
+        return
     if kind == "excl":
         searches, excl = _load(context)
         target = {"aw": excl.words, "ac": excl.companies, "ad": excl.en_descripcion}[waiting[1]]
@@ -886,14 +915,17 @@ def build_application(paths: Paths) -> Application:
                 "descartadas": cmd_descartadas, "probar": cmd_probar, "recientes": cmd_recientes, "semana": cmd_semana,
                 "estado": cmd_estado, "silencio": cmd_silencio, "escanear": cmd_escanear,
                 "ayuda": cmd_ayuda}
-    from . import bot_fuentes
+    from . import bot_fuentes, bot_seguimiento
     commands.update(bot_fuentes.HANDLERS)
+    commands.update(bot_seguimiento.HANDLERS)
     for name, fn in commands.items():
         app.add_handler(CommandHandler(name, fn, filters=auth))
+    app.add_handler(MessageHandler(filters.Regex(bot_seguimiento.OFERTA_PATTERN) & auth,
+                                   bot_seguimiento.cmd_oferta))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND & auth, on_text))
     for pattern, fn in [(r"^[hn]:\d+$", on_job_action), (r"^g:\d+$", on_era_buena), (r"^k:", on_token),
                         (r"^m:", on_group), (r"^v:", on_see), (r"^x:", on_exclusion),
-                        (r"^s:", on_search_action), (r"^w:", on_wizard), (r"^sem:", on_week), *bot_fuentes.CALLBACKS]:
+                        (r"^s:", on_search_action), (r"^w:", on_wizard), (r"^sem:", on_week), *bot_fuentes.CALLBACKS, *bot_seguimiento.CALLBACKS]:
         app.add_handler(CallbackQueryHandler(fn, pattern=pattern))
     app.add_error_handler(on_error)
     return app

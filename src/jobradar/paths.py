@@ -26,6 +26,11 @@ class Paths:
         return self.root / "sinonimos_usuario.yaml"
 
     @property
+    def candidatura(self) -> Path:
+        """Datos de la persona para preparar solicitudes (/candidatura)."""
+        return self.root / "candidatura.yaml"
+
+    @property
     def profile_marker(self) -> Path:
         """Id del bot al que ya se le puso nombre, descripción y foto."""
         return self.root / "perfil_bot.txt"

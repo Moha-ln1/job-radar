@@ -44,6 +44,9 @@ responde al aviso original:
 - **Ofertas repetidas**: una sola notificación con todos los enlaces.
 - **Experiencia pedida**: si la descripción de una oferta «junior» exige más años de los que admites, se descarta
   (en las fuentes que envían la descripción).
+- **Seguimiento de candidaturas**: cada aviso trae 📝 Aplicar (enlace, carta corta y respuestas habituales listas
+  para copiar) y 💾 Guardar. `/aplicadas` agrupa tus ofertas por estado (guardada, aplicada, entrevista, oferta,
+  rechazada) y a la semana de aplicar te recuerda preguntar. El bot no envía nada por ti.
 - **Revisión de descartes**: `/descartadas` muestra qué se ha descartado y por qué, y permite rescatar ofertas.
 
 ## Inicio rápido
@@ -99,6 +102,8 @@ tipo, área, modalidad, ubicación y cuándo avisarte. No hace falta tocar ning�
 | Saber si un título me llegaría | `/probar <título>` |
 | Ver todas las ofertas de la semana, por búsqueda | `/semana` |
 | Ver qué se ha descartado y por qué | `/descartadas` |
+| Seguir mis candidaturas y preparar solicitudes | `/aplicadas`, `/candidatura` |
+| Ver cifras de la búsqueda o llevarme las ofertas a una hoja de cálculo | `/estadisticas`, `/exportar` |
 
 El [tutorial](docs/TUTORIAL.md#5-primer-uso-del-bot) lo explica paso a paso, con un ejemplo de búsquedas.
 
